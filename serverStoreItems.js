@@ -3,6 +3,7 @@
 //the store sells virtual cosmetics to users and this
 //logic helps us gather the current inventory
 
+//setting up express environment
 const express = require('express');
 const app = express();
 const PORT = 3000;
@@ -22,5 +23,5 @@ app.get('/api/store/items', (req, res) => {
     res.json(storeItems);
 });
 
-const PORt = 3000;
+//output message to confirm the service is running locally
 app.listen(PORT, () => console.log('Server running on port ${PORT}'));
