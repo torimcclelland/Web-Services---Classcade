@@ -22,6 +22,7 @@ const storeItems = [
 app.get('/api/store/items', (req, res) => {
     res.json(storeItems);
 });
+
 // DELETE a cosmetic item
 app.delete('/api/store/items/:id', (req, res) => {
     const id = parseInt(req.params.id);
@@ -29,7 +30,7 @@ app.delete('/api/store/items/:id', (req, res) => {
     if (index === -1) {
         return res.status(404).json({message: 'Item not found'});
     }
-    const deletedItem = store storeItems.splice(index, 1);
+    const deletedItem = storeItems.splice(index, 1);
     res.json({message: 'Item deleted successfully', item: deletedItem[0]});
 })
 
