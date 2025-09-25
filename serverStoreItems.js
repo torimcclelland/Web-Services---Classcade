@@ -23,5 +23,17 @@ app.get('/api/store/items', (req, res) => {
     res.json(storeItems);
 });
 
+
+// DELETE a cosmetic item
+app.delete('/api/store/items/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const index = storeItems.findIndex(item => item.id === id);
+    if (index === -1) {
+        return res.status(404).json({message: 'Item not found'});
+    }
+    const deletedItem = storeItems.splice(index, 1);
+    res.json({message: 'Item deleted successfully', item: deletedItem[0]});
+})
+
 //output message to confirm the service is running locally
 app.listen(PORT, () => console.log('Server running on port ${PORT}'));
