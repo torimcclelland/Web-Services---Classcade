@@ -54,5 +54,28 @@ app.post('/api/store/items', (req, res) => {
     res.status(201).json(newItem);
 });
 
+// PUT endpoint to update an existing item in the store
+app.put('/api/store/items/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    const {name, price} = req.body;
+
+    // find the item to update
+    const item = storeItems.find(item => item.id === id);
+    if (!item) {
+        return res.status(404).json({message: 'Item not found'});
+    }
+
+    // validation for user data
+    if ((name && typeof name !== 'string') || (price != null && typeof price !== 'number')) {
+        return res.status(400).json({error: 'Invalid item. Name must be a string and price must be a number.'});
+    }
+
+    // update item details
+    item.name = name;
+    item.price = price;
+
+    res.json({message: 'Item updated successfully', item});
+});
+
 //output message to confirm the service is running locally
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
