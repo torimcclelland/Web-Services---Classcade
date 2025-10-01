@@ -7,6 +7,9 @@
 const express = require('express');
 const app = express();
 const PORT = 3000;
+const connectDB = require('./db');
+
+connectDB();
 
 //middleware used in parsing json file format
 app.use(express.json());
