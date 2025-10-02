@@ -24,7 +24,11 @@ module.exports = {
   return project.trackedTime.reduce((sum, entry) => sum + entry.timeSpent, 0);
 }
 },
-  getDueDate: async (id) => {/* logic for due date */},
+  getDueDate: async (id) => {getDueDate: async (id) => {
+  const project = await Project.findById(id);
+  return project?.dueDate || null;
+}
+},
   getStreak: async (id) => {getStreak: async (id) => {
   const project = await Project.findById(id);
   if (!project || !project.trackedTime) return 0;
