@@ -1,0 +1,19 @@
+module.exports = {
+  createProject: async (data) => await Project.create(data),
+  getProjectById: async (id) => await Project.findById(id),
+  getAllProjects: async () => await Project.find(),
+  updateProject: async (id, data) => await Project.findByIdAndUpdate(id, data, { new: true }),
+  updateStatus: async (id, status) => await Project.findByIdAndUpdate(id, { status }, { new: true }),
+  deleteProject: async (id) => await Project.findByIdAndDelete(id),
+  deleteAllProjects: async () => await Project.deleteMany({}),
+  getProgress: async (id) => {/* logic for progress */},
+  getTimeSpent: async (id) => {/* logic for time tracking */},
+  getDueDate: async (id) => {/* logic for due date */},
+  getStreak: async (id) => {/* logic for streak */},
+  getMembers: async (id) => {/* logic for member list */},
+  addMember: async (id, userId) => {/* push userId to project.members */},
+  removeMember: async (id, userId) => {/* pull userId from project.members */},
+  getTrackedTime: async (id, userId) => {/* logic for user time */},
+  updateTrackedTime: async (id, userId, time) => {/* logic to update time */},
+  deleteTrackedTime: async (id, userId) => {/* logic to delete time */}
+};
