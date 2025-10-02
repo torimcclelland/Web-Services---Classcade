@@ -14,10 +14,16 @@ module.exports = {
   const goal = project.goalTime;
 
   const progress = (totalTime / goal) * 100;
-  return Math.min(progress, 100); // cap at 100%
+  return Math.min(progress, 100);
 }
 },
-  getTimeSpent: async (id) => {/* logic for time tracking */},
+  getTimeSpent: async (id) => {getTimeSpent: async (id) => {
+  const project = await Project.findById(id);
+  if (!project || !project.trackedTime) return 0;
+
+  return project.trackedTime.reduce((sum, entry) => sum + entry.timeSpent, 0);
+}
+},
   getDueDate: async (id) => {/* logic for due date */},
   getStreak: async (id) => {getStreak: async (id) => {
   const project = await Project.findById(id);
