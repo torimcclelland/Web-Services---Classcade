@@ -1,5 +1,5 @@
 const axios = require('axios');
-const User = require('../models/User'); // assumes User model stores zoom tokens
+const User = require('../models/User');
 
 const ZOOM_API_BASE = 'https://api.zoom.us/v2';
 
@@ -8,7 +8,6 @@ const getAuthHeader = (accessToken) => ({
 });
 
 module.exports = {
-  // Exchange authorization code for access token
   connectZoom: async (userId, code) => {
     const response = await axios.post('https://zoom.us/oauth/token', null, {
       params: {
@@ -35,7 +34,6 @@ module.exports = {
     return { connected: true };
   },
 
-  // Get user's Zoom meetings
   getMeetings: async (userId) => {
     const user = await User.findById(userId);
     if (!user?.zoom?.accessToken) throw new Error('Zoom account not connected');
@@ -47,7 +45,6 @@ module.exports = {
     return response.data.meetings;
   },
 
-  // Update a specific Zoom meeting
   updateMeeting: async (userId, meetingId, updateData) => {
     const user = await User.findById(userId);
     if (!user?.zoom?.accessToken) throw new Error('Zoom account not connected');
@@ -59,7 +56,6 @@ module.exports = {
     return response.data;
   },
 
-  // Disconnect Zoom account
   disconnectZoom: async (userId) => {
     const user = await User.findById(userId);
     if (!user?.zoom?.accessToken) return { disconnected: true };
