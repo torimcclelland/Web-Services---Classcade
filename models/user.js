@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['student', 'teacher', 'admin'], // NOTE: do we want to add or remove any roles?
+    enum: ['student', 'teacher', 'admin'], // NOTE: do we want to add or remove any roles?  // Adam - yes, that's a good idea
     default: 'student'
   },
   email: {
