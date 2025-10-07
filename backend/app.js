@@ -1,9 +1,9 @@
 const express = require('express');
 const connectDB = require('./db');
 
-const taskRoutes = require('./api/task');
-const projectRoutes = require('./api/project');
-const notificationRoutes = require('./api/notification');
+const taskRoutes = require('./services/taskService');
+const projectRoutes = require('./services/projectService');
+const notificationRoutes = require('./services/notificationService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
