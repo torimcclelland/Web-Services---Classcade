@@ -1,198 +1,237 @@
+const express = require('express');
+const router = express.Router();
 const Project = require('../models/project');
 
-const createProject = async (data) => {
-  const payload = { ...data };
-  if (payload.name) {
-    payload.name = payload.name.trim();
+// CREATE a new project
+router.post('/create', async (req, res) => {
+  try {
+    const payload = { ...req.body };
+    if (payload.name) payload.name = payload.name.trim();
+    const project = await Project.create(payload);
+    res.json(project);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-  return Project.create(payload);
-};
+});
 
-const getProjectById = (id) => Project.findById(id);
-
-const getAllProjects = () => Project.find();
-
-const updateProject = (id, data) =>
-  Project.findByIdAndUpdate(id, data, { new: true, runValidators: true });
-
-const updateStatus = (id, status) => {
-  if (typeof status !== 'string' || !status.trim()) {
-    throw new Error('Status must be a non-empty string');
+// GET all projects
+router.get('/', async (req, res) => {
+  try {
+    const projects = await Project.find();
+    res.json(projects);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-  return Project.findByIdAndUpdate(id, { status: status.trim() }, { new: true, runValidators: true });
-};
+});
 
-const deleteProject = (id) => Project.findByIdAndDelete(id);
-
-const deleteAllProjects = () => Project.deleteMany({});
-
-const getProgress = async (id) => {
-  const project = await Project.findById(id);
-  if (!project || !Array.isArray(project.trackedTime) || !project.goalTime) {
-    return 0;
+// GET project by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    res.json(project);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
+});
 
-  const totalTime = project.trackedTime.reduce(
-    (sum, entry) => sum + (Number(entry.timeSpent) || 0),
-    0
-  );
-  if (!project.goalTime) {
-    return 0;
+// UPDATE project by ID
+router.put('/:id', async (req, res) => {
+  try {
+    const updated = await Project.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
+});
 
-  const progress = (totalTime / project.goalTime) * 100;
-  return Math.min(progress, 100);
-};
-
-const getTimeSpent = async (id) => {
-  const project = await Project.findById(id);
-  if (!project || !Array.isArray(project.trackedTime)) {
-    return 0;
+// UPDATE project status
+router.put('/:id/status', async (req, res) => {
+  try {
+    const status = req.body.status?.trim();
+    if (!status) throw new Error('Status must be a non-empty string');
+    const updated = await Project.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true, runValidators: true }
+    );
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
+});
 
-  return project.trackedTime.reduce(
-    (sum, entry) => sum + (Number(entry.timeSpent) || 0),
-    0
-  );
-};
-
-const getDueDate = async (id) => {
-  const project = await Project.findById(id);
-  return project?.dueDate ?? null;
-};
-
-const getStreak = async (id) => {
-  const project = await Project.findById(id);
-  if (!project || !Array.isArray(project.trackedTime) || project.trackedTime.length === 0) {
-    return 0;
+// DELETE project by ID
+router.delete('/:id', async (req, res) => {
+  try {
+    await Project.findByIdAndDelete(req.params.id);
+    res.json({ deleted: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
+});
 
-  const today = new Date();
-  let streak = 0;
+// DELETE all projects
+router.delete('/', async (req, res) => {
+  try {
+    await Project.deleteMany({});
+    res.json({ deletedAll: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
-  // trackedTime does not store dates by default; allow optional updatedAt fallback
-  const uniqueDates = project.trackedTime
-    .map((entry) => entry.updatedAt || entry.createdAt)
-    .filter(Boolean)
-    .map((date) => new Date(date).toDateString())
-    .filter((value, index, array) => array.indexOf(value) === index)
-    .sort((a, b) => new Date(a) - new Date(b));
+// GET progress
+router.get('/:id/progress', async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    const totalTime = project.trackedTime?.reduce((sum, entry) => sum + (Number(entry.timeSpent) || 0), 0) || 0;
+    const progress = project.goalTime ? Math.min((totalTime / project.goalTime) * 100, 100) : 0;
+    res.json({ progress });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
-  for (let i = uniqueDates.length - 1; i >= 0; i -= 1) {
-    const current = new Date(uniqueDates[i]);
-    const expected = new Date(today);
-    expected.setDate(expected.getDate() - streak);
+// GET time spent
+router.get('/:id/time', async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    const timeSpent = project.trackedTime?.reduce((sum, entry) => sum + (Number(entry.timeSpent) || 0), 0) || 0;
+    res.json({ timeSpent });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
-    if (current.toDateString() === expected.toDateString()) {
-      streak += 1;
-    } else {
-      break;
+// GET due date
+router.get('/:id/due', async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    res.json({ dueDate: project?.dueDate ?? null });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET streak
+router.get('/:id/streak', async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    const today = new Date();
+    let streak = 0;
+
+    const uniqueDates = project.trackedTime
+      ?.map((entry) => entry.updatedAt || entry.createdAt)
+      .filter(Boolean)
+      .map((date) => new Date(date).toDateString())
+      .filter((value, index, array) => array.indexOf(value) === index)
+      .sort((a, b) => new Date(a) - new Date(b)) || [];
+
+    for (let i = uniqueDates.length - 1; i >= 0; i--) {
+      const current = new Date(uniqueDates[i]);
+      const expected = new Date(today);
+      expected.setDate(expected.getDate() - streak);
+      if (current.toDateString() === expected.toDateString()) {
+        streak++;
+      } else {
+        break;
+      }
     }
+
+    res.json({ streak });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
+});
 
-  return streak;
-};
-
-const getMembers = async (id) => {
-  const project = await Project.findById(id).populate('members');
-  if (!project) {
-    throw new Error('Project not found');
+// GET members
+router.get('/:id/members', async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id).populate('members');
+    res.json(project.members);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-  return project.members;
-};
+});
 
-const addMember = async (id, userId) => {
-  if (!userId) {
-    throw new Error('userId is required');
+// ADD member
+router.post('/:id/members', async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const project = await Project.findById(req.params.id);
+    if (!project.members.includes(userId)) {
+      project.members.push(userId);
+      await project.save();
+    }
+    res.json(project);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
+});
 
-  const project = await Project.findById(id);
-  if (!project) {
-    throw new Error('Project not found');
+// REMOVE member
+router.delete('/:id/members/:userId', async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    project.members = project.members.filter(
+      (member) => member.toString() !== req.params.userId
+    );
+    await project.save();
+    res.json(project);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
+});
 
-  const exists = project.members.some((member) => member.toString() === String(userId));
-  if (exists) {
-    throw new Error('User is already a member');
+// GET tracked time for user
+router.get('/:id/time/:userId', async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    const entry = project.trackedTime.find(
+      (item) => item.userId?.toString() === req.params.userId
+    );
+    res.json({ timeSpent: entry ? Number(entry.timeSpent) || 0 : 0 });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
+});
 
-  project.members.push(userId);
-  await project.save();
-  return project;
-};
-
-const removeMember = async (id, userId) => {
-  const project = await Project.findById(id);
-  if (!project) {
-    throw new Error('Project not found');
+// UPDATE tracked time
+router.put('/:id/time/:userId', async (req, res) => {
+  try {
+    const { timeSpent } = req.body;
+    const project = await Project.findById(req.params.id);
+    const entry = project.trackedTime.find(
+      (item) => item.userId?.toString() === req.params.userId
+    );
+    if (entry) {
+      entry.timeSpent = timeSpent;
+    } else {
+      project.trackedTime.push({ userId: req.params.userId, timeSpent });
+    }
+    await project.save();
+    res.json(project);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
+});
 
-  project.members = project.members.filter((member) => member.toString() !== String(userId));
-  await project.save();
-  return project;
-};
-
-const getTrackedTime = async (id, userId) => {
-  const project = await Project.findById(id);
-  if (!project) {
-    throw new Error('Project not found');
+// DELETE tracked time
+router.delete('/:id/time/:userId', async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    project.trackedTime = project.trackedTime.filter(
+      (item) => item.userId?.toString() !== req.params.userId
+    );
+    await project.save();
+    res.json(project);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
+});
 
-  const entry = project.trackedTime.find((item) => item.userId?.toString() === String(userId));
-  return entry ? Number(entry.timeSpent) || 0 : 0;
-};
-
-const updateTrackedTime = async (id, userId, timeSpent) => {
-  if (!Number.isFinite(timeSpent)) {
-    throw new Error('timeSpent must be a number');
-  }
-
-  const project = await Project.findById(id);
-  if (!project) {
-    throw new Error('Project not found');
-  }
-
-  const entry = project.trackedTime.find((item) => item.userId?.toString() === String(userId));
-  if (entry) {
-    entry.timeSpent = timeSpent;
-  } else {
-    project.trackedTime.push({ userId, timeSpent });
-  }
-
-  await project.save();
-  return project;
-};
-
-const deleteTrackedTime = async (id, userId) => {
-  const project = await Project.findById(id);
-  if (!project) {
-    throw new Error('Project not found');
-  }
-
-  project.trackedTime = project.trackedTime.filter(
-    (item) => item.userId?.toString() !== String(userId)
-  );
-
-  await project.save();
-  return project;
-};
-
-module.exports = {
-  createProject,
-  getProjectById,
-  getAllProjects,
-  updateProject,
-  updateStatus,
-  deleteProject,
-  deleteAllProjects,
-  getProgress,
-  getTimeSpent,
-  getDueDate,
-  getStreak,
-  getMembers,
-  addMember,
-  removeMember,
-  getTrackedTime,
-  updateTrackedTime,
-  deleteTrackedTime,
-};
+module.exports = router;
