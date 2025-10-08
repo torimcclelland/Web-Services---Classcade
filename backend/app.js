@@ -15,8 +15,8 @@ app.get('/', (_req, res) => {
 });
 
 app.use('/api/task', taskRoutes);
-app.use('/api/project', projectRoutes);
-app.use('/api/notification', notificationRoutes);
+// app.use('/api/project', projectRoutes);
+// app.use('/api/notification', notificationRoutes);
 
 const startServer = async () => {
   try {
