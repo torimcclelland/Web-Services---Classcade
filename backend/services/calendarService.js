@@ -1,7 +1,13 @@
+// calendarService.js 
+
 const express = require('express');
 const router = express.Router();
 
-// Add event to Google Calendar
+// 8 methods
+
+
+// 1. Add event to Google Calendar
+// POST
 router.post('/google/link', (req, res) => {
   const { userId, event } = req.body;
   if (!userId || !event) {
@@ -14,14 +20,16 @@ router.post('/google/link', (req, res) => {
   res.status(201).json({ message: 'Event added to Google Calendar', event });
 });
 
-// Get Google Calendar events for a user
+// 2. Get Google Calendar events for a user
+// GET
 router.get('/google/:userid', (req, res) => {
   const { userid } = req.params;
   const events = googleEvents[userid] || [];
   res.json(events);
 });
 
-// Update Google Calendar event
+// 3. Update Google Calendar event
+// PUT
 router.put('/google/update', (req, res) => {
   const { userId, eventId, updatedEvent } = req.body;
   const userEvents = googleEvents[userId];
@@ -35,14 +43,16 @@ router.put('/google/update', (req, res) => {
   res.json({ message: 'Google event updated', updatedEvent });
 });
 
-// Remove Google Calendar association
+// 4. Remove Google Calendar association
+// DELETE
 router.delete('/google/delete', (req, res) => {
   const { userId } = req.body;
   delete googleEvents[userId];
   res.json({ message: 'Google Calendar association removed' });
 });
 
-// Add event to Outlook Calendar
+// 5. Add event to Outlook Calendar
+// POST
 router.post('/outlook/link', (req, res) => {
   const { userId, event } = req.body;
   if (!userId || !event) {
@@ -55,14 +65,16 @@ router.post('/outlook/link', (req, res) => {
   res.status(201).json({ message: 'Event added to Outlook Calendar', event });
 });
 
-// Get Outlook Calendar events for a user
+// 6. Get Outlook Calendar events for a user
+// GET
 router.get('/outlook/:userid', (req, res) => {
   const { userid } = req.params;
   const events = outlookEvents[userid] || [];
   res.json(events);
 });
 
-// Update Outlook Calendar event
+// 7. Update Outlook Calendar event
+// PUT
 router.put('/outlook/update', (req, res) => {
   const { userId, eventId, updatedEvent } = req.body;
   const userEvents = outlookEvents[userId];
@@ -76,7 +88,8 @@ router.put('/outlook/update', (req, res) => {
   res.json({ message: 'Outlook event updated', updatedEvent });
 });
 
-// Remove Outlook Calendar association
+// 8. Remove Outlook Calendar association
+// DELETE
 router.delete('/outlook/delete', (req, res) => {
   const { userId } = req.body;
   delete outlookEvents[userId];
