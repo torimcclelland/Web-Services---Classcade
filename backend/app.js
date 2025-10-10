@@ -1,13 +1,17 @@
 const express = require('express');
+const cors = require('cors');
 const connectDB = require('./db');
 
 const taskRoutes = require('./services/taskService');
 const projectRoutes = require('./services/projectService');
 const notificationRoutes = require('./services/notificationService');
+const userRoutes = require('./services/userService');
+const chatRoutes = require('./services/chatService');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
+app.use(cors());
 app.use(express.json());
 
 app.get('/', (_req, res) => {
@@ -15,8 +19,10 @@ app.get('/', (_req, res) => {
 });
 
 app.use('/api/task', taskRoutes);
-// app.use('/api/project', projectRoutes);
-// app.use('/api/notification', notificationRoutes);
+app.use('/api/project', projectRoutes);
+app.use('/api/notification', notificationRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/chat', chatRoutes);
 
 const startServer = async () => {
   try {

@@ -1,4 +1,4 @@
-.pageWrapper {
+/* .pageWrapper {
   display: flex;
   height: 100vh;
   background-color: #f0f4f8;
@@ -69,4 +69,4 @@
 .buttonRow {
   display: flex;
   gap: 1rem;
-}
+} */
