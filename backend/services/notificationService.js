@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const Notification = require('../models/notification');
 
-// CREATE a new notification
 router.post('/', async (req, res) => {
   try {
     const notification = await Notification.create(req.body);
@@ -12,7 +11,6 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET all notifications for a user
 router.get('/user/:userId', async (req, res) => {
   try {
     const notifications = await Notification.find({ recipientId: req.params.userId }).sort({ createdAt: -1 });
@@ -22,7 +20,6 @@ router.get('/user/:userId', async (req, res) => {
   }
 });
 
-// GET a single notification by ID
 router.get('/:id', async (req, res) => {
   try {
     const notification = await Notification.findById(req.params.id);
@@ -33,7 +30,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// UPDATE a notification by ID
 router.put('/:id', async (req, res) => {
   try {
     const updated = await Notification.findByIdAndUpdate(
@@ -48,7 +44,6 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// DELETE a notification by ID
 router.delete('/:id', async (req, res) => {
   try {
     const deleted = await Notification.findByIdAndDelete(req.params.id);
@@ -58,3 +53,5 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+module.exports = router;
