@@ -9,13 +9,12 @@
 //         type="text"
 //         className="search-bar"
 //         placeholder="Search..."
-//         defaultValue="swearing"
+//         defaultValue=""
 //       />
 //       <button className="compose-btn">
 //       </button>
 //       <select className="group-dropdown">
 //         <option>Group 3</option>
-//         {/* Add more groups dynamically if needed */}
 //       </select>
 //       <button className="settings-btn">
 //       </button>
