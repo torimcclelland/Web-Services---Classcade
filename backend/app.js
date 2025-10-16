@@ -13,7 +13,15 @@ const storeRoutes = require('./services/storeService');
 const calendarRoutes = require('./services/calendarService');
 const scheduleRoutes = require('./services/scheduleService');
 const zoomRoutes = require('./services/zoomService');
-const usersApiDocsRoutes = require('./my-api-docs/routes/users');
+const storeApiDocsRoutes = require('./my-api-docs/routes/storeRoute');
+const calendarApiDocsRoutes = require('./my-api-docs/routes/calendarRoute');
+const chatApiDocsRoutes = require('./my-api-docs/routes/chatRoute');
+const notificationApiDocsRoutes = require('./my-api-docs/routes/notificationRoute');
+const projectApiDocsRoutes = require('./my-api-docs/routes/projectRoute');
+const scheduleApiDocsRoutes = require('./my-api-docs/routes/scheduleRoute');
+const taskApiDocsRoutes = require('./my-api-docs/routes/taskRoute');
+const userApiDocsRoutes = require('./my-api-docs/routes/userRoute');
+const zoomApiDocsRoutes = require('./my-api-docs/routes/zoomRoute');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -21,11 +29,11 @@ const PORT = process.env.PORT || 4000;
 // Swagger configuration options
 const options = {
   definition: {
-    openapi: '3.0.0', // Specifies the OpenAPI version
+    openapi: '3.0.0',
     info: {
-      title: 'My Simple API',
+      title: 'Classcade API',
       version: '1.0.0',
-      description: 'A basic API to demonstrate Swagger documentation',
+      description: 'This documentation shows all of the endpoints available within Classcade.',
     },
     servers: [
       {
@@ -60,7 +68,15 @@ app.use('/api/store', storeRoutes);
 app.use('/api/calendar', calendarRoutes);
 app.use('/api/schedule', scheduleRoutes);
 app.use('/api/zoom', zoomRoutes);
-app.use('/', usersApiDocsRoutes);
+app.use('/', calendarApiDocsRoutes);
+app.use('/', chatApiDocsRoutes);
+app.use('/', notificationApiDocsRoutes);
+app.use('/', projectApiDocsRoutes);
+app.use('/', scheduleApiDocsRoutes);
+app.use('/', storeApiDocsRoutes);
+app.use('/', taskApiDocsRoutes);
+app.use('/', userApiDocsRoutes);
+app.use('/', zoomApiDocsRoutes);
 
 const startServer = async () => {
   try {
