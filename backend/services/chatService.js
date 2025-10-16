@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Chat = require('../models/chat');
+const connectDB = require('../db');
+
 router.use(express.json());
 
 // Create a message
@@ -131,3 +133,24 @@ router.delete('/:messageId/reaction/:userId', async (req, res) => {
 });
 
 module.exports = router;
+
+if (require.main === module) {
+  const app = express();
+  const PORT = process.env.PORT || 3000;
+
+  app.use(express.json());
+  app.use('/api/chat', router);
+
+  connectDB()
+    .then(async () => {
+      const mongoose = require('mongoose');
+      console.log('mongoose state:', mongoose.connection.readyState);
+      app.listen(PORT, () => {
+        console.log(`Chat service running on port ${PORT}`);
+      });
+    })
+    .catch(err => {
+      console.error('DB connect failed, starting server without DB:', err);
+      app.listen(PORT, () => console.log(`Chat service running on port ${PORT} (no DB)`));
+    });
+}

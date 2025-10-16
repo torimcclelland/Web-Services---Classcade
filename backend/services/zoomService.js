@@ -1,4 +1,6 @@
 const axios = require('axios');
+const express = require('express');
+const router = express.Router();
 const User = require('../models/user');
 
 const ZOOM_API_BASE = 'https://api.zoom.us/v2';
@@ -85,3 +87,5 @@ module.exports = {
   updateMeeting,
   disconnectZoom,
 };
+
+module.exports = router;
