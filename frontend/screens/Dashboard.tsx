@@ -1,4 +1,5 @@
 import React from 'react';
+import DashboardStyle from '../src/styles/DashboardStyle';
 import TopNavBar from '../components/TopNavBar';
 import SideBar from '../components/Sidebar';
 import PrimaryButton from '../components/PrimaryButton';
