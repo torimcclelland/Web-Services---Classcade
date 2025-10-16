@@ -1,7 +1,6 @@
 import React from 'react';
-import styles from './DashboardStyle.ts';
 import TopNavBar from '../components/TopNavBar';
-import SideBar from '../components/SideBar';
+import SideBar from '../components/Sidebar';
 import PrimaryButton from '../components/PrimaryButton';
 
 const DashboardPage: React.FC = () => {
