@@ -1,8 +1,8 @@
-
-
 // scheduleService.js
 // 6 methods
 
+const express = require('express');
+const router = express.Router();
 
 // connect schedule.js with scheduleService.js
 const Schedule = require('../models/schedule');
@@ -101,3 +101,5 @@ module.exports = {
   updateMeetingTime,
   deleteMeeting
 };
+
+module.exports = router;

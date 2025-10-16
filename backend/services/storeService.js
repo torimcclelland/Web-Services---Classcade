@@ -1,11 +1,8 @@
 const express = require('express');
-const app = express();
-const PORT = 3000;
-const connectDB = require('../db');
+const router = express.Router();
 const {StoreIcon, StoreBanner, StoreBackdrop } = require('../models/store');
 
-// middleware used in parsing json file format
-app.use(express.json());
+router.use(express.json());
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -13,7 +10,7 @@ app.use(express.json());
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 // GET all profile icons
-app.get('/api/store_icon', async (req, res) => {
+router.get('/store_icon', async (req, res) => {
     try {
         const items = await StoreIcon.find();
         res.json(items);
@@ -23,7 +20,7 @@ app.get('/api/store_icon', async (req, res) => {
 });
 
 // GET profile icon by id
-app.get('/api/store_icon/:id', async (req, res) => {
+router.get('/store_icon/:id', async (req, res) => {
     try {
         const id = req.params.id;
         const item = await StoreIcon.findById(id);
@@ -38,7 +35,7 @@ app.get('/api/store_icon/:id', async (req, res) => {
 
 
 // CREATE profile icon
-app.post('/api/store_icon', async (req, res) => {
+router.post('/store_icon', async (req, res) => {
     const { name, price } = req.body;
 
     // validation for user data
@@ -64,7 +61,7 @@ app.post('/api/store_icon', async (req, res) => {
 
 
 // UPDATE profile icon
-app.put('/api/store_icon/:id', async (req, res) => {
+router.put('/store_icon/:id', async (req, res) => {
     const id = req.params.id;
     const { name, price } = req.body;
 
@@ -100,7 +97,7 @@ app.put('/api/store_icon/:id', async (req, res) => {
 
 
 // DELETE a profile icon
-app.delete('/api/store_icon/:id', async (req, res) => {
+router.delete('/store_icon/:id', async (req, res) => {
     try {
         const id = req.params.id;
         const deletedItem = await StoreIcon.findByIdAndDelete(id);
@@ -119,7 +116,7 @@ app.delete('/api/store_icon/:id', async (req, res) => {
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 // GET all banners
-app.get('/api/store_banner', async (req, res) => {
+router.get('/store_banner', async (req, res) => {
     try {
         const items = await StoreBanner.find();
         res.json(items);
@@ -129,7 +126,7 @@ app.get('/api/store_banner', async (req, res) => {
 });
 
 // GET banner by id
-app.get('/api/store_banner/:id', async (req, res) => {
+router.get('/store_banner/:id', async (req, res) => {
     try {
         const id = req.params.id;
         const item = await StoreBanner.findById(id);
@@ -144,7 +141,8 @@ app.get('/api/store_banner/:id', async (req, res) => {
 
 
 // CREATE a banner
-app.post('/api/store_banner', async (req, res) => {
+// CREATE banner in the store
+router.post('/store_banner', async (req, res) => {
     const {name, price} = req.body; 
 
     // validation for user data
@@ -170,7 +168,8 @@ app.post('/api/store_banner', async (req, res) => {
 
 
 // UPDATE a banner
-app.put('/api/store_banner/:id', async (req, res) => {
+// UPDATE banner in the store
+router.put('/store_banner/:id', async (req, res) => {
     const id = req.params.id;
     const {name, price} = req.body;
 
@@ -206,7 +205,7 @@ app.put('/api/store_banner/:id', async (req, res) => {
 
 
 // DELETE a banner
-app.delete('/api/store_banner/:id', async (req, res) => {
+router.delete('/store_banner/:id', async (req, res) => {
     try {
         const id = req.params.id;
         const deletedItem = await StoreBanner.findByIdAndDelete(id);
@@ -225,7 +224,7 @@ app.delete('/api/store_banner/:id', async (req, res) => {
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 // GET backdrops
-app.get('/api/store_backdrop', async (req, res) => {
+router.get('/store_backdrop', async (req, res) => {
     try {
         const items = await StoreBackdrop.find();
         res.json(items);
@@ -235,7 +234,7 @@ app.get('/api/store_backdrop', async (req, res) => {
 });
 
 // GET backdrop by id
-app.get('/api/store_backdrop/:id', async (req, res) => {
+router.get('/store_backdrop/:id', async (req, res) => {
     try {
         const id = req.params.id;
         const item = await StoreBackdrop.findById(id);
@@ -250,7 +249,7 @@ app.get('/api/store_backdrop/:id', async (req, res) => {
 
 
 // CREATE backdrop
-app.post('/api/store_backdrop', async (req, res) => {
+router.post('/store_backdrop', async (req, res) => {
     const {name, price} = req.body; 
 
     // validation for user data
@@ -276,7 +275,7 @@ app.post('/api/store_backdrop', async (req, res) => {
 
 
 // UPDATE backdrop
-app.put('/api/store_backdrop/:id', async (req, res) => {
+router.put('/store_backdrop/:id', async (req, res) => {
     const id = req.params.id;
     const {name, price} = req.body;
 
@@ -312,7 +311,7 @@ app.put('/api/store_backdrop/:id', async (req, res) => {
 
 
 // DELETE a backdrop
-app.delete('/api/store_backdrop/:id', async (req, res) => {
+router.delete('/store_backdrop/:id', async (req, res) => {
     try {
         const id = req.params.id;
         const deletedItem = await StoreBackdrop.findByIdAndDelete(id);
@@ -328,13 +327,4 @@ app.delete('/api/store_backdrop/:id', async (req, res) => {
 
 
 
-connectDB()
-  .then(async () => {
-    const mongoose = require('mongoose');
-    console.log('mongoose state:', mongoose.connection.readyState);
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  })
-  .catch(err => {
-    console.error('DB connect failed, starting server without DB:', err);
-    app.listen(PORT, () => console.log(`Server running on port ${PORT} (no DB)`));
-  });
+module.exports = router;

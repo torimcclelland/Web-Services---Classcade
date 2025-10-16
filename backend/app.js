@@ -7,6 +7,10 @@ const projectRoutes = require('./services/projectService');
 const notificationRoutes = require('./services/notificationService');
 const userRoutes = require('./services/userService');
 const chatRoutes = require('./services/chatService');
+const storeRoutes = require('./services/storeService');
+const calendarRoutes = require('./services/calendarService');
+const scheduleRoutes = require('./services/scheduleService');
+const zoomRoutes = require('./services/zoomService');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -23,6 +27,10 @@ app.use('/api/project', projectRoutes);
 app.use('/api/notification', notificationRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/store', storeRoutes);
+app.use('/api/calendar', calendarRoutes);
+app.use('/api/schedule', scheduleRoutes);
+app.use('/api/zoom', zoomRoutes);
 
 const startServer = async () => {
   try {
