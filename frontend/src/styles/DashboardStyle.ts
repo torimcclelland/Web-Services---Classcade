@@ -46,32 +46,34 @@ const DashboardStyle = {
     marginBottom: '0.25rem',
     display: 'block',
   },
+
+  statValue: {
+    fontSize: '1.1rem',
+    fontWeight: 500,
+    color: '#1e3a8a',
+  },
+
+  progressBar: {
+    backgroundColor: '#e0e0e0',
+    borderRadius: '6px',
+    height: '10px',
+    margin: '0.5rem 0',
+    overflow: 'hidden',
+  },
+
+  progressFill: {
+    backgroundColor: '#1e3a8a',
+    height: '100%',
+    borderRadius: '6px',
+  },
+
+  buttonRow: {
+    display: 'flex',
+    gap: '1rem',
+  },
 };
 
 export default DashboardStyle;
 
 
-.statValue {
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: #1e3a8a;
-}
 
-.progressBar {
-  background-color: #e0e0e0;
-  border-radius: 6px;
-  height: 10px;
-  margin: 0.5rem 0;
-  overflow: hidden;
-}
-
-.progressFill {
-  background-color: #1e3a8a;
-  height: 100%;
-  border-radius: 6px;
-}
-
-.buttonRow {
-  display: flex;
-  gap: 1rem;
-}
