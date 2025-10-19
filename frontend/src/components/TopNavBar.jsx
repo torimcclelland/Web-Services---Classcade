@@ -1,5 +1,5 @@
 import React from 'react';
-import './TopNavBar.css';
+import '../styles/TopNavBarStyle';
 
 const TopNavBar = () => {
   return (

@@ -1,27 +1,46 @@
-// src/screens/Login.tsx
+// src/screens/SignUp.tsx
 
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import TextField from '../components/TextField';
 import PrimaryButton from '../components/PrimaryButton';
 
-const Login: React.FC = () => {
+const SignUp = () => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleInstructorLogin = () => {
-    console.log('Instructor login:', { email, password });
-    // TODO: Navigate to instructor dashboard
+  const handleSignUp = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/task', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'New Task',
+          description: 'Demo task for sign-up',
+        }),
+      });
+  
+      const data = await response.json();
+      console.log('Created:', data);
+      Alert.alert('Success', 'User created!');
+    } catch (error) {
+      console.error('Error:', error);
+      Alert.alert('Error', 'Could not create user');
+    }
   };
-
-  const handleStudentLogin = () => {
-    console.log('Student login:', { email, password });
-    // TODO: Navigate to student dashboard
-  };
+  
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Welcome Back</Text>
+      <Text style={styles.title}>Create Your Account</Text>
+
+      <TextField
+        label="Name"
+        placeholder="Enter your full name"
+        value={name}
+        onChangeText={setName}
+      />
 
       <TextField
         label="Email"
@@ -34,19 +53,16 @@ const Login: React.FC = () => {
 
       <TextField
         label="Password"
-        placeholder="Enter your password"
+        placeholder="Create a password"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
       />
 
-      <View style={styles.buttonGroup}>
-        <PrimaryButton title="Sign In as Instructor" onPress={handleInstructorLogin} />
-        <PrimaryButton title="Sign In as Student" onPress={handleStudentLogin} />
-      </View>
+      <PrimaryButton title="Sign Up" onPress={handleSignUp} />
 
       <Text style={styles.footerText}>
-        Don't have an account? <Text style={styles.link}>Sign up</Text>
+        Already have an account? <Text style={styles.link}>Log in</Text>
       </Text>
     </ScrollView>
   );
@@ -55,7 +71,7 @@ const Login: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     padding: 24,
-    backgroundColor: '#E6F4EA', // soft green from your Figma
+    backgroundColor: '#E6F4EA', //seafoam green
     flexGrow: 1,
     justifyContent: 'center',
   },
@@ -63,12 +79,8 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '600',
     marginBottom: 24,
-    color: '#2E7D32', // deeper green
+    color: '#2E7D32', //dark green
     textAlign: 'center',
-  },
-  buttonGroup: {
-    marginTop: 24,
-    gap: 12,
   },
   footerText: {
     marginTop: 16,
@@ -82,7 +94,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Login;
-
-
+export default SignUp;
 

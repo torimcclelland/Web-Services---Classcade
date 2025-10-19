@@ -4,6 +4,7 @@ import ChatDemo from "./components/ChatDemo";
 import ProjectDemo from "./components/ProjectDemo";
 import NotificationDemo from "./components/NotificationDemo";
 import UserDemo from "./components/UserDemo";
+import DashboardPage from "./screens/Dashboard";
 
 export default function App() {
   const [tab, setTab] = useState("task");
@@ -18,7 +19,8 @@ export default function App() {
 
   return (
     <div style={{ padding: 20 }}>
-      <h1>Backend Integration Demo</h1>
+      <DashboardPage />
+      {/* <h1>Backend Integration Demo</h1>
       <div style={{ marginBottom: 10 }}>
         {Object.keys(components).map((k) => (
           <button key={k} onClick={() => setTab(k)} style={{ marginRight: 5 }}>
@@ -28,7 +30,7 @@ export default function App() {
       </div>
       <div style={{ border: "1px solid #ccc", padding: 10 }}>
         {components[tab]}
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './PrimaryButtonStyle.ts';
+import styles from '../styles/PrimaryButtonStyle';
 
 interface PrimaryButtonProps {
   text: string;
