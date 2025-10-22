@@ -1,14 +1,11 @@
 const DashboardStyle = {
   pageWrapper: {
-    display: 'flex',
     height: '100vh',
     backgroundColor: '#f0f4f8',
   },
 
   mainContent: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
+    
   },
 
   dashboardPanel: {
