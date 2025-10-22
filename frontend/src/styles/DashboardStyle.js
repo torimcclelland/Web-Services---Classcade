@@ -1,76 +1,52 @@
-const DashboardStyle = {
-  pageWrapper: {
+export const dashboardStyles = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
     height: '100vh',
-    backgroundColor: '#f0f4f8',
   },
-
-  mainContent: {
-    
+  layout: {
+    display: 'flex',
+    flex: 1,
   },
-
-  dashboardPanel: {
+  main: {
+    flex: 1,
     padding: '2rem',
-    backgroundColor: '#ffffff',
-    margin: '1rem',
+    backgroundColor: '#f3f4f6', // light gray
+  },
+  statsPanel: {
+    backgroundColor: '#e5e7eb', // gray rectangle
+    padding: '2rem',
     borderRadius: '12px',
-    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.08)',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
   },
-
-  title: {
-    fontSize: '1.6rem',
-    fontWeight: 600,
-    color: '#1e3a8a',
-    marginBottom: '1.5rem',
-  },
-
   statsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
     gap: '1.5rem',
-    marginBottom: '2rem',
+    marginTop: '1rem',
   },
-
-  statBox: {
-    backgroundColor: '#f9fafc',
-    padding: '1rem',
-    borderRadius: '8px',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+  statItem: {
+    display: 'flex',
+    flexDirection: 'column',
   },
-
   statLabel: {
-    fontSize: '0.85rem',
-    color: '#555',
-    marginBottom: '0.25rem',
-    display: 'block',
+    fontWeight: 600,
+    marginBottom: '0.5rem',
   },
-
-  statValue: {
-    fontSize: '1.1rem',
-    fontWeight: 500,
-    color: '#1e3a8a',
-  },
-
   progressBar: {
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#d1d5db',
     borderRadius: '6px',
     height: '10px',
-    margin: '0.5rem 0',
     overflow: 'hidden',
+    marginBottom: '0.5rem',
   },
-
   progressFill: {
     backgroundColor: '#1e3a8a',
     height: '100%',
-    borderRadius: '6px',
   },
-
-  buttonRow: {
+  actionButtons: {
     display: 'flex',
     gap: '1rem',
+    marginTop: '2rem',
   },
 };
-
-export default DashboardStyle;
-
-
-
