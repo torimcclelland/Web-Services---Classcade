@@ -1,6 +1,6 @@
 // PrimaryButtonStyle.js
 
-export const styles = {
+export const PrimaryButtonStyle = {
   primaryButton: {
     backgroundColor: '#1e3a8a',
     color: 'white',
@@ -23,4 +23,6 @@ export const styles = {
     alignItems: 'center',
   },
 };
+
+export default PrimaryButtonStyle;
 

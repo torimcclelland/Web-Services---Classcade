@@ -1,4 +1,6 @@
-export const dashboardStyles = {
+import Dashboard from "../screens/Dashboard";
+
+export const DashboardStyle = {
   container: {
     display: 'flex',
     flexDirection: 'column',
@@ -50,3 +52,5 @@ export const dashboardStyles = {
     marginTop: '2rem',
   },
 };
+
+export default DashboardStyle;

@@ -6,55 +6,55 @@ import PrimaryButton from '../components/PrimaryButton';
 
 const Dashboard = () => {
   return (
-    <div style={dashboardStyles.container}>
+    <div style={DashboardStyle.container}>
       <TopNavBar />
 
-      <div style={dashboardStyles.layout}>
-        <Sidebar />
+      <div style={DashboardStyle.layout}>
+        <SideBar />
 
-        <main style={dashboardStyles.main}>
-          <div style={dashboardStyles.statsPanel}>
+        <main style={DashboardStyle.main}>
+          <div style={DashboardStyle.statsPanel}>
             <h2>Dashboard</h2>
 
-            <div style={dashboardStyles.statsGrid}>
-              <div style={dashboardStyles.statItem}>
-                <label style={dashboardStyles.statLabel}>Overall Progress</label>
-                <div style={dashboardStyles.progressBar}>
-                  <div style={{ ...dashboardStyles.progressFill, width: '55%' }}></div>
+            <div style={DashboardStyle.statsGrid}>
+              <div style={DashboardStyle.statItem}>
+                <label style={DashboardStyle.statLabel}>Overall Progress</label>
+                <div style={DashboardStyle.progressBar}>
+                  <div style={{ ...DashboardStyle.progressFill, width: '55%' }}></div>
                 </div>
                 <span>55%</span>
               </div>
 
-              <div style={dashboardStyles.statItem}>
-                <label style={dashboardStyles.statLabel}>Streak</label>
+              <div style={DashboardStyle.statItem}>
+                <label style={DashboardStyle.statLabel}>Streak</label>
                 <span>3</span>
               </div>
 
-              <div style={dashboardStyles.statItem}>
-                <label style={dashboardStyles.statLabel}>Time Spent</label>
+              <div style={DashboardStyle.statItem}>
+                <label style={DashboardStyle.statLabel}>Time Spent</label>
                 <span>3 Hours</span>
               </div>
 
-              <div style={dashboardStyles.statItem}>
-                <label style={dashboardStyles.statLabel}>Project Due Date</label>
+              <div style={DashboardStyle.statItem}>
+                <label style={DashboardStyle.statLabel}>Project Due Date</label>
                 <span>9 September 2025</span>
               </div>
 
-              <div style={dashboardStyles.statItem}>
-                <label style={dashboardStyles.statLabel}>Current Active Task</label>
+              <div style={DashboardStyle.statItem}>
+                <label style={DashboardStyle.statLabel}>Current Active Task</label>
                 <span>Create Prototype</span>
               </div>
 
-              <div style={dashboardStyles.statItem}>
-                <label style={dashboardStyles.statLabel}>Task Due Date</label>
+              <div style={DashboardStyle.statItem}>
+                <label style={DashboardStyle.statLabel}>Task Due Date</label>
                 <span>9 September 2025</span>
               </div>
             </div>
 
-            <div style={dashboardStyles.actionButtons}>
-              <button style={buttonStyles.primaryButton}>Detailed Stats</button>
-              <button style={buttonStyles.primaryButton}>Track Time</button>
-              <button style={buttonStyles.primaryButton}>Schedule Meeting</button>
+            <div style={DashboardStyle.actionButtons}>
+              <PrimaryButton text="Detailed Stats" />
+              <PrimaryButton text="Track Time" />
+              <PrimaryButton text="Schedule Meeting" />
             </div>
           </div>
         </main>
