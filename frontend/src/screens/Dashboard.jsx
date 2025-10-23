@@ -1,61 +1,66 @@
 import React from 'react';
-// import DashboardStyle from '../styles/DashboardStyle';
+import DashboardStyle from '../styles/DashboardStyle';
 import TopNavBar from '../components/TopNavBar';
 import SideBar from '../components/Sidebar';
 import PrimaryButton from '../components/PrimaryButton';
 
-function DashboardPage() {
+const Dashboard = () => {
   return (
-    <div style={DashboardStyle.pageWrapper}>
-      <SideBar />
+    <div style={dashboardStyles.container}>
       <TopNavBar />
 
-      <div style={DashboardStyle.dashboardPanel}>
-        <h2 style={DashboardStyle.title}>Dashboard</h2>
+      <div style={dashboardStyles.layout}>
+        <Sidebar />
 
-        <div style={DashboardStyle.statsGrid}>
-          <div style={DashboardStyle.statBox}>
-            <label>Overall Progress</label>
-            <div style={DashboardStyle.progressBar}>
-              <div style={DashboardStyle.progressFill} />
+        <main style={dashboardStyles.main}>
+          <div style={dashboardStyles.statsPanel}>
+            <h2>Dashboard</h2>
+
+            <div style={dashboardStyles.statsGrid}>
+              <div style={dashboardStyles.statItem}>
+                <label style={dashboardStyles.statLabel}>Overall Progress</label>
+                <div style={dashboardStyles.progressBar}>
+                  <div style={{ ...dashboardStyles.progressFill, width: '55%' }}></div>
+                </div>
+                <span>55%</span>
+              </div>
+
+              <div style={dashboardStyles.statItem}>
+                <label style={dashboardStyles.statLabel}>Streak</label>
+                <span>3</span>
+              </div>
+
+              <div style={dashboardStyles.statItem}>
+                <label style={dashboardStyles.statLabel}>Time Spent</label>
+                <span>3 Hours</span>
+              </div>
+
+              <div style={dashboardStyles.statItem}>
+                <label style={dashboardStyles.statLabel}>Project Due Date</label>
+                <span>9 September 2025</span>
+              </div>
+
+              <div style={dashboardStyles.statItem}>
+                <label style={dashboardStyles.statLabel}>Current Active Task</label>
+                <span>Create Prototype</span>
+              </div>
+
+              <div style={dashboardStyles.statItem}>
+                <label style={dashboardStyles.statLabel}>Task Due Date</label>
+                <span>9 September 2025</span>
+              </div>
             </div>
-            <span style={DashboardStyle.statValue}>55%</span>
-          </div>
 
-          <div style={DashboardStyle.statBox}>
-            <label>Streak</label>
-            <span style={DashboardStyle.statValue}>3</span>
+            <div style={dashboardStyles.actionButtons}>
+              <button style={buttonStyles.primaryButton}>Detailed Stats</button>
+              <button style={buttonStyles.primaryButton}>Track Time</button>
+              <button style={buttonStyles.primaryButton}>Schedule Meeting</button>
+            </div>
           </div>
-
-          <div style={DashboardStyle.statBox}>
-            <label>Time Spent</label>
-            <span style={DashboardStyle.statValue}>3 Hours</span>
-          </div>
-
-          <div style={DashboardStyle.statBox}>
-            <label>Project Due Date</label>
-            <span style={DashboardStyle.statValue}>9 September 2025</span>
-          </div>
-
-          <div style={DashboardStyle.statBox}>
-            <label>Current Active Task</label>
-            <span style={DashboardStyle.statValue}>Create Prototype</span>
-          </div>
-
-          <div style={DashboardStyle.statBox}>
-            <label>Task Due Date</label>
-            <span style={DashboardStyle.statValue}>9 September 2025</span>
-          </div>
-        </div>
-
-        <div style={DashboardStyle.buttonRow}>
-          <PrimaryButton text="Detailed Stats" />
-          <PrimaryButton text="Track Time" />
-          <PrimaryButton text="Schedule Meeting" />
-        </div>
+        </main>
       </div>
     </div>
   );
-}
+};
 
-export default DashboardPage;
+export default Dashboard;
