@@ -1,24 +1,26 @@
 import React from 'react';
-import '../styles/TopNavBarStyle';
+import TopNavBarStyle from '../styles/TopNavBarStyle';
 
 const TopNavBar = () => {
-  return (
-    <div className="top-navbar">
-       <input
-       type="text"
-        className="search-bar"
-         placeholder="Search..."
-         defaultValue=""
-       />      
-       <button className="compose-btn">
-       </button>
-       <select className="group-dropdown">
-         <option>Group 3</option>
-       </select>
-       <button className="settings-btn">
-      </button>
-     </div>
-   );
- };
+  const groupTabs = ['sweng300', 'compsci', 'group3'];
 
- export default TopNavBar;
+  return (
+    <div style={TopNavBarStyle.topNavbar}>
+      <button style={TopNavBarStyle.homeBtn}>🏠</button>
+
+      <div style={TopNavBarStyle.groupTabs}>
+        {groupTabs.map((group, index) => (
+          <div key={index} style={TopNavBarStyle.groupTab}>
+            <span>{group}</span>
+            <button style={TopNavBarStyle.closeTabBtn}>✕</button>
+          </div>
+        ))}
+        <button style={TopNavBarStyle.addTabBtn}>＋</button>
+      </div>
+
+      <button style={TopNavBarStyle.exitBtn}>✕</button>
+    </div>
+  );
+};
+
+export default TopNavBar;
