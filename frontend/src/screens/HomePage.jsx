@@ -110,11 +110,11 @@ const styles = {
     alignSelf: 'flex-start',
   },
   logoutBtn: {
-    position: 'absolute',
-    top: -10,
-    left: 20,
-    width: 0,
-    height: 0,
+    position: 'fixed',
+    top: 12,
+    left: 8,
+    width: 50,
+    height: 50,
     backgroundColor: '#DDF9EA',
     border: 0,
     cursor: 'pointer',
@@ -124,6 +124,7 @@ const styles = {
     fontSize: 28,
     color: '#0F3E2D',
     fontWeight: 'bold',
+    zIndex: 9999,
   }
 };
 
