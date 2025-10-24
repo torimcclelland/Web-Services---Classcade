@@ -7,6 +7,7 @@ import UserDemo from "./components/UserDemo";
 import DashboardPage from "./screens/Dashboard";
 import LogInPage from "./screens/LogIn";
 import HomePage from "./screens/HomePage";
+import MyTasks from "./screens/MyTasks";
 
 export default function App() {
   const [tab, setTab] = useState("task");
@@ -21,7 +22,7 @@ export default function App() {
 
   return (
     <div style={{ padding: 20 }}>
-      <DashboardPage />
+      <MyTasks />
       {/* <h1>Backend Integration Demo</h1>
       <div style={{ marginBottom: 10 }}>
         {Object.keys(components).map((k) => (
