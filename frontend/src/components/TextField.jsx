@@ -1,41 +1,66 @@
-// import React from 'react';
-// import styles from './TextField.module.css';
+import React from 'react';
 
-// interface TextFieldProps {
-//   label?: string;
-//   placeholder?: string;
-//   value?: string;
-//   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-//   icon?: React.ReactNode;
-//   type?: 'text' | 'email' | 'password' | 'search';
-//   name?: string;
-// }
+const styles = {
+  wrapper: {
+    marginBottom: '16px',
+    width: '100%',
+  },
+  label: {
+    display: 'block',
+    marginBottom: '8px',
+    fontSize: '14px',
+    fontWeight: 500,
+    color: '#2E7D32',
+  },
+  inputContainer: {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  icon: {
+    position: 'absolute',
+    left: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    color: '#666',
+  },
+  input: {
+    width: '100%',
+    padding: '12px',
+    paddingLeft: '12px',
+    fontSize: '14px',
+    border: '1px solid #ccc',
+    borderRadius: '6px',
+    outline: 'none',
+    transition: 'border-color 0.2s',
+  },
+};
 
-// const TextField: React.FC<TextFieldProps> = ({
-//   label,
-//   placeholder,
-//   value,
-//   onChange,
-//   icon,
-//   type = 'text',
-//   name,
-// }) => {
-//   return (
-//     <div className={styles.wrapper}>
-//       {label && <label className={styles.label}>{label}</label>}
-//       <div className={styles.inputContainer}>
-//         {icon && <span className={styles.icon}>{icon}</span>}
-//         <input
-//           type={type}
-//           name={name}
-//           className={styles.input}
-//           placeholder={placeholder}
-//           value={value}
-//           onChange={onChange}
-//         />
-//       </div>
-//     </div>
-//   );
-// };
+const TextField = ({
+  label,
+  placeholder,
+  value,
+  onChange,
+  icon,
+  type = 'text',
+  name,
+}) => {
+  return (
+    <div style={styles.wrapper}>
+      {label && <label style={styles.label}>{label}</label>}
+      <div style={styles.inputContainer}>
+        {icon && <span style={styles.icon}>{icon}</span>}
+        <input
+          type={type}
+          name={name}
+          style={{ ...styles.input, paddingLeft: icon ? '40px' : '12px' }}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+        />
+      </div>
+    </div>
+  );
+};
 
-// export default TextField;
+export default TextField;
