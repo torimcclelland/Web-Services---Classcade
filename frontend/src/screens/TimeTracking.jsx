@@ -48,6 +48,32 @@ const TimeTracking = () => {
 
         </button>
 
+        <textfield
+            // import styles here
+            onClick = {handleMinutes}
+            aria-label="Minutes"
+        >
+
+        </textfield>
+
+        <textfield // should be a dropdown, not textfield
+            onClick = {handleClassSelect}
+            aria-label="Select a Class"
+            placeholder="Select a Class"
+        >
+
+        </textfield>
+
+        <textfield // should be a dropdown, not a textfield
+            onClick = {handleTaskSelect}
+            aria-label="Select a Task"
+            placeholder="Select a Task"
+        >
+
+        </textfield>
+
+        
+
         </div>
     );
 
