@@ -1,5 +1,12 @@
+
+// TimeTracking.jsx
+
+// Work in progress -- Brooke
+
+
 import React from 'react';
 // Create stylesheet for this page and import here
+import Logo from '../assets/Logo.png';
 
 const TimeTracking = () => {
     console.log('You are on the Time Tracking screen.')
@@ -72,7 +79,7 @@ const TimeTracking = () => {
 
         </textfield>
 
-        
+
 
         </div>
     );
