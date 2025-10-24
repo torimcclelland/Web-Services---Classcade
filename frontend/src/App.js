@@ -5,6 +5,7 @@ import ProjectDemo from "./components/ProjectDemo";
 import NotificationDemo from "./components/NotificationDemo";
 import UserDemo from "./components/UserDemo";
 import DashboardPage from "./screens/Dashboard";
+import LogInPage from "./screens/LogIn";
 
 export default function App() {
   const [tab, setTab] = useState("task");
