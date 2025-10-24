@@ -51,6 +51,12 @@ export const DashboardStyle = {
     gap: '1rem',
     marginTop: '2rem',
   },
+  profileHeader: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    marginBottom: '1rem',
+  },
+
 };
 
 export default DashboardStyle;

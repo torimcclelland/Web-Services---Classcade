@@ -14,9 +14,11 @@ const Dashboard = () => {
         <SideBar />
 
         <main style={DashboardStyle.main}>
-          <div style={DashboardStyle.statsPanel}>
+        <div style={DashboardStyle.profileHeader}>
           <ProfileCircle avatarUrl="https://plus.unsplash.com/premium_photo-1732757787074-0f95bf19cf73?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8dXNlciUyMGF2YXRhcnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=500" size={64} />
-
+            </div>
+          <div style={DashboardStyle.statsPanel}>
+            
             <h2>Dashboard</h2>
 
             <div style={DashboardStyle.statsGrid}>
