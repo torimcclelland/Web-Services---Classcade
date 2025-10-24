@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import TaskDemo from "./components/TaskDemo";
 import ChatDemo from "./components/ChatDemo";
 import ProjectDemo from "./components/ProjectDemo";
@@ -20,19 +21,12 @@ export default function App() {
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <DashboardPage />
-      {/* <h1>Backend Integration Demo</h1>
-      <div style={{ marginBottom: 10 }}>
-        {Object.keys(components).map((k) => (
-          <button key={k} onClick={() => setTab(k)} style={{ marginRight: 5 }}>
-            {k}
-          </button>
-        ))}
-      </div>
-      <div style={{ border: "1px solid #ccc", padding: 10 }}>
-        {components[tab]}
-      </div> */}
-    </div>
+    <Router>
+      <Routes>
+        <Route path = "/" element = {<LogInPage />}/>
+        <Route path = "/home" element = {<HomePage />}/>
+        <Route path = "/dashboard" element = {<DashboardPage />}/>
+      </Routes>
+    </Router>
   );
 }
