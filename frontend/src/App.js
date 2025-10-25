@@ -9,6 +9,7 @@ import DashboardPage from "./screens/Dashboard";
 import LogInPage from "./screens/LogIn";
 import HomePage from "./screens/HomePage";
 import TimeTracking from './screens/TimeTracking';
+import Profile from './screens/Profile';
 
 export default function App() {
   const [tab, setTab] = useState("task");
@@ -28,6 +29,7 @@ export default function App() {
         <Route path = "/home" element = {<HomePage />}/>
         <Route path = "/dashboard" element = {<DashboardPage />}/>
         <Route path = "/timetracking" element={<TimeTracking />} /> 
+        <Route path = "/profile" element={<Profile />} />
       </Routes>
     </Router>
   );
