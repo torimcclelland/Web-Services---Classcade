@@ -27,6 +27,7 @@ export default function App() {
         <Route path = "/" element = {<LogInPage />}/>
         <Route path = "/home" element = {<HomePage />}/>
         <Route path = "/dashboard" element = {<DashboardPage />}/>
+        <Route path = "/timetracking" element={<TimeTracking />} /> 
       </Routes>
     </Router>
   );
