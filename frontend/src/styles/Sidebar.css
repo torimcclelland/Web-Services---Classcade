@@ -1,0 +1,134 @@
+:root {
+  --cc-blue: #2d57ff;
+  --cc-blue-hover: #274de4;
+  --cc-white: #ffffff;
+  --cc-pill-bg: #ffffff;
+  --cc-pill-text: #1e3a8a;
+  --cc-icon-only-width: 76px;
+  --cc-expanded-width: 260px;
+  --cc-radius-lg: 18px;
+  --cc-radius-md: 12px;
+}
+
+.cc-sidebar {
+  position: sticky;
+  top: 16px;
+  height: calc(100vh - 32px);
+  width: var(--cc-expanded-width);
+  margin: 16px;
+  z-index: 10;
+}
+
+.cc-sidebar__inner {
+  height: 100%;
+  background: var(--cc-blue);
+  color: var(--cc-white);
+  border-radius: var(--cc-radius-lg);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.cc-sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 6px 8px;
+}
+
+.cc-sidebar__brandMark {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: radial-gradient(65% 65% at 30% 30%, #7aa9ff 0%, #2d57ff 60%, #1637b7 100%);
+  border: 2px solid rgba(255, 255, 255, 0.65);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+.cc-sidebar__brandText {
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  font-size: 1.05rem;
+}
+
+.cc-sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.cc-sidebar__item {
+  text-decoration: none;
+  color: var(--cc-white);
+  border-radius: var(--cc-radius-md);
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  transition: background 160ms ease, transform 120ms ease;
+}
+
+.cc-sidebar__item:hover {
+  background: var(--cc-blue-hover);
+}
+
+.cc-sidebar__icon {
+  font-size: 18px;
+  display: inline-grid;
+  place-items: center;
+}
+
+.cc-sidebar__label {
+  font-weight: 700;
+  font-size: 0.98rem;
+}
+
+.cc-sidebar__action {
+  font-size: 14px;
+  opacity: 0.95;
+}
+
+.cc-sidebar__item.is-active {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.cc-sidebar__item.is-active--pill {
+  background: var(--cc-pill-bg);
+  color: var(--cc-pill-text);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Responsive (collapse to icon-only) */
+@media (max-width: 980px) {
+  .cc-sidebar {
+    width: var(--cc-icon-only-width);
+    margin: 12px;
+    height: calc(100vh - 24px);
+  }
+
+  .cc-sidebar__label {
+    display: none;
+  }
+
+  .cc-sidebar__item {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    padding: 12px 10px;
+  }
+
+  .cc-sidebar__brandText {
+    display: none;
+  }
+
+  .cc-sidebar__brand {
+    justify-content: center;
+  }
+
+  .cc-sidebar__action {
+    display: none;
+  }
+}
