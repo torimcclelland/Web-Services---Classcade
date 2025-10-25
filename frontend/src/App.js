@@ -8,6 +8,7 @@ import UserDemo from "./components/UserDemo";
 import DashboardPage from "./screens/Dashboard";
 import LogInPage from "./screens/LogIn";
 import HomePage from "./screens/HomePage";
+import TimeTracking from './screens/TimeTracking';
 
 export default function App() {
   const [tab, setTab] = useState("task");
