@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import TopNavBar from '../components/TopNavBar';
 import PrimaryButton from '../components/PrimaryButton';
 import ProfileStyle from '../styles/ProfileStyle';
+import Sidebar from '../components/Sidebar';
 
 const Profile = () => {
   const [popupMessage, setPopupMessage] = useState('');
@@ -14,7 +15,6 @@ const Profile = () => {
   return (
     <div style={ProfileStyle.container}>
       <TopNavBar />
-
       <main style={ProfileStyle.main}>
         <div style={ProfileStyle.profilePanel}>
           <h2 style={ProfileStyle.title}>Your Profile</h2>
