@@ -1,4 +1,5 @@
 import React, { useState, useEffect} from 'react';
+import { useNavigate } from 'react-router-dom';
 import TextField from '../components/TextField';
 import PrimaryButton from '../components/PrimaryButton';
 import Logo from '../assets/Logo.png';
@@ -6,7 +7,7 @@ import Logo from '../assets/Logo.png';
 const styles = {
   container: {
     padding: 24,
-    backgroundColor: '#E6F4EA',
+    backgroundColor: '#DDF9EA',
     minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
@@ -26,7 +27,7 @@ const styles = {
     fontSize: 34,
     fontWeight: 600,
     marginBottom: 24,
-    color: '#2E7D32',
+    color: '#0F3E2D',
     textAlign: 'center',
   },
   buttonGroup: {
@@ -58,12 +59,13 @@ const styles = {
 };
 
 const LogIn = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   
   const handleSignUp = () => {
     console.log('User clicked Sign up');
-    // TODO: Navigate to dashboard
+    //navigate('/signUp');
   };
 
   useEffect(() => {
@@ -80,7 +82,7 @@ const LogIn = () => {
   const handleLogin = (e) => {
     e.preventDefault();
     console.log('Student login:', { email, password });
-    // TODO: Navigate to dashboard
+    navigate('/home');
   };
 
   return (

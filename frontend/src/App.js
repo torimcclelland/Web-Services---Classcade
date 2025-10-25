@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import TaskDemo from "./components/TaskDemo";
 import ChatDemo from "./components/ChatDemo";
 import ProjectDemo from "./components/ProjectDemo";
@@ -7,7 +8,9 @@ import UserDemo from "./components/UserDemo";
 import DashboardPage from "./screens/Dashboard";
 import LogInPage from "./screens/LogIn";
 import HomePage from "./screens/HomePage";
-import MyTasks from "./screens/MyTasks";
+import TimeTracking from './screens/TimeTracking';
+import Profile from './screens/Profile';
+import MyTasks from './screens/MyTasks';
 
 export default function App() {
   const [tab, setTab] = useState("task");
@@ -22,7 +25,7 @@ export default function App() {
 
   return (
     <div style={{ padding: 20 }}>
-      <MyTasks />
+      <DashboardPage />
       {/* <h1>Backend Integration Demo</h1>
       <div style={{ marginBottom: 10 }}>
         {Object.keys(components).map((k) => (

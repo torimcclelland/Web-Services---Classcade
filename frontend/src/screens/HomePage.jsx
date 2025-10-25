@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Logo from '../assets/Logo.png';
 import LogoutImg from '../assets/Logout.png';
 
@@ -135,9 +136,10 @@ const groups = [
 ];
 
 const HomePage = () => {
+  const navigate = useNavigate();
   const handleCardClick = (groupId, groupName) => {
     console.log(`Card clicked: ${groupName} (ID: ${groupId})`);
-    // TODO: Navigate to group dashboard
+    navigate('/dashboard');
   };
 
   const handleDeleteClick = (e, groupId, groupName) => {
@@ -153,7 +155,7 @@ const HomePage = () => {
 
   const handleLogout = () => {
     console.log('Logout button clicked');
-    // TODO: Open login page
+    navigate('/');
   };
 
   return (
