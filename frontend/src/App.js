@@ -31,7 +31,7 @@ export default function App() {
         <Route path = "/dashboard" element = {<DashboardPage />}/>
         <Route path = "/timetracking" element={<TimeTracking />} /> 
         <Route path = "/profile" element={<Profile />} />
-        <Route path = "/mytasks" element={<MyTasks />} />
+        <Route path = "/tasks" element={<MyTasks />} />
       </Routes>
     </Router>
   );
