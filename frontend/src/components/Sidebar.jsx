@@ -34,7 +34,7 @@ export default function Sidebar() {
               to={item.path}
               className={({ isActive }) =>
                 `cc-sidebar__item ${isActive ? 'is-active' : ''} ${
-                  isActive && item.key === 'tasks' ? 'is-active--pill' : ''
+                  isActive && item.key === 'tasks' ? '' : ''
                 }`
               }
             >
