@@ -7,6 +7,7 @@ import {
   FaComments,
   FaCog,
   FaPencilAlt,
+  FaChartBar,
 } from 'react-icons/fa';
 import '../styles/Sidebar.css';
 
@@ -17,6 +18,8 @@ export default function Sidebar() {
     { key: 'timetracking', label: 'Time Tracking', icon: <FaCalendarAlt />, path: '/timetracking' },
     { key: 'profile', label: 'Profile', icon: <FaComments />, path: '/profile' },
     { key: 'home', label: 'Home', icon: <FaCog />, path: '/home' },
+    { key: 'stats', label: 'Stats', icon: <FaChartBar />, path: '/stats'},
+    { key: 'addnewgroup', label: 'Add New Group', icon: <FaPencilAlt />, path: '/addnewgroup' }
   ];
 
   return (

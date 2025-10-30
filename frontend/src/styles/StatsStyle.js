@@ -37,11 +37,6 @@ export const ChartBox = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-
-  img {
-    max-width: 100%;
-    height: auto;
-  }
 `;
 
 export const SummaryBox = styled.div`
@@ -60,3 +55,10 @@ export const SummaryItem = styled.p`
     color: #222;
   }
 `;
+
+export const ProfileCircle = styled.div`
+  display: flex;
+  justify-content: right;
+  margin: 1rem 0;
+`;
+
