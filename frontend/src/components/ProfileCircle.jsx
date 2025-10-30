@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
@@ -18,8 +19,12 @@ const Avatar = styled.img`
 `;
 
 const ProfileCircle = ({ avatarUrl, size = 48, alt = 'User avatar' }) => {
+  const navigate = useNavigate();
+  const goToProfile = () => {
+    navigate("/profile");
+  }
   return (
-    <Circle size={size}>
+    <Circle size={size} onClick={goToProfile}>
       <Avatar src={avatarUrl} alt={alt} />
     </Circle>
   );

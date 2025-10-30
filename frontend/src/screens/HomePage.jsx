@@ -154,9 +154,9 @@ const HomePage = () => {
   };
 
   const handleLogout = () => {
-    console.log('Logout button clicked');
+    localStorage.removeItem("user");
     navigate('/');
-  };
+};
 
   return (
     <div style={styles.page}>

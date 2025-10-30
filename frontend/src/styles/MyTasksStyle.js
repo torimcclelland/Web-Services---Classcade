@@ -1,5 +1,6 @@
 const MyTasksStyle = {
     container: {
+      backgroundColor: '#f3f4f6',
       display: 'flex',
       flexDirection: 'column',
       height: '100vh',

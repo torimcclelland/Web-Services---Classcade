@@ -1,12 +1,12 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TextField from '../components/TextField';
 import PrimaryButton from '../components/PrimaryButton';
 import Logo from '../assets/Logo.png';
+import api from '../api';
 
 const styles = {
   container: {
-    padding: 24,
     backgroundColor: '#DDF9EA',
     minHeight: '100vh',
     display: 'flex',
@@ -17,10 +17,6 @@ const styles = {
     inset: 0,
     padding: 24,
     boxSizing: 'border-box',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
     overflow: 'hidden',
   },
   title: {
@@ -30,11 +26,18 @@ const styles = {
     color: '#0F3E2D',
     textAlign: 'center',
   },
+  form: {
+    width: '100%',
+    maxWidth: 400,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 16,
+  },
   buttonGroup: {
     marginTop: 24,
     display: 'flex',
-    gap: 12,
     flexDirection: 'column',
+    gap: 12,
     width: '100%',
     alignItems: 'center',
   },
@@ -42,65 +45,56 @@ const styles = {
     marginTop: 16,
     fontSize: 14,
     color: '#555',
-    textAlign: 'center',
   },
   link: {
     color: '#2E7D32',
     fontWeight: 500,
     cursor: 'pointer',
-  },
-  form: {
-    width: '100%',
-    maxWidth: 400,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 16,
   }
 };
 
 const LogIn = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  
-  const handleSignUp = () => {
-    console.log('User clicked Sign up');
-    //navigate('/signUp');
-  };
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const prevBodyMargin = document.body.style.margin;
-    const prevBodyOverflow = document.body.style.overflow;
-    document.body.style.margin = '0';
+    if (localStorage.getItem("user")) {
+      navigate("/home");
+    }
+    const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.margin = prevBodyMargin;
-      document.body.style.overflow = prevBodyOverflow;
-    };
+    return () => { document.body.style.overflow = prevOverflow; };
   }, []);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    console.log('Student login:', { email, password });
-    navigate('/home');
+    setError('');
+
+    try {
+      const res = await api.post("/api/user/login", { username, password });
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      navigate("/home");
+    } catch (err) {
+      setError(err.response?.data?.error || "Login failed. Please check your credentials.");
+    }
   };
 
   return (
     <div style={styles.container}>
-      <img
-        src={Logo}
-        alt="Logo"
-        style={{ width: 150, height: 'auto', marginBottom: 20 }}
-      />
+      <img src={Logo} alt="Logo" style={{ width: 150, marginBottom: 20 }} />
+
       <div style={styles.title}>Welcome Back</div>
-      <form style={styles.form}>
+
+      <form style={styles.form} onSubmit={handleLogin}>
         <TextField
-          label="Email"
-          placeholder="Enter your email"
-          type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
+          label="Username"
+          placeholder="Enter your username"
+          value={username}
+          onChange={e => setUsername(e.target.value)}
         />
+
         <TextField
           label="Password"
           placeholder="Enter your password"
@@ -108,21 +102,17 @@ const LogIn = () => {
           value={password}
           onChange={e => setPassword(e.target.value)}
         />
+
+        {error && <div style={{ color: 'red', fontSize: 14 }}>{error}</div>}
+
         <div style={styles.buttonGroup}>
-          <PrimaryButton text="Sign In" onClick={handleLogin} />
+          <PrimaryButton text="Sign In" type="submit" />
         </div>
       </form>
+
       <div style={styles.footerText}>
         Don't have an account?{' '}
-        <span
-          style={styles.link}
-          role="button"
-          tabIndex={0}
-          onClick={handleSignUp}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') handleSignUp();
-          }}
-        >
+        <span style={styles.link} onClick={() => navigate('/signUp')}>
           Sign up
         </span>
       </div>
