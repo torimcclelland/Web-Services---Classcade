@@ -1,5 +1,3 @@
-import Dashboard from "../screens/Dashboard";
-
 export const DashboardStyle = {
   container: {
     backgroundColor: '#f3f4f6',

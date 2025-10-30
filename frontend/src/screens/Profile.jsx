@@ -3,14 +3,20 @@ import TopNavBar from '../components/TopNavBar';
 import PrimaryButton from '../components/PrimaryButton';
 import ProfileStyle from '../styles/ProfileStyle';
 import Sidebar from '../components/Sidebar';
+import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
   const [popupMessage, setPopupMessage] = useState('');
+  const navigate = useNavigate();
 
   const handleButtonClick = (message) => {
     setPopupMessage(message);
     setTimeout(() => setPopupMessage(''), 1200);
   };
+
+  const handleStoreClick = () => {
+    navigate('/store');
+  }
 
   return (
     <div style={ProfileStyle.container}>
@@ -36,7 +42,7 @@ const Profile = () => {
             />
             <PrimaryButton
               text="Store"
-              onClick={() => handleButtonClick('Accessing Store')}
+              onClick={() => handleStoreClick()}
             />
           </div>
         </div>

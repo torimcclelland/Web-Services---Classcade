@@ -9,6 +9,14 @@ import MyTasks from "./screens/MyTasks";
 import Calendar from "./screens/Calendar";
 import SignUp from "./screens/SignUp";
 import ProtectedRoute from "./components/ProtectedRoute";
+import TimeTracking from './screens/TimeTracking';
+import Profile from './screens/Profile';
+import MyTasks from './screens/MyTasks';
+import Calendar from './screens/Calendar';
+import AddNewGroup from './screens/AddNewGroup';
+import Stats from './screens/Stats';
+import Zoom from './screens/Zoom';
+import StorePage from './screens/Store';
 
 export default function App() {
   return (
@@ -64,6 +72,17 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route path = "/" element = {<LogInPage />}/>
+        <Route path = "/home" element = {<HomePage />}/>
+        <Route path = "/dashboard" element = {<DashboardPage />}/>
+        <Route path = "/timetracking" element={<TimeTracking />} /> 
+        <Route path = "/profile" element={<Profile />} />
+        <Route path = "/tasks" element={<MyTasks />} />
+        <Route path = "/calendar" element={<Calendar />} />
+        <Route path = "/addnewgroup" element={<AddNewGroup />} />
+        <Route path = "/stats" element={<Stats />} />
+        <Route path = "/zoom" element={<Zoom />} />
+        <Route path = "/store" element = {<StorePage />}/>
       </Routes>
     </Router>
   );
