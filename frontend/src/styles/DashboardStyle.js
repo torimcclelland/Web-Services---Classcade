@@ -1,5 +1,3 @@
-import Dashboard from "../screens/Dashboard";
-
 export const DashboardStyle = {
   container: {
     display: 'flex',

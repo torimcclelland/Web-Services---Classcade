@@ -11,6 +11,10 @@ import HomePage from "./screens/HomePage";
 import TimeTracking from './screens/TimeTracking';
 import Profile from './screens/Profile';
 import MyTasks from './screens/MyTasks';
+import Calendar from './screens/Calendar';
+import AddNewGroup from './screens/AddNewGroup';
+import Stats from './screens/Stats';
+import Zoom from './screens/Zoom';
 import StorePage from './screens/Store';
 
 export default function App() {
@@ -33,6 +37,10 @@ export default function App() {
         <Route path = "/timetracking" element={<TimeTracking />} /> 
         <Route path = "/profile" element={<Profile />} />
         <Route path = "/tasks" element={<MyTasks />} />
+        <Route path = "/calendar" element={<Calendar />} />
+        <Route path = "/addnewgroup" element={<AddNewGroup />} />
+        <Route path = "/stats" element={<Stats />} />
+        <Route path = "/zoom" elelement={ <Zoom />} />
         <Route path = "/store" element = {<StorePage />}/>
       </Routes>
     </Router>
