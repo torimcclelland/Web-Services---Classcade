@@ -6,8 +6,9 @@ import {
   FaCalendarAlt,
   FaComments,
   FaCog,
-  FaPencilAlt,
 } from 'react-icons/fa';
+
+import Logo from '../assets/Logo.png';
 import '../styles/Sidebar.css';
 
 export default function Sidebar() {
@@ -15,15 +16,16 @@ export default function Sidebar() {
     { key: 'dashboard', label: 'Dashboard', icon: <FaHome />, path: '/dashboard' },
     { key: 'tasks', label: 'My Tasks', icon: <FaTasks />, path: '/tasks' },
     { key: 'timetracking', label: 'Time Tracking', icon: <FaCalendarAlt />, path: '/timetracking' },
-    { key: 'profile', label: 'Profile', icon: <FaComments />, path: '/profile' },
+    // { key: 'profile', label: 'Profile', icon: <FaComments />, path: '/profile' },
     { key: 'home', label: 'Home', icon: <FaCog />, path: '/home' },
   ];
 
   return (
     <aside className="cc-sidebar">
       <div className="cc-sidebar__inner">
+
         <div className="cc-sidebar__brand">
-          <div className="cc-sidebar__brandMark" />
+          <img src={Logo} alt="Classcade Logo" className="cc-sidebar__logo" />
           <span className="cc-sidebar__brandText">CLASSCADE</span>
         </div>
 
@@ -33,9 +35,7 @@ export default function Sidebar() {
               key={item.key}
               to={item.path}
               className={({ isActive }) =>
-                `cc-sidebar__item ${isActive ? 'is-active' : ''} ${
-                  isActive && item.key === 'tasks' ? '' : ''
-                }`
+                `cc-sidebar__item ${isActive ? 'is-active' : ''}`
               }
             >
               <span className="cc-sidebar__icon">{item.icon}</span>
