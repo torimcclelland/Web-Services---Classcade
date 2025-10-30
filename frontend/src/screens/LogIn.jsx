@@ -11,13 +11,10 @@ const styles = {
     minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'center',
     alignItems: 'center',
-    position: 'fixed',
-    inset: 0,
     padding: 24,
     boxSizing: 'border-box',
-    overflow: 'hidden',
+    overflowY: 'auto',
   },
   title: {
     fontSize: 34,
@@ -26,9 +23,16 @@ const styles = {
     color: '#0F3E2D',
     textAlign: 'center',
   },
+  formWrapper: {
+    maxWidth: 400,
+    width: '100%',
+    margin: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center'
+  },
   form: {
     width: '100%',
-    maxWidth: 400,
     display: 'flex',
     flexDirection: 'column',
     gap: 16,
@@ -45,6 +49,7 @@ const styles = {
     marginTop: 16,
     fontSize: 14,
     color: '#555',
+    textAlign: 'center',
   },
   link: {
     color: '#2E7D32',
@@ -60,12 +65,7 @@ const LogIn = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (localStorage.getItem("user")) {
-      navigate("/home");
-    }
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = prevOverflow; };
+    if (localStorage.getItem("user")) navigate("/home");
   }, []);
 
   const handleLogin = async (e) => {
@@ -83,38 +83,40 @@ const LogIn = () => {
 
   return (
     <div style={styles.container}>
-      <img src={Logo} alt="Logo" style={{ width: 150, marginBottom: 20 }} />
+      <div style={styles.formWrapper}>
+        <img src={Logo} alt="Logo" style={{ width: 150, marginBottom: 20 }} />
 
-      <div style={styles.title}>Welcome Back</div>
+        <div style={styles.title}>Welcome Back</div>
 
-      <form style={styles.form} onSubmit={handleLogin}>
-        <TextField
-          label="Username"
-          placeholder="Enter your username"
-          value={username}
-          onChange={e => setUsername(e.target.value)}
-        />
+        <form style={styles.form} onSubmit={handleLogin}>
+          <TextField
+            label="Username"
+            placeholder="Enter your username"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+          />
 
-        <TextField
-          label="Password"
-          placeholder="Enter your password"
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-        />
+          <TextField
+            label="Password"
+            placeholder="Enter your password"
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+          />
 
-        {error && <div style={{ color: 'red', fontSize: 14 }}>{error}</div>}
+          {error && <div style={{ color: 'red', fontSize: 14 }}>{error}</div>}
 
-        <div style={styles.buttonGroup}>
-          <PrimaryButton text="Sign In" type="submit" />
+          <div style={styles.buttonGroup}>
+            <PrimaryButton text="Sign In" type="submit" />
+          </div>
+        </form>
+
+        <div style={styles.footerText}>
+          Don't have an account?{' '}
+          <span style={styles.link} onClick={() => navigate('/signUp')}>
+            Sign up
+          </span>
         </div>
-      </form>
-
-      <div style={styles.footerText}>
-        Don't have an account?{' '}
-        <span style={styles.link} onClick={() => navigate('/signUp')}>
-          Sign up
-        </span>
       </div>
     </div>
   );

@@ -13,11 +13,9 @@ const styles = {
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'fixed',
-    inset: 0,
     padding: 24,
     boxSizing: 'border-box',
-    overflow: 'hidden',
+    overflowY: 'auto'
   },
   title: {
     fontSize: 34,
@@ -67,9 +65,6 @@ const SignUp = () => {
     if (localStorage.getItem("user")) {
       navigate("/home");
     }
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = prevOverflow; };
   }, []);
 
   const handleSignUp = async (e) => {
