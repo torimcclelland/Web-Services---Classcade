@@ -12,6 +12,7 @@ import TimeTracking from './screens/TimeTracking';
 import Profile from './screens/Profile';
 import MyTasks from './screens/MyTasks';
 import Calendar from './screens/Calendar';
+import AddNewGroup from './screens/AddNewGroup';
 
 export default function App() {
   const [tab, setTab] = useState("task");
@@ -34,6 +35,7 @@ export default function App() {
         <Route path = "/profile" element={<Profile />} />
         <Route path = "/tasks" element={<MyTasks />} />
         <Route path = "/calendar" element={<Calendar />} />
+        <Route path = "/addnewgroup" element={<AddNewGroup />} />
       </Routes>
     </Router>
   );

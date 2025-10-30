@@ -31,41 +31,41 @@ const AddNewGroup = () => {
   };
 
   return (
-    <div style={TimeTrackingStyle.container}>
+    <div style={AddNewGroupStyle.container}>
       <TopNavBar />
-      <div style={TimeTrackingStyle.layout}>
+      <div style={AddNewGroupStyle.layout}>
         <SideBar />
-        <main style={TimeTrackingStyle.main}>
-          <div style={TimeTrackingStyle.formPanel}>
-            <h2 style={TimeTrackingStyle.title}>Add New Group</h2>
+        <main style={AddNewGroupStyle.main}>
+          <div style={AddNewGroupStyle.formPanel}>
+            <h2 style={AddNewGroupStyle.title}>Add New Group</h2>
 
-            <label style={TimeTrackingStyle.label}>Group Name</label>
+            <label style={AddNewGroupStyle.label}>Group Name</label>
             <input
               type="text"
-              style={TimeTrackingStyle.input}
+              style={AddNewGroupStyle.input}
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
               placeholder="Enter group name"
             />
 
-            <label style={TimeTrackingStyle.label}>Teacher Email (optional)</label>
+            <label style={AddNewGroupStyle.label}>Teacher Email (optional)</label>
             <input
               type="email"
-              style={TimeTrackingStyle.input}
+              style={AddNewGroupStyle.input}
               value={teacherEmail}
               onChange={(e) => setTeacherEmail(e.target.value)}
               placeholder="Enter teacher email"
             />
 
-            <label style={TimeTrackingStyle.label}>Groupmate Emails</label>
+            <label style={AddNewGroupStyle.label}>Groupmate Emails</label>
             <textarea
-              style={{ ...TimeTrackingStyle.input, height: '80px' }}
+              style={{ ...AddNewGroupStyle.input, height: '80px' }}
               value={groupmateEmails}
               onChange={(e) => setGroupmateEmails(e.target.value)}
               placeholder="Enter emails separated by commas"
             />
 
-            <div style={TimeTrackingStyle.actionButtons}>
+            <div style={AddNewGroupStyle.actionButtons}>
               <PrimaryButton text="Cancel" onClick={handleCancel} />
               <PrimaryButton text="Create" onClick={handleSubmit} />
             </div>
@@ -74,12 +74,12 @@ const AddNewGroup = () => {
       </div>
 
       {showCancelPopup && (
-        <div style={TimeTrackingStyle.overlay}>
-          <div style={TimeTrackingStyle.popup}>
-            <p style={TimeTrackingStyle.popupText}>
+        <div style={AddNewGroupStyle.overlay}>
+          <div style={AddNewGroupStyle.popup}>
+            <p style={AddNewGroupStyle.popupText}>
               Are you sure you want to cancel?
             </p>
-            <div style={TimeTrackingStyle.popupButtons}>
+            <div style={AddNewGroupStyle.popupButtons}>
               <PrimaryButton text="Yes" onClick={confirmCancel} />
               <PrimaryButton
                 text="No"
@@ -91,9 +91,9 @@ const AddNewGroup = () => {
       )}
 
       {showConfirmPopup && (
-        <div style={TimeTrackingStyle.overlay}>
-          <div style={TimeTrackingStyle.popup}>
-            <p style={TimeTrackingStyle.popupText}>Group creation cancelled.</p>
+        <div style={AddNewGroupStyle.overlay}>
+          <div style={AddNewGroupStyle.popup}>
+            <p style={AddNewGroupStyle.popupText}>Group creation cancelled.</p>
           </div>
         </div>
       )}
