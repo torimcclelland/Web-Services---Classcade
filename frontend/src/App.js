@@ -14,6 +14,7 @@ import MyTasks from './screens/MyTasks';
 import Calendar from './screens/Calendar';
 import AddNewGroup from './screens/AddNewGroup';
 import Stats from './screens/Stats';
+import Zoom from './screens/Zoom';
 
 export default function App() {
   const [tab, setTab] = useState("task");
@@ -38,6 +39,7 @@ export default function App() {
         <Route path = "/calendar" element={<Calendar />} />
         <Route path = "/addnewgroup" element={<AddNewGroup />} />
         <Route path = "/stats" element={<Stats />} />
+        <Route path = "/zoom" elelement={ <Zoom />} />
       </Routes>
     </Router>
   );
