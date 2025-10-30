@@ -1,6 +1,6 @@
 import React from 'react';
 import Sidebar from '../components/Sidebar';
-import TopNavbar from '../components/TopNavBar';
+import TopNavBar from '../components/TopNavBar';
 import ProfileCircle from '../components/ProfileCircle';
 import {
   ZoomContainer,
@@ -18,7 +18,7 @@ const Zoom = () => {
     <ZoomContainer>
       <Sidebar />
       <MainContent>
-        <TopNavbar />
+        <TopNavBar />
         <ProfileRow>
           <ProfileCircle
             avatarUrl="https://plus.unsplash.com/premium_photo-1732757787074-0f95bf19cf73?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8dXNlciUyMGF2YXRhcnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=500"

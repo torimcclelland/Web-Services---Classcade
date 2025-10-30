@@ -39,7 +39,7 @@ export default function App() {
         <Route path = "/calendar" element={<Calendar />} />
         <Route path = "/addnewgroup" element={<AddNewGroup />} />
         <Route path = "/stats" element={<Stats />} />
-        <Route path = "/zoom" elelement={ <Zoom />} />
+        <Route path = "/zoom" element={<Zoom />} />
       </Routes>
     </Router>
   );

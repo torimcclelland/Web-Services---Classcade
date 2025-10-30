@@ -8,6 +8,7 @@ import {
   FaCog,
   FaPencilAlt,
   FaChartBar,
+  FaCamera
 } from 'react-icons/fa';
 import '../styles/Sidebar.css';
 
@@ -19,7 +20,8 @@ export default function Sidebar() {
     { key: 'profile', label: 'Profile', icon: <FaComments />, path: '/profile' },
     { key: 'home', label: 'Home', icon: <FaCog />, path: '/home' },
     { key: 'stats', label: 'Stats', icon: <FaChartBar />, path: '/stats'},
-    { key: 'addnewgroup', label: 'Add New Group', icon: <FaPencilAlt />, path: '/addnewgroup' }
+    { key: 'addnewgroup', label: 'Add New Group', icon: <FaPencilAlt />, path: '/addnewgroup' },
+    { key: 'zoom', label: 'Zoom', icon: <FaCamera />, path: '/zoom' }
   ];
 
   return (
