@@ -72,17 +72,38 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route path = "/" element = {<LogInPage />}/>
-        <Route path = "/home" element = {<HomePage />}/>
-        <Route path = "/dashboard" element = {<DashboardPage />}/>
-        <Route path = "/timetracking" element={<TimeTracking />} /> 
-        <Route path = "/profile" element={<Profile />} />
-        <Route path = "/tasks" element={<MyTasks />} />
-        <Route path = "/calendar" element={<Calendar />} />
-        <Route path = "/addnewgroup" element={<AddNewGroup />} />
-        <Route path = "/stats" element={<Stats />} />
-        <Route path = "/zoom" element={<Zoom />} />
-        <Route path = "/store" element = {<StorePage />}/>
+        <Route
+          path="/addnewgroup"
+          element={
+            <ProtectedRoute>
+              <AddNewGroup />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/stats"
+          element={
+            <ProtectedRoute>
+              <Stats />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/zoom"
+          element={
+            <ProtectedRoute>
+              <Zoom />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/store"
+          element={
+            <ProtectedRoute>
+              <StorePage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   );
