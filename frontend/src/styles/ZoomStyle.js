@@ -7,7 +7,7 @@ export const ZoomContainer = styled.div`
 
 export const MainContent = styled.div`
   flex: 1;
-  padding: 2rem;
+  padding: 0 2rem 2rem 2rem;
   position: relative;
   background-color: #f9f9fb;
   overflow-y: auto;
