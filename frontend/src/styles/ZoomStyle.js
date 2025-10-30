@@ -2,6 +2,7 @@ import styled from 'styled-components';
 
 export const ZoomContainer = styled.div`
   display: flex;
+  flex-direction: column;
   height: 100vh;
 `;
 
@@ -68,3 +69,9 @@ export const ZoomButton = styled.button`
       color === 'blue' ? '#2563eb' : color === 'green' ? '#059669' : '#aaa'};
   }
 `;
+
+export const ContentRow = styled.div`
+  display: flex;
+  flex: 1;
+`;
+

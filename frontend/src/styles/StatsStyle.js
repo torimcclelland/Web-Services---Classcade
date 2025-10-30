@@ -2,15 +2,8 @@ import styled from 'styled-components';
 
 export const StatsContainer = styled.div`
   display: flex;
+  flex-direction: column;
   height: 100vh;
-
-  .main-content {
-    flex: 1;
-    padding: 0 2rem 2rem 2rem;
-    position: relative;
-    background-color: #f9f9fb;
-    overflow-y: auto;
-  }
 `;
 
 export const PageTitle = styled.h1`
@@ -61,4 +54,24 @@ export const ProfileCircle = styled.div`
   justify-content: right;
   margin: 1rem 0;
 `;
+
+export const ContentRow = styled.div`
+  display: flex;
+  flex: 1;
+`;
+
+export const MainContent = styled.div`
+  flex: 1;
+  padding: 2rem;
+  position: relative;
+  background-color: #f9f9fb;
+  overflow-y: auto;
+`;
+
+export const ProfileRow = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+`;
+
 
