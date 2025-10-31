@@ -1,11 +1,14 @@
 import React from 'react';
 import DashboardStyle from '../styles/DashboardStyle';
+import { useNavigate } from 'react-router-dom';
 import TopNavBar from '../components/TopNavBar';
 import SideBar from '../components/Sidebar';
 import PrimaryButton from '../components/PrimaryButton';
 import ProfileCircle from '../components/ProfileCircle';
+import AddNewProject from './AddNewProject';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   return (
     <div style={DashboardStyle.container}>
       <TopNavBar />
@@ -60,6 +63,7 @@ const Dashboard = () => {
               <PrimaryButton text="Detailed Stats" />
               <PrimaryButton text="Track Time" />
               <PrimaryButton text="Schedule Meeting" />
+              <PrimaryButton text="Add New Project" onClick={() => navigate('/addnewproject')} />
             </div>
           </div>
         </main>

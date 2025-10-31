@@ -8,16 +8,17 @@ export const ZoomContainer = styled.div`
 
 export const MainContent = styled.div`
   flex: 1;
-  padding: 0 2rem 2rem 2rem;
-  position: relative;
-  background-color: #f9f9fb;
-  overflow-y: auto;
+  padding: 20px;   // adds breathing room inside the content area
+  display: flex;
+  flex-direction: column;
 `;
+
 
 export const ProfileRow = styled.div`
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 1rem;
+  margin-top: 20px;   // pushes it down from the top nav
+  margin-bottom: 10px;
 `;
 
 export const PageTitle = styled.h1`

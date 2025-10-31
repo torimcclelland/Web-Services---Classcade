@@ -13,6 +13,7 @@ import AddNewGroup from './screens/AddNewGroup';
 import Stats from './screens/Stats';
 import Zoom from './screens/Zoom';
 import StorePage from './screens/Store';
+import AddNewProject from './screens/AddNewProject';
 
 export default function App() {
   return (
@@ -97,6 +98,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <StorePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/addnewproject"
+          element={
+            <ProtectedRoute>
+              <AddNewProject />
             </ProtectedRoute>
           }
         />

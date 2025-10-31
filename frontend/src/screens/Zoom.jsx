@@ -6,7 +6,7 @@ import {
   ZoomContainer,
   ContentRow,
   MainContent,
-  ProfileRow,
+  ProfileRow,   // make sure this matches StatsStyle spacing
   ZoomHeader,
   ZoomMessage,
   ButtonRow,
@@ -21,13 +21,16 @@ const Zoom = () => {
       <ContentRow>
         <Sidebar />
         <MainContent>
+          {/* Match Stats layout */}
           <ProfileRow>
             <ProfileCircle
               avatarUrl="https://plus.unsplash.com/premium_photo-1732757787074-0f95bf19cf73?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8dXNlciUyMGF2YXRhcnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=500"
               size={64}
             />
           </ProfileRow>
+
           <PageTitle>Zoom Portal</PageTitle>
+
           <ZoomHeader>
             <ZoomMessage>
               FirstName LastName,<br />

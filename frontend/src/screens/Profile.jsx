@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import TopNavBar from '../components/TopNavBar';
 import PrimaryButton from '../components/PrimaryButton';
 import ProfileStyle from '../styles/ProfileStyle';
-import Sidebar from '../components/Sidebar';
+import SideBar from '../components/Sidebar';
 import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
