@@ -18,6 +18,11 @@ const Profile = () => {
     navigate('/store');
   }
 
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/');
+  }
+
   return (
     <div style={ProfileStyle.container}>
       <TopNavBar />
@@ -43,6 +48,10 @@ const Profile = () => {
             <PrimaryButton
               text="Store"
               onClick={() => handleStoreClick()}
+            />
+            <PrimaryButton
+              text="Logout"
+              onClick={() => handleLogout()}
             />
           </div>
         </div>
