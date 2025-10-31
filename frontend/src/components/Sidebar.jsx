@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   FaHome,
   FaTasks,
@@ -8,32 +8,41 @@ import {
   FaCog,
   FaPencilAlt,
   FaChartBar,
-  FaCamera
+  FaCamera,
+  FaShoppingBag
 } from 'react-icons/fa';
 
 import Logo from '../assets/Logo.png';
 import '../styles/Sidebar.css';
 
 export default function Sidebar() {
+  const navigate = useNavigate();
   const items = [
     { key: 'dashboard', label: 'Dashboard', icon: <FaHome />, path: '/dashboard' },
     { key: 'tasks', label: 'My Tasks', icon: <FaTasks />, path: '/tasks' },
     { key: 'timetracking', label: 'Time Tracking', icon: <FaCalendarAlt />, path: '/timetracking' },
     // { key: 'profile', label: 'Profile', icon: <FaComments />, path: '/profile' },
-    { key: 'home', label: 'Home', icon: <FaCog />, path: '/home' },
+    //{ key: 'home', label: 'Home', icon: <FaCog />, path: '/home' },
+    // WIP:  { key: 'messages', label: 'Messages', icon: <FaComments />, path: '/messages' },
     { key: 'stats', label: 'Stats', icon: <FaChartBar />, path: '/stats'},
     { key: 'addnewgroup', label: 'Add New Group', icon: <FaPencilAlt />, path: '/addnewgroup' },
-    { key: 'zoom', label: 'Zoom', icon: <FaCamera />, path: '/zoom' }
+    { key: 'zoom', label: 'Zoom', icon: <FaCamera />, path: '/zoom' },
+    { key: 'store', label: 'Shop', icon: <FaShoppingBag />, path: '/store' }
   ];
 
   return (
     <aside className="cc-sidebar">
       <div className="cc-sidebar__inner">
 
-        <div className="cc-sidebar__brand">
+        <button 
+          className="cc-sidebar__brand"
+          onClick={() => navigate('/home')}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', color: 'white' }}
+          aria-label="Go to home page"
+        >
           <img src={Logo} alt="Classcade Logo" className="cc-sidebar__logo" />
           <span className="cc-sidebar__brandText">CLASSCADE</span>
-        </div>
+        </button>
 
         <nav className="cc-sidebar__nav">
           {items.map((item) => (

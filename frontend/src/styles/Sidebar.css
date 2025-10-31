@@ -11,11 +11,10 @@
 }
 
 .cc-sidebar {
-  position: sticky;
-  top: 16px;
-  height: calc(100vh - 32px);
+  position: relative;
+  height: auto;
   width: var(--cc-expanded-width);
-  margin: 16px;
+  margin: 16px 16px 40px 10px;
   z-index: 10;
 }
 
@@ -117,7 +116,7 @@
   .cc-sidebar {
     width: var(--cc-icon-only-width);
     margin: 12px;
-    height: calc(100vh - 24px);
+    height: auto;
   }
 
   .cc-sidebar__label {

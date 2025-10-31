@@ -4,6 +4,7 @@ import TextField from '../components/TextField';
 import PrimaryButton from '../components/PrimaryButton';
 import TopNavBar from '../components/TopNavBar';
 import ProfileCircle from '../components/ProfileCircle';
+import Sidebar from '../components/Sidebar';
 import Logo from '../assets/Logo.png';
 import icon1 from '../assets/icon1.png'
 import icon2 from '../assets/icon2.png'
@@ -25,26 +26,25 @@ import star from '../assets/star.png'
 import flame from '../assets/fire.png'
 
 const storeStyles = {
-  page: {
-    minHeight: '100vh',
+  container: {
     backgroundColor: '#DDF9EA',
-    boxSizing: 'border-box',
+    minHeight: '100vh',
+  },
+  layout: {
+    display: 'flex',
+  },
+  main: {
+    flex: 1,
     padding: 24,
     paddingTop: 40,
-    position: 'relative'
-  },
-  fixedTop: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 9999,
+    backgroundColor: '#DDF9EA',
+    position: 'relative',
   },
   profileIcon: {
     position: 'absolute',
-    top: 80,
+    top: 20,
     right: 40,
-    zIndex: 9998,
+    zIndex: 10,
   },
   content: {
     maxWidth: 1400,
@@ -53,7 +53,7 @@ const storeStyles = {
     gap: 16,
     alignItems: 'flex-start',
     flexWrap: 'wrap',
-    paddingTop: 145
+    paddingTop: 80
   },
   left: {
     flex: '1 1 500px',
@@ -449,13 +449,15 @@ const Store = () => {
   };
 
   return (
-    <div style={storeStyles.page}>
-      <div style={storeStyles.fixedTop}>
-        <TopNavBar />
-      </div>
-      <div style={storeStyles.profileIcon}>
-        <ProfileCircle avatarUrl="https://plus.unsplash.com/premium_photo-1732757787074-0f95bf19cf73?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8dXNlciUyMGF2YXRhcnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=500" size={64} />
-      </div>
+    <div style={storeStyles.container}>
+      <TopNavBar />
+      
+      <div style={storeStyles.layout}>
+        <Sidebar />
+        <div style={storeStyles.main}>
+          <div style={storeStyles.profileIcon}>
+            <ProfileCircle avatarUrl="https://plus.unsplash.com/premium_photo-1732757787074-0f95bf19cf73?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8dXNlciUyMGF2YXRhcnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=500" size={64} />
+          </div>
 
       <div style={storeStyles.content}>
         <div style={storeStyles.left}>
@@ -574,6 +576,8 @@ const Store = () => {
           </div>
         </>
       )}
+        </div>
+      </div>
     </div>
   );
 };
