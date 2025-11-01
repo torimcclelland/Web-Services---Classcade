@@ -9,7 +9,6 @@ import MyTasks from "./screens/MyTasks";
 import Calendar from "./screens/Calendar";
 import SignUp from "./screens/SignUp";
 import ProtectedRoute from "./components/ProtectedRoute";
-import AddNewGroup from './screens/AddNewGroup';
 import Stats from './screens/Stats';
 import Zoom from './screens/Zoom';
 import StorePage from './screens/Store';
@@ -70,10 +69,10 @@ export default function App() {
           }
         />
         <Route
-          path="/addnewgroup"
+          path="/addnewproject"
           element={
             <ProtectedRoute>
-              <AddNewGroup />
+              <AddNewProject />
             </ProtectedRoute>
           }
         />
@@ -98,14 +97,6 @@ export default function App() {
           element={
             <ProtectedRoute>
               <StorePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/addnewproject"
-          element={
-            <ProtectedRoute>
-              <AddNewProject />
             </ProtectedRoute>
           }
         />

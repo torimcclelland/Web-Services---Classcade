@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopNavBar from '../components/TopNavBar';
 import SideBar from '../components/Sidebar';
@@ -7,31 +7,15 @@ import AddNewGroupStyle from '../styles/AddNewGroupStyle';
 
 const AddNewProject = () => {
   const navigate = useNavigate();
-  const [groups, setGroups] = useState([]);        // store groups
-  const [selectedGroup, setSelectedGroup] = useState('');
-  const [projectName, setProjectName] = useState('');
+  const [groupName, setGroupName] = useState('');
+  const [teacherEmail, setTeacherEmail] = useState('');
+  const [groupmateEmails, setGroupmateEmails] = useState('');
   const [showCancelPopup, setShowCancelPopup] = useState(false);
   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
 
-  // 🔹 Fetch groups for the current user
-  useEffect(() => {
-    const fetchGroups = async () => {
-      try {
-        // Replace with your actual API call or context
-        const response = await fetch('/api/groups'); 
-        const data = await response.json();
-        setGroups(data);
-      } catch (error) {
-        console.error('Error fetching groups:', error);
-      }
-    };
-
-    fetchGroups();
-  }, []);
-
   const handleSubmit = () => {
     alert(
-      `Project Created:\nGroup: ${selectedGroup}\nProject Name: ${projectName}`
+      `Group Created:\nName: ${groupName}\nTeacher Email: ${teacherEmail}\nGroupmate Emails: ${groupmateEmails}`
     );
   };
 
@@ -53,30 +37,32 @@ const AddNewProject = () => {
         <SideBar />
         <main style={AddNewGroupStyle.main}>
           <div style={AddNewGroupStyle.formPanel}>
-            <h2 style={AddNewGroupStyle.title}>Add New Project</h2>
+            <h2 style={AddNewGroupStyle.title}>Add New Group</h2>
 
-            {/* 🔹 Dropdown for groups */}
-            <label style={AddNewGroupStyle.label}>Select Group</label>
-            <select
-              style={AddNewGroupStyle.select}
-              value={selectedGroup}
-              onChange={(e) => setSelectedGroup(e.target.value)}
-            >
-              <option value="">-- Choose a group --</option>
-              {groups.map((group) => (
-                <option key={group.id} value={group.name}>
-                  {group.name}
-                </option>
-              ))}
-            </select>
-
-            <label style={AddNewGroupStyle.label}>Project Name</label>
+            <label style={AddNewGroupStyle.label}>Group Name</label>
             <input
               type="text"
               style={AddNewGroupStyle.input}
-              value={projectName}
-              onChange={(e) => setProjectName(e.target.value)}
-              placeholder="Enter project name"
+              value={groupName}
+              onChange={(e) => setGroupName(e.target.value)}
+              placeholder="Enter group name"
+            />
+
+            <label style={AddNewGroupStyle.label}>Teacher Email (optional)</label>
+            <input
+              type="email"
+              style={AddNewGroupStyle.input}
+              value={teacherEmail}
+              onChange={(e) => setTeacherEmail(e.target.value)}
+              placeholder="Enter teacher email"
+            />
+
+            <label style={AddNewGroupStyle.label}>Groupmate Emails</label>
+            <textarea
+              style={{ ...AddNewGroupStyle.input, height: '80px' }}
+              value={groupmateEmails}
+              onChange={(e) => setGroupmateEmails(e.target.value)}
+              placeholder="Enter emails separated by commas"
             />
 
             <div style={AddNewGroupStyle.actionButtons}>
@@ -107,7 +93,7 @@ const AddNewProject = () => {
       {showConfirmPopup && (
         <div style={AddNewGroupStyle.overlay}>
           <div style={AddNewGroupStyle.popup}>
-            <p style={AddNewGroupStyle.popupText}>Project creation cancelled.</p>
+            <p style={AddNewGroupStyle.popupText}>Group creation cancelled.</p>
           </div>
         </div>
       )}
@@ -116,4 +102,3 @@ const AddNewProject = () => {
 };
 
 export default AddNewProject;
-

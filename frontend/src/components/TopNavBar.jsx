@@ -10,17 +10,17 @@ const TopNavBar = () => {
 
   const navigate = useNavigate();
 
-  const goToDashboard = () => {
-    navigate('/dashboard');
+  const goToHome = () => {
+    navigate('/home');
   };
 
-  const goToAddNewGroup = () => {
-    navigate('/addnewgroup');
+  const goToAddNewProject = () => {
+    navigate('/addnewproject');
   };
 
   return (
     <div style={TopNavBarStyle.topNavbar}>
-      <button style={TopNavBarStyle.homeBtn} onClick={goToDashboard}>
+      <button style={TopNavBarStyle.homeBtn} onClick={goToHome}>
         <FaHome size={24} />
       </button>
 
@@ -31,7 +31,7 @@ const TopNavBar = () => {
             <button style={TopNavBarStyle.closeTabBtn}>✕</button>
           </div>
         ))}
-        <button style={TopNavBarStyle.addTabBtn} onClick={goToAddNewGroup}>＋</button>
+        <button style={TopNavBarStyle.addTabBtn} onClick={goToAddNewProject}>＋</button>
       </div>
 
       <button style={TopNavBarStyle.exitBtn}>✕</button>

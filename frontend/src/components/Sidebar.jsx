@@ -25,7 +25,7 @@ export default function Sidebar() {
     //{ key: 'home', label: 'Home', icon: <FaCog />, path: '/home' },
     // WIP:  { key: 'messages', label: 'Messages', icon: <FaComments />, path: '/messages' },
     { key: 'stats', label: 'Stats', icon: <FaChartBar />, path: '/stats'},
-    { key: 'addnewgroup', label: 'Add New Group', icon: <FaPencilAlt />, path: '/addnewgroup' },
+    // { key: 'addnewgroup', label: 'Add New Group', icon: <FaPencilAlt />, path: '/addnewgroup' },
     { key: 'zoom', label: 'Zoom', icon: <FaCamera />, path: '/zoom' },
     { key: 'store', label: 'Shop', icon: <FaShoppingBag />, path: '/store' }
   ];
