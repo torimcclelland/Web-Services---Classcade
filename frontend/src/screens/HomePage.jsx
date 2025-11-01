@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../assets/Logo.png';
 import LogoutImg from '../assets/Logout.png';
+import api from '../api';
+import { ProjectContext } from "../context/ProjectContext";
 
 const styles = {
   page: {
@@ -56,6 +58,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
+    cursor: 'pointer'
   },
   cardLeft: {
     display: 'flex',
@@ -90,13 +93,6 @@ const styles = {
   metaText: {
     fontStyle: 'italic',
   },
-  deleteBtn: {
-    background: 'transparent',
-    border: 'none',
-    color: '#e53935',
-    fontSize: 35,
-    cursor: 'pointer'
-  },
   newGroupBtn: {
     marginLeft: 20,
     padding: '12px 24px',
@@ -129,79 +125,77 @@ const styles = {
   }
 };
 
-const groups = [
-  { id: 1, name: 'SWENG', status: 'In progress', modified: 'yesterday' },
-  { id: 2, name: 'COMPSCI', status: 'In progress', modified: '1 week ago' },
-  { id: 3, name: 'GROUP 3', status: 'Complete', modified: '3 years ago' },
-];
-
 const HomePage = () => {
   const navigate = useNavigate();
-  const handleCardClick = (groupId, groupName) => {
-    console.log(`Card clicked: ${groupName} (ID: ${groupId})`);
+  const [groups, setGroups] = useState([]);
+
+  const { setSelectedProject } = useContext(ProjectContext);
+
+  const fetchProjects = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user?._id) return;
+
+      const res = await api.get(`/api/project/user/${user._id}`);
+      setGroups(res.data || []);
+    } catch (e) {
+      console.error("Error fetching projects", e);
+    }
+  };
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const handleCardClick = (project) => {
+    setSelectedProject(project);
+    
     navigate('/dashboard');
-  };
-
-  const handleDeleteClick = (e, groupId, groupName) => {
-    e.stopPropagation(); // Prevent card click when delete is clicked
-    console.log(`Delete clicked: ${groupName} (ID: ${groupId})`);
-    // TODO: Show confirmation dialog and delete group
-  };
-
-  const handleNewGroupClick = () => {
-    console.log('New Group button clicked');
-    // TODO: Open new page window
   };
 
   const handleLogout = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("selectedProject");
     navigate('/');
-};
+  };
 
   return (
     <div style={styles.page}>
       <div style={styles.inner}>
-        <button 
-          style={styles.logoutBtn}
-          onClick={handleLogout}
-          aria-label="Logout"
-        >
+        <button style={styles.logoutBtn} onClick={handleLogout}>
           <img src={LogoutImg} alt="logout" style={{ width: 26, height: 31 }} />
         </button>
+
         <img src={Logo} alt="logo" style={{ width: 120, height: 120 }} />
 
-        <h1 style={styles.heading}>Welcome to CLASSCADE John!</h1>
+        <h1 style={styles.heading}>Welcome to CLASSCADE!</h1>
         <div style={styles.subtitle}>Click a group or create a new one to get started</div>
 
         <div style={styles.list}>
-          {groups.map((g) => (
+          {groups.map((g, index) => (
             <div 
-              key={g.id} 
+              key={g._id || index}
               style={styles.card}
-              onClick={() => handleCardClick(g.id, g.name)}
+              onClick={() => handleCardClick(g)}
             >
               <div style={styles.cardLeft}>
-                <div style={styles.badge}>{g.id}.</div>
+                <div style={styles.badge}>{index + 1}.</div>
                 <div style={styles.cardContent}>
                   <div style={styles.cardTitle}>{g.name}</div>
                   <div style={styles.cardMeta}>
-                    <div style={styles.metaText}>Status: {g.status}</div>
-                    <div style={styles.metaText}>Last Modified: {g.modified}</div>
+                    <div style={styles.metaText}>Members: {g.members?.length || 0}</div>
+                    <div style={styles.metaText}>Status: {g.status || "N/A"}</div>
                   </div>
                 </div>
               </div>
-              <button 
-                style={styles.deleteBtn} 
-                aria-label={`delete ${g.name}`}
-                onClick={(e) => handleDeleteClick(e, g.id, g.name)}
-              >
-                &#128465;
-              </button>
             </div>
           ))}
         </div>
 
-        <button style={styles.newGroupBtn} onClick={handleNewGroupClick}>
+        <button 
+          style={styles.newGroupBtn} 
+          onClick={() => navigate("/addnewproject")}
+        >
           + New Group
         </button>
       </div>

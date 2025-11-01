@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { ProjectProvider } from "./context/ProjectContext";
 import DashboardPage from "./screens/Dashboard";
 import LogInPage from "./screens/LogIn";
 import HomePage from "./screens/HomePage";
@@ -16,6 +17,7 @@ import AddNewProject from './screens/AddNewProject';
 
 export default function App() {
   return (
+  <ProjectProvider>
     <Router>
       <Routes>
         <Route path="/" element={<LogInPage />} />
@@ -102,5 +104,6 @@ export default function App() {
         />
       </Routes>
     </Router>
+  </ProjectProvider>
   );
 }

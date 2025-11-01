@@ -1,21 +1,38 @@
-import React from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopNavBarStyle from '../styles/TopNavBarStyle';
-import {
-  FaHome,
-} from 'react-icons/fa';
+import { FaHome } from 'react-icons/fa';
+import api from '../api';
+import { ProjectContext } from '../context/ProjectContext';
 
 const TopNavBar = () => {
-  const groupTabs = ['sweng300', 'compsci', 'group3'];
-
   const navigate = useNavigate();
+  const [projects, setProjects] = useState([]);
 
-  const goToHome = () => {
-    navigate('/home');
-  };
+  const { selectedProject, setSelectedProject } = useContext(ProjectContext);
 
-  const goToAddNewProject = () => {
-    navigate('/addnewproject');
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      if (!user?._id) return;
+      try {
+        const res = await api.get(`/api/project/user/${user._id}`);
+        setProjects(res.data);
+      } catch (err) {
+        console.error("Error fetching user projects:", err);
+      }
+    };
+
+    fetchProjects();
+  }, [user]);
+
+  const goToHome = () => navigate('/home');
+  const goToAddNewProject = () => navigate('/addnewproject');
+
+  const selectProject = (project) => {
+    setSelectedProject(project);
+    navigate('/dashboard');
   };
 
   return (
@@ -25,13 +42,32 @@ const TopNavBar = () => {
       </button>
 
       <div style={TopNavBarStyle.groupTabs}>
-        {groupTabs.map((group, index) => (
-          <div key={index} style={TopNavBarStyle.groupTab}>
-            <span>{group}</span>
-            <button style={TopNavBarStyle.closeTabBtn}>✕</button>
-          </div>
-        ))}
-        <button style={TopNavBarStyle.addTabBtn} onClick={goToAddNewProject}>＋</button>
+        {projects.map((proj) => {
+          const isActive = selectedProject?._id === proj._id;
+
+          return (
+            <div
+              key={proj._id}
+              style={{
+                ...TopNavBarStyle.groupTab,
+                ...(isActive ? TopNavBarStyle.activeTab : {})
+              }}
+              onClick={() => selectProject(proj)}
+            >
+              <span>{proj.name}</span>
+              <button
+                style={TopNavBarStyle.closeTabBtn}
+                onClick={(e) => e.stopPropagation()}
+              >
+                ✕
+              </button>
+            </div>
+          );
+        })}
+
+        <button style={TopNavBarStyle.addTabBtn} onClick={goToAddNewProject}>
+          ＋
+        </button>
       </div>
 
       <button style={TopNavBarStyle.exitBtn}>✕</button>

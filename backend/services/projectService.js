@@ -1,14 +1,46 @@
 const express = require('express');
 const router = express.Router();
 const Project = require('../models/project');
+const User = require('../models/user');
 
 // CREATE a new project
 router.post('/create', async (req, res) => {
   try {
-    const payload = { ...req.body };
-    if (payload.name) payload.name = payload.name.trim();
-    const project = await Project.create(payload);
-    res.json(project);
+    const { name, teacherEmail, groupmateEmails = [] } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ error: "Project name is required" });
+    }
+
+    const userId = req.body.userId;
+    const user = await User.findById(userId);
+    if (!user) return res.status(400).json({ error: "User not found" });
+
+    const emails = [
+      user.email,
+      teacherEmail,
+      ...groupmateEmails
+    ].filter(Boolean);
+
+    const users = await User.find({ email: { $in: emails } });
+
+    if (users.length === 0)
+      return res.status(400).json({ error: "No valid users found" });
+
+    const memberIds = users.map(u => u._id);
+
+    const project = await Project.create({
+      name: name.trim(),
+      members: memberIds,
+      goalTime: 10
+    });
+
+    await User.updateMany(
+      { _id: { $in: memberIds } },
+      { $push: { projects: project._id.toString() } }
+    );
+
+    return res.status(201).json({ project });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -231,6 +263,18 @@ router.delete('/:id/time/:userId', async (req, res) => {
     res.json(project);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// Get all projects for a specific user
+router.get('/user/:userId', async (req, res) => {
+  try {
+    const projects = await Project.find({ members: req.params.userId })
+      .populate('members', 'username firstName lastName email');
+
+    res.json(projects);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to get user projects' });
   }
 });
 

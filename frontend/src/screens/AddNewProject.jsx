@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopNavBar from '../components/TopNavBar';
-import SideBar from '../components/Sidebar';
 import PrimaryButton from '../components/PrimaryButton';
+import api from '../api';
 import AddNewGroupStyle from '../styles/AddNewGroupStyle';
 
 const AddNewProject = () => {
@@ -11,67 +11,92 @@ const AddNewProject = () => {
   const [teacherEmail, setTeacherEmail] = useState('');
   const [groupmateEmails, setGroupmateEmails] = useState('');
   const [showCancelPopup, setShowCancelPopup] = useState(false);
-  const [showConfirmPopup, setShowConfirmPopup] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = () => {
-    alert(
-      `Group Created:\nName: ${groupName}\nTeacher Email: ${teacherEmail}\nGroupmate Emails: ${groupmateEmails}`
-    );
+  const handleSubmit = async () => {
+    setError('');
+
+    if (!groupName.trim()) {
+      setError("Group name is required");
+      return;
+    }
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) {
+      setError("User not logged in");
+      return;
+    }
+
+    const emails = groupmateEmails
+      .split(',')
+      .map(e => e.trim())
+      .filter(Boolean);
+
+    try {
+      await api.post("/api/project/create", {
+        userId: user._id,
+        name: groupName,
+        teacherEmail,
+        groupmateEmails: emails
+      });
+
+      alert("Group created successfully!");
+      navigate("/home");
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.error || "Error creating project");
+    }
   };
 
   const handleCancel = () => setShowCancelPopup(true);
 
   const confirmCancel = () => {
     setShowCancelPopup(false);
-    setShowConfirmPopup(true);
-    setTimeout(() => {
-      setShowConfirmPopup(false);
-      navigate('/dashboard');
-    }, 1200);
+    navigate('/home');
   };
 
   return (
     <div style={AddNewGroupStyle.container}>
       <TopNavBar />
-      <div style={AddNewGroupStyle.layout}>
-        <SideBar />
-        <main style={AddNewGroupStyle.main}>
-          <div style={AddNewGroupStyle.formPanel}>
-            <h2 style={AddNewGroupStyle.title}>Add New Group</h2>
 
-            <label style={AddNewGroupStyle.label}>Group Name</label>
-            <input
-              type="text"
-              style={AddNewGroupStyle.input}
-              value={groupName}
-              onChange={(e) => setGroupName(e.target.value)}
-              placeholder="Enter group name"
-            />
+      <main style={{ ...AddNewGroupStyle.main, marginLeft: 0 }}>
+        <div style={AddNewGroupStyle.formPanel}>
+          <h2 style={AddNewGroupStyle.title}>Add New Group</h2>
 
-            <label style={AddNewGroupStyle.label}>Teacher Email (optional)</label>
-            <input
-              type="email"
-              style={AddNewGroupStyle.input}
-              value={teacherEmail}
-              onChange={(e) => setTeacherEmail(e.target.value)}
-              placeholder="Enter teacher email"
-            />
+          <label style={AddNewGroupStyle.label}>Group Name</label>
+          <input
+            type="text"
+            style={AddNewGroupStyle.input}
+            value={groupName}
+            onChange={(e) => setGroupName(e.target.value)}
+            placeholder="Enter group name"
+          />
 
-            <label style={AddNewGroupStyle.label}>Groupmate Emails</label>
-            <textarea
-              style={{ ...AddNewGroupStyle.input, height: '80px' }}
-              value={groupmateEmails}
-              onChange={(e) => setGroupmateEmails(e.target.value)}
-              placeholder="Enter emails separated by commas"
-            />
+          <label style={AddNewGroupStyle.label}>Teacher Email (optional)</label>
+          <input
+            type="email"
+            style={AddNewGroupStyle.input}
+            value={teacherEmail}
+            onChange={(e) => setTeacherEmail(e.target.value)}
+            placeholder="Enter teacher email"
+          />
 
-            <div style={AddNewGroupStyle.actionButtons}>
-              <PrimaryButton text="Cancel" onClick={handleCancel} />
-              <PrimaryButton text="Create" onClick={handleSubmit} />
-            </div>
+          <label style={AddNewGroupStyle.label}>Groupmate Emails</label>
+          <textarea
+            style={{ ...AddNewGroupStyle.input, height: '80px' }}
+            value={groupmateEmails}
+            onChange={(e) => setGroupmateEmails(e.target.value)}
+            placeholder="Enter emails separated by commas"
+          />
+
+          {error && <div style={{ color: 'red', marginTop: 10 }}>{error}</div>}
+
+          <div style={AddNewGroupStyle.actionButtons}>
+            <PrimaryButton text="Cancel" onClick={handleCancel} />
+            <PrimaryButton text="Create" onClick={handleSubmit} />
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
 
       {showCancelPopup && (
         <div style={AddNewGroupStyle.overlay}>
@@ -86,14 +111,6 @@ const AddNewProject = () => {
                 onClick={() => setShowCancelPopup(false)}
               />
             </div>
-          </div>
-        </div>
-      )}
-
-      {showConfirmPopup && (
-        <div style={AddNewGroupStyle.overlay}>
-          <div style={AddNewGroupStyle.popup}>
-            <p style={AddNewGroupStyle.popupText}>Group creation cancelled.</p>
           </div>
         </div>
       )}

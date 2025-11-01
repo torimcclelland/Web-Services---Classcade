@@ -46,6 +46,10 @@ const TopNavBarStyle = {
       fontSize: '1.2rem',
       cursor: 'pointer',
     },
+    activeTab: {
+      backgroundColor: '#C8E6C9',
+      fontWeight: '700',
+    }
   };
   
   export default TopNavBarStyle;
