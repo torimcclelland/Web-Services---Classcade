@@ -1,70 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopNavBar from '../components/TopNavBar';
 import SideBar from '../components/Sidebar';
 import PrimaryButton from '../components/PrimaryButton';
 import TimeTrackingStyle from '../styles/TimeTrackingStyle';
-import axios from 'axios'; // added axios
 
 const TimeTracking = () => {
   const navigate = useNavigate();
-  const [projects, setProjects] = useState([]);
-  const [tasks, setTasks] = useState([]);
-  const [selectedProject, setSelectedProject] = useState('');
+  const [selectedClass, setSelectedClass] = useState('');
   const [selectedTask, setSelectedTask] = useState('');
   const [minutes, setMinutes] = useState('');
   const [completed, setCompleted] = useState(false);
   const [showCancelPopup, setShowCancelPopup] = useState(false);
   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
 
-  // Updated portion: fetch projects for logged-in user
-  useEffect(() => {
-    axios.get(`${apiUrl}/projects`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .then(res => setProjects(res.data))
-    .catch(err => console.error(err));
-  }, []);
-
-  // Updated portion: fetch tasks when project changes
-  useEffect(() => {
-    if (!selectedProject) {
-      setTasks([]);
-      setSelectedTask('');
-      return;
-    }
-    axios.get(`${apiUrl}/projects/${selectedProject}/tasks`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .then(res => setTasks(res.data))
-    .catch(err => console.error(err));
-  }, [selectedProject]);
-
-  const handleSubmit = async () => {
-    if (!selectedProject || !selectedTask || !minutes) {
-      alert('Please fill in all fields.');
-      return;
-    }
-
-    try {
-      await axios.post(`${apiUrl}/time-tracking`, {
-        projectId: selectedProject,
-        taskId: selectedTask,
-        minutes: parseInt(minutes),
-        completed,
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      alert('Time entry submitted!');
-      setSelectedProject('');
-      setSelectedTask('');
-      setMinutes('');
-      setCompleted(false);
-    } catch (err) {
-      console.error(err);
-      alert('Failed to submit time entry.');
-    }
+  const handleSubmit = () => {
+    alert(
+      `Form Submitted:\nClass: ${selectedClass}\nTask: ${selectedTask}\nMinutes: ${minutes}\nCompleted: ${completed}`
+    );
   };
 
   const handleCancel = () => setShowCancelPopup(true);
@@ -89,29 +42,28 @@ const TimeTracking = () => {
           <div style={TimeTrackingStyle.formPanel}>
             <h2 style={TimeTrackingStyle.title}>Time Tracking</h2>
 
-            <label style={TimeTrackingStyle.label}>Select Project</label>
+            <label style={TimeTrackingStyle.label}>Select a Class</label>
             <select
               style={TimeTrackingStyle.select}
-              value={selectedProject}
-              onChange={(e) => setSelectedProject(e.target.value)}
+              value={selectedClass}
+              onChange={(e) => setSelectedClass(e.target.value)}
             >
-              <option value="">Select a Project</option>
-              {projects.map(p => (
-                <option key={p._id} value={p._id}>{p.name}</option>
-              ))}
+              <option value="">Select a Class</option>
+              <option value="SWENG">SWENG</option>
+              <option value="COMPSCI">COMPSCI</option>
+              <option value="GROUP 3">GROUP 3</option>
             </select>
 
-            <label style={TimeTrackingStyle.label}>Select Task</label>
+            <label style={TimeTrackingStyle.label}>Select a Task</label>
             <select
               style={TimeTrackingStyle.select}
               value={selectedTask}
               onChange={(e) => setSelectedTask(e.target.value)}
-              disabled={!selectedProject}
             >
               <option value="">Select a Task</option>
-              {tasks.map(t => (
-                <option key={t._id} value={t._id}>{t.name}</option>
-              ))}
+              <option value="Homework">Homework</option>
+              <option value="Project">Project</option>
+              <option value="Meeting">Meeting</option>
             </select>
 
             <label style={TimeTrackingStyle.label}>Minutes</label>
@@ -136,7 +88,7 @@ const TimeTracking = () => {
                     ...TimeTrackingStyle.toggleCircle,
                     left: completed ? 28 : 3,
                   }}
-                />
+                ></div>
               </div>
             </div>
 
@@ -151,10 +103,15 @@ const TimeTracking = () => {
       {showCancelPopup && (
         <div style={TimeTrackingStyle.overlay}>
           <div style={TimeTrackingStyle.popup}>
-            <p style={TimeTrackingStyle.popupText}>Are you sure you want to cancel?</p>
+            <p style={TimeTrackingStyle.popupText}>
+              Are you sure you want to cancel?
+            </p>
             <div style={TimeTrackingStyle.popupButtons}>
               <PrimaryButton text="Yes" onClick={confirmCancel} />
-              <PrimaryButton text="No" onClick={() => setShowCancelPopup(false)} />
+              <PrimaryButton
+                text="No"
+                onClick={() => setShowCancelPopup(false)}
+              />
             </div>
           </div>
         </div>
@@ -172,5 +129,3 @@ const TimeTracking = () => {
 };
 
 export default TimeTracking;
-
-
