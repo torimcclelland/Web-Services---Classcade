@@ -59,44 +59,56 @@ const AddNewProject = () => {
     <div style={AddNewGroupStyle.container}>
       <TopNavBar />
 
-      <main style={{ ...AddNewGroupStyle.main, marginLeft: 0 }}>
-        <div style={AddNewGroupStyle.formPanel}>
-          <h2 style={AddNewGroupStyle.title}>Add New Group</h2>
+      <div style={AddNewGroupStyle.layout}>
+        <main style={AddNewGroupStyle.main}>
+          <div style={AddNewGroupStyle.formPanel}>
+            <h2 style={AddNewGroupStyle.title}>Add New Group</h2>
+            <hr style={{ border: 'none', borderTop: '1px solid #d1d5db', marginBottom: '1rem' }} />
 
-          <label style={AddNewGroupStyle.label}>Group Name</label>
-          <input
-            type="text"
-            style={AddNewGroupStyle.input}
-            value={groupName}
-            onChange={(e) => setGroupName(e.target.value)}
-            placeholder="Enter group name"
-          />
+            <label style={AddNewGroupStyle.label}>Group Name</label>
+            <input
+              type="text"
+              style={AddNewGroupStyle.input}
+              value={groupName}
+              onChange={(e) => setGroupName(e.target.value)}
+              placeholder="Enter group name"
+            />
 
-          <label style={AddNewGroupStyle.label}>Teacher Email (optional)</label>
-          <input
-            type="email"
-            style={AddNewGroupStyle.input}
-            value={teacherEmail}
-            onChange={(e) => setTeacherEmail(e.target.value)}
-            placeholder="Enter teacher email"
-          />
+            <label style={AddNewGroupStyle.label}>Teacher Email (optional)</label>
+            <input
+              type="email"
+              style={AddNewGroupStyle.input}
+              value={teacherEmail}
+              onChange={(e) => setTeacherEmail(e.target.value)}
+              placeholder="Enter teacher email"
+            />
 
-          <label style={AddNewGroupStyle.label}>Groupmate Emails</label>
-          <textarea
-            style={{ ...AddNewGroupStyle.input, height: '80px' }}
-            value={groupmateEmails}
-            onChange={(e) => setGroupmateEmails(e.target.value)}
-            placeholder="Enter emails separated by commas"
-          />
+            <label style={AddNewGroupStyle.label}>Groupmate Emails</label>
+            <textarea
+              style={{
+                ...AddNewGroupStyle.textarea,
+                height: '100px',
+                lineHeight: '1.5',
+                padding: '0.75rem',
+              }}
+              value={groupmateEmails}
+              onChange={(e) => setGroupmateEmails(e.target.value)}
+              placeholder="Enter emails separated by commas"
+            />
 
-          {error && <div style={{ color: 'red', marginTop: 10 }}>{error}</div>}
+            {error && (
+              <div style={{ color: 'red', marginTop: '1rem', textAlign: 'center' }}>
+                {error}
+              </div>
+            )}
 
-          <div style={AddNewGroupStyle.actionButtons}>
-            <PrimaryButton text="Cancel" onClick={handleCancel} />
-            <PrimaryButton text="Create" onClick={handleSubmit} />
+            <div style={AddNewGroupStyle.actionButtons}>
+              <PrimaryButton text="Cancel" onClick={handleCancel} />
+              <PrimaryButton text="Create" onClick={handleSubmit} />
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
 
       {showCancelPopup && (
         <div style={AddNewGroupStyle.overlay}>

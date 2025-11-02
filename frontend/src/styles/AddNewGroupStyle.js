@@ -1,5 +1,6 @@
 export const AddNewGroupStyle = {
   container: {
+    backgroundColor: '#f3f4f6',
     display: 'flex',
     flexDirection: 'column',
     height: '100vh',
@@ -11,13 +12,14 @@ export const AddNewGroupStyle = {
   main: {
     flex: 1,
     padding: '2rem',
-    backgroundColor: '#f3f4f6', 
+    backgroundColor: '#f3f4f6',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'flex-start',
+    paddingTop: '3rem', // balances TopNavBar height
   },
   formPanel: {
-    backgroundColor: '#e5e7eb', 
+    backgroundColor: '#e5e7eb',
     padding: '2rem',
     borderRadius: '12px',
     boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
@@ -30,30 +32,35 @@ export const AddNewGroupStyle = {
   title: {
     fontSize: 24,
     fontWeight: 700,
-    marginBottom: '1rem',
+    marginBottom: '1.5rem',
     textAlign: 'center',
     color: '#1f2937',
   },
   label: {
     fontWeight: 600,
     marginBottom: '0.25rem',
+    marginTop: '1rem',
     color: '#111827',
   },
   input: {
-    width: '100%',
-    padding: '0.5rem',
+    width: '90%',
+    padding: '0.5rem 0.5rem 0.5rem 0.25rem',
     borderRadius: '6px',
     border: '1px solid #d1d5db',
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: 'left',
+    align: 'center'
+  },
+  textarea:{
+    padding: '0.5rem 0.5rem 0.5rem 0.25rem'
   },
   select: {
     width: '100%',
-    padding: '0.5rem',      
+    padding: '0.5rem 0.5rem',
     borderRadius: '6px',
     border: '1px solid #d1d5db',
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: 'left',
   },
   row: {
     display: 'flex',
@@ -100,7 +107,7 @@ export const AddNewGroupStyle = {
     zIndex: 1000,
   },
   popup: {
-    backgroundColor: '#e5e7eb', 
+    backgroundColor: '#e5e7eb',
     borderRadius: 12,
     padding: '2rem',
     textAlign: 'center',
