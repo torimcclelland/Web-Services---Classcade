@@ -12,9 +12,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { selectedProject, loadingProject } = useProject();
 
-  const [report, setReport] = useState(null);
+  const [report, setReport] = useState({ total: 0, completed: 0 });
   const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!loadingProject && !selectedProject) {
@@ -34,22 +33,17 @@ const Dashboard = () => {
 
         setReport(resReport.data);
         setTasks(resTasks.data);
-      } finally {
-        setLoading(false);
+      } catch (err) {
+        console.error("Dashboard fetch error:", err);
       }
     };
 
     fetchData();
   }, [loadingProject, selectedProject]);
 
-  if (loadingProject || loading) {
-    return <div style={{ padding: 40 }}>Loading dashboard...</div>;
-  }
-
   const total = report?.total || 0;
   const completed = report?.completed || 0;
   const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
-
   const upcomingTask = tasks.find((t) => t.status !== "Done");
   const projectDueDate = selectedProject?.dueDate
     ? new Date(selectedProject.dueDate).toLocaleDateString()
@@ -71,12 +65,11 @@ const Dashboard = () => {
           </div>
 
           <div style={DashboardStyle.statsPanel}>
-            <h2>{selectedProject.name} Dashboard</h2>
+            <h2>{selectedProject?.name} Dashboard</h2>
 
             <div style={DashboardStyle.statsGrid}>
               <div style={DashboardStyle.statItem}>
                 <label style={DashboardStyle.statLabel}>Overall Progress</label>
-
                 <div style={DashboardStyle.progressBar}>
                   <div
                     style={{
