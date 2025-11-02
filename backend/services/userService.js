@@ -158,4 +158,43 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Purchase an item (icon, banner, or backdrop)
+router.post('/:id/purchase', async (req, res) => {
+  try {
+    const { itemType, itemId } = req.body; // itemType: 'icon' | 'banner' | 'backdrop'
+    
+    if (!['icon', 'banner', 'backdrop'].includes(itemType)) {
+      return res.status(400).json({ error: 'Invalid item type' });
+    }
+    
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Determine which array to update
+    let arrayField;
+    if (itemType === 'icon') arrayField = 'ownedIcons';
+    else if (itemType === 'banner') arrayField = 'ownedBanners';
+    else if (itemType === 'backdrop') arrayField = 'ownedBackdrops';
+
+    // Check if already owned
+    if (user[arrayField].includes(itemId)) {
+      return res.status(400).json({ error: 'Item already owned' });
+    }
+
+    // Add item to owned array
+    user[arrayField].push(itemId);
+    await user.save();
+
+    res.json({ 
+      message: 'Purchase successful', 
+      user: user.toObject() 
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

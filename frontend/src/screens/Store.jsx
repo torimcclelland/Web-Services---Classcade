@@ -5,6 +5,7 @@ import PrimaryButton from '../components/PrimaryButton';
 import TopNavBar from '../components/TopNavBar';
 import ProfileCircle from '../components/ProfileCircle';
 import Sidebar from '../components/Sidebar';
+import api from '../api';
 import Logo from '../assets/Logo.png';
 import icon1 from '../assets/icon1.png'
 import icon2 from '../assets/icon2.png'
@@ -238,7 +239,12 @@ const Store = () => {
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
-  const [availableIcons, setAvailableIcons] = useState([
+  const [availableIcons, setAvailableIcons] = useState([]);
+  const [availableBanners, setAvailableBanners] = useState([]);
+  const [availableBackdrops, setAvailableBackdrops] = useState([]);
+
+  // All possible items in the store
+  const allIcons = [
     { id: 'i1', name: 'Man 1', price: .99, image: icon1 },
     { id: 'i2', name: 'Woman 1', price: .99, image: icon2 },
     { id: 'i3', name: 'Woman 2', price: .99, image: icon3 },
@@ -254,22 +260,62 @@ const Store = () => {
     { id: 'i13', name: 'Unicorn', price: 2.99, image: icon13 },
     { id: 'i14', name: 'Panda', price: 2.99, image: icon14 },
     { id: 'i15', name: 'T-Rex', price: 3.99, image: icon15 },
-  ]);
-  const [availableBanners, setAvailableBanners] = useState([
+  ];
+
+  const allBanners = [
     { id: 'b1', name: 'Red Banner', price: 1.99, color: '#FF5252' },
     { id: 'b2', name: 'Blue Banner', price: 1.99, color: '#8dccffff' },
     { id: 'b3', name: 'Green Banner', price: 1.99, color: '#43ca47ff' },
     { id: 'b4', name: 'Purple Banner', price: 2.49, color: '#9C27B0' },
     { id: 'b5', name: 'Orange Banner', price: 2.49, color: '#FF9800' },
-  ]);
-  const [availableBackdrops, setAvailableBackdrops] = useState([
+  ];
+
+  const allBackdrops = [
     { id: 'd1', name: 'Circle Ring', price: 1.49, type: 'circle', color: '#FF6B6B' },
     { id: 'd2', name: 'Diamond', price: 1.49, type: 'diamond', color: '#A855F7' },
     { id: 'd3', name: 'Hexagon', price: 1.49, type: 'hexagon', color: '#6BCB77' },
     { id: 'd4', name: 'Double Ring', price: 1.49, type: 'doublering', color: '#4D96FF' },
     { id: 'd5', name: 'Star Burst', price: 2.49, type: 'star', color: '#FFD93D' },
     { id: 'd6', name: 'Flame', price: 2.99, type: 'flame', color: '#EC4899' },
-  ]);
+  ];
+
+  // Fetch user's owned items and filter available items
+  useEffect(() => {
+    const fetchUserItems = async () => {
+      try {
+        const userData = JSON.parse(localStorage.getItem('user'));
+        if (!userData || !userData._id) {
+          // show all items by default
+          setAvailableIcons(allIcons);
+          setAvailableBanners(allBanners);
+          setAvailableBackdrops(allBackdrops);
+          return;
+        }
+
+        // Fetch user data
+        const response = await api.get(`/api/user/${userData._id}`);
+        const user = response.data;
+
+        // Filter out owned items
+        const ownedIconIds = user.ownedIcons || [];
+        const ownedBannerIds = user.ownedBanners || [];
+        const ownedBackdropIds = user.ownedBackdrops || [];
+
+        setAvailableIcons(allIcons.filter(icon => !ownedIconIds.includes(icon.id)));
+        setAvailableBanners(allBanners.filter(banner => !ownedBannerIds.includes(banner.id)));
+        setAvailableBackdrops(allBackdrops.filter(backdrop => !ownedBackdropIds.includes(backdrop.id)));
+
+      } catch (error) {
+        console.error('Error fetching user items:', error);
+        // On error, show all items
+        setAvailableIcons(allIcons);
+        setAvailableBanners(allBanners);
+        setAvailableBackdrops(allBackdrops);
+      }
+    };
+
+    fetchUserItems();
+  }, []);
 
   // Render backdrop based on type
   const renderBackdrop = (type, color) => {
@@ -404,48 +450,76 @@ const Store = () => {
     }
   };
 
-  const confirmPurchase = () => {
-    if (selectedIcon) {
-      // Remove purchased icon from available icons
-      setAvailableIcons(prevIcons => prevIcons.filter(icon => icon.id !== selectedIcon.id));
-      
-      setPopupMessage(`Successfully purchased ${selectedIcon.name} for ${selectedIcon.price} dollars!`);
+  const cancelPurchase = () => {
+    setShowConfirmPopup(false);
+  };
+
+  const confirmPurchase = async () => {
+    try {
+      // Get user ID from localStorage
+      const userData = JSON.parse(localStorage.getItem('user'));
+      if (!userData || !userData._id) {
+        setPopupMessage('Please log in to make a purchase');
+        setShowConfirmPopup(false);
+        setShowSuccessPopup(true);
+        return;
+      }
+
+      let itemType, itemId, itemName, itemPrice;
+
+      if (selectedIcon) {
+        itemType = 'icon';
+        itemId = selectedIcon.id;
+        itemName = selectedIcon.name;
+        itemPrice = selectedIcon.price;
+      } else if (selectedBanner) {
+        itemType = 'banner';
+        itemId = selectedBanner.id;
+        itemName = selectedBanner.name;
+        itemPrice = selectedBanner.price;
+      } else if (selectedBackdrop) {
+        itemType = 'backdrop';
+        itemId = selectedBackdrop.id;
+        itemName = selectedBackdrop.name;
+        itemPrice = selectedBackdrop.price;
+      }
+
+      // Make API call to save purchase
+      await api.post(`/api/user/${userData._id}/purchase`, {
+        itemType,
+        itemId
+      });
+
+      // Update local state to remove purchased item
+      if (selectedIcon) {
+        setAvailableIcons(prevIcons => prevIcons.filter(icon => icon.id !== selectedIcon.id));
+        setSelectedIcon(null);
+      } else if (selectedBanner) {
+        setAvailableBanners(prevBanners => prevBanners.filter(banner => banner.id !== selectedBanner.id));
+        setSelectedBanner(null);
+      } else if (selectedBackdrop) {
+        setAvailableBackdrops(prevBackdrops => prevBackdrops.filter(backdrop => backdrop.id !== selectedBackdrop.id));
+        setSelectedBackdrop(null);
+      }
+
+      setPopupMessage(`Successfully purchased ${itemName} for ${itemPrice} dollars!`);
       setShowConfirmPopup(false);
       setShowSuccessPopup(true);
-      setSelectedIcon(null);
-      
+
       setTimeout(() => {
         setShowSuccessPopup(false);
       }, 2000);
-    } else if (selectedBanner) {
-      // Remove purchased banner from available banners
-      setAvailableBanners(prevBanners => prevBanners.filter(banner => banner.id !== selectedBanner.id));
-      
-      setPopupMessage(`Successfully purchased ${selectedBanner.name} for ${selectedBanner.price} dollars!`);
+
+    } catch (error) {
+      console.error('Purchase error:', error);
+      setPopupMessage(error.response?.data?.error || 'Purchase failed. Please try again.');
       setShowConfirmPopup(false);
       setShowSuccessPopup(true);
-      setSelectedBanner(null);
-      
-      setTimeout(() => {
-        setShowSuccessPopup(false);
-      }, 2000);
-    } else if (selectedBackdrop) {
-      // Remove purchased backdrop from available backdrops
-      setAvailableBackdrops(prevBackdrops => prevBackdrops.filter(backdrop => backdrop.id !== selectedBackdrop.id));
-      
-      setPopupMessage(`Successfully purchased ${selectedBackdrop.name} for ${selectedBackdrop.price} dollars!`);
-      setShowConfirmPopup(false);
-      setShowSuccessPopup(true);
-      setSelectedBackdrop(null);
-      
+
       setTimeout(() => {
         setShowSuccessPopup(false);
       }, 2000);
     }
-  };
-
-  const cancelPurchase = () => {
-    setShowConfirmPopup(false);
   };
 
   return (

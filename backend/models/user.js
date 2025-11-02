@@ -37,6 +37,30 @@ const userSchema = new mongoose.Schema({
   projects: {
     type: [String],
     default: []
+  },
+  ownedIcons: {
+    type: [String],
+    default: []
+  },
+  ownedBanners: {
+    type: [String],
+    default: []
+  },
+  ownedBackdrops: {
+    type: [String],
+    default: []
+  },
+  selectedIcon: {
+    type: String,
+    default: null
+  },
+  selectedBanner: {
+    type: String,
+    default: null
+  },
+  selectedBackdrop: {
+    type: String,
+    default: null
   }
 }, { timestamps: true });
 
