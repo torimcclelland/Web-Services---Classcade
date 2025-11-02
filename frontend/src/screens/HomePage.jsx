@@ -128,6 +128,7 @@ const styles = {
 const HomePage = () => {
   const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
+  const [firstName, setFirstName] = useState('');
 
   const { setCurrentProject } = useProject();
 
@@ -143,8 +144,21 @@ const HomePage = () => {
     }
   };
 
+  const fetchUserInfo = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user?._id) return;
+
+      const res = await api.get(`/api/user/${user._id}`);
+      setFirstName(res.data.firstName || '');
+    } catch (e) {
+      console.error("Error fetching user info", e);
+    }
+  };
+
   useEffect(() => {
     fetchProjects();
+    fetchUserInfo();
   }, []);
 
   const handleCardClick = (project) => {
@@ -168,7 +182,9 @@ const HomePage = () => {
 
         <img src={Logo} alt="logo" style={{ width: 120, height: 120 }} />
 
-        <h1 style={styles.heading}>Welcome to CLASSCADE!</h1>
+        <h1 style={styles.heading}>
+          Welcome to CLASSCADE{firstName ? `, ${firstName}` : ''}!
+        </h1>
         <div style={styles.subtitle}>Click a group or create a new one to get started</div>
 
         <div style={styles.list}>
