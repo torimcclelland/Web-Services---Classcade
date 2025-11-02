@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const taskSchema = new mongoose.Schema(
   {
     projectId: {
-      type: mongoose.Schema.Types.ObjectId, //associated project
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'Project',
       required: true,
     },
@@ -12,20 +12,18 @@ const taskSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    description: {
-      type: String,
-    },
-    assignedTo: { // associated user
+    description: String,
+    assignedTo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
-    completed: {
-      type: Boolean,
-      default: false,
+    status: {
+      type: String,
+      enum: ["Not Started", "In Progress", "Under Review", "Done"],
+      default: "Not Started",
     },
-    dueDate: {
-      type: Date,
-    },
+
+    dueDate: Date,
   },
   { timestamps: true }
 );

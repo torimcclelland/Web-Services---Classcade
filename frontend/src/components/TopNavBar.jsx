@@ -1,15 +1,15 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopNavBarStyle from '../styles/TopNavBarStyle';
 import { FaHome } from 'react-icons/fa';
 import api from '../api';
-import { ProjectContext } from '../context/ProjectContext';
+import { useProject } from '../context/ProjectContext';
 
 const TopNavBar = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
 
-  const { selectedProject, setSelectedProject } = useContext(ProjectContext);
+  const { currentProject, setCurrentProject } = useProject();
 
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -30,8 +30,8 @@ const TopNavBar = () => {
   const goToHome = () => navigate('/home');
   const goToAddNewProject = () => navigate('/addnewproject');
 
-  const selectProject = (project) => {
-    setSelectedProject(project);
+  const handleSelectProject = (project) => {
+    setCurrentProject(project);
     navigate('/dashboard');
   };
 
@@ -43,7 +43,7 @@ const TopNavBar = () => {
 
       <div style={TopNavBarStyle.groupTabs}>
         {projects.map((proj) => {
-          const isActive = selectedProject?._id === proj._id;
+          const isActive = currentProject?._id === proj._id;
 
           return (
             <div
@@ -52,7 +52,7 @@ const TopNavBar = () => {
                 ...TopNavBarStyle.groupTab,
                 ...(isActive ? TopNavBarStyle.activeTab : {})
               }}
-              onClick={() => selectProject(proj)}
+              onClick={() => handleSelectProject(proj)}
             >
               <span>{proj.name}</span>
               <button

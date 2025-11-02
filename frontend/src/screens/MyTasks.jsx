@@ -6,19 +6,22 @@ import ProfileCircle from '../components/ProfileCircle';
 import PrimaryButton from '../components/PrimaryButton';
 import MyTasksStyle from '../styles/MyTasksStyle';
 import api from '../api';
+import { useProject } from '../context/ProjectContext';
 
-const swimlanes = ['Not Started', 'In Progress', 'Under Review', 'Complete'];
+const swimlanes = ['Not Started', 'In Progress', 'Under Review', 'Done'];
 
 const MyTasks = () => {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
   const user = JSON.parse(localStorage.getItem('user'));
+  const { currentProject } = useProject();
 
   useEffect(() => {
     const fetchTasks = async () => {
-      if (!user?._id) return;
+      if (!currentProject?._id || !user?._id) return;
+
       try {
-        const res = await api.get(`/api/tasks/user/${user._id}`);
+        const res = await api.get(`/api/task/${currentProject._id}`);
         setTasks(res.data || []);
       } catch (err) {
         console.error('Failed to fetch tasks:', err);
@@ -26,10 +29,10 @@ const MyTasks = () => {
     };
 
     fetchTasks();
-  }, [user]);
+  }, [currentProject, user]);
 
   const getTasksByStatus = (status) =>
-    tasks.filter((task) => task.completed === (status === 'Complete'));
+    tasks.filter(task => task.status === status);
 
   return (
     <div style={MyTasksStyle.container}>
@@ -39,7 +42,8 @@ const MyTasks = () => {
 
         <main style={MyTasksStyle.main}>
           <div style={MyTasksStyle.header}>
-            <h2>My Tasks</h2>
+            <h2>My Tasks ({currentProject?.name})</h2>
+
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <PrimaryButton text="Add Task" onClick={() => navigate('/add-task')} />
               <ProfileCircle
@@ -53,13 +57,14 @@ const MyTasks = () => {
             {swimlanes.map((lane) => (
               <div key={lane} style={MyTasksStyle.swimlane}>
                 <h3 style={MyTasksStyle.swimlaneTitle}>{lane}</h3>
+
                 {getTasksByStatus(lane).map((task) => (
                   <div key={task._id} style={MyTasksStyle.taskCard}>
                     <h4 style={MyTasksStyle.taskTitle}>{task.name}</h4>
                     <p style={MyTasksStyle.taskDescription}>{task.description}</p>
                     {task.dueDate && (
                       <p style={MyTasksStyle.taskDueDate}>
-                        Due Date: {new Date(task.dueDate).toLocaleDateString()}
+                        Due: {new Date(task.dueDate).toLocaleDateString()}
                       </p>
                     )}
                   </div>
@@ -74,4 +79,3 @@ const MyTasks = () => {
 };
 
 export default MyTasks;
-

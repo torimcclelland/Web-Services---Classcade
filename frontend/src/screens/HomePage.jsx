@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logo from '../assets/Logo.png';
 import LogoutImg from '../assets/Logout.png';
 import api from '../api';
-import { ProjectContext } from "../context/ProjectContext";
+import { useProject } from "../context/ProjectContext";
 
 const styles = {
   page: {
@@ -129,7 +129,7 @@ const HomePage = () => {
   const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
 
-  const { setSelectedProject } = useContext(ProjectContext);
+  const { setCurrentProject } = useProject();
 
   const fetchProjects = async () => {
     try {
@@ -148,14 +148,14 @@ const HomePage = () => {
   }, []);
 
   const handleCardClick = (project) => {
-    setSelectedProject(project);
-    
+    setCurrentProject(project);
     navigate('/dashboard');
   };
 
   const handleLogout = () => {
     localStorage.removeItem("user");
-    localStorage.removeItem("selectedProject");
+    localStorage.removeItem("currentProject");
+    setCurrentProject(null);
     navigate('/');
   };
 
