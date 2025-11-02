@@ -72,14 +72,14 @@ const AddNewProject = () => {
             placeholder="Enter project name"
           />
 
-            <label style={AddNewGroupStyle.label}>Teacher Email (optional)</label>
-            <input
-              type="email"
-              style={AddNewGroupStyle.input}
-              value={teacherEmail}
-              onChange={(e) => setTeacherEmail(e.target.value)}
-              placeholder="Enter teacher email"
-            />
+          <label style={AddNewGroupStyle.label}>Teacher Email (optional)</label>
+          <input
+            type="email"
+            style={AddNewGroupStyle.input}
+            value={teacherEmail}
+            onChange={(e) => setTeacherEmail(e.target.value)}
+            placeholder="Enter teacher email"
+          />
 
           <label style={AddNewGroupStyle.label}>Groupmate Emails</label>
           <textarea
@@ -91,13 +91,12 @@ const AddNewProject = () => {
 
           {error && <div style={{ color: "red", marginTop: 10 }}>{error}</div>}
 
-            <div style={AddNewGroupStyle.actionButtons}>
-              <PrimaryButton text="Cancel" onClick={handleCancel} />
-              <PrimaryButton text="Create" onClick={handleSubmit} />
-            </div>
+          <div style={AddNewGroupStyle.actionButtons}>
+            <PrimaryButton text="Cancel" onClick={handleCancel} />
+            <PrimaryButton text="Create" onClick={handleSubmit} />
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
 
       {showCancelPopup && (
         <div style={AddNewGroupStyle.overlay}>
