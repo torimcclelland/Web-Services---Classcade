@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import TopNavBar from '../components/TopNavBar';
-import PrimaryButton from '../components/PrimaryButton';
-import api from '../api';
-import AddNewGroupStyle from '../styles/AddNewGroupStyle';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import TopNavBar from "../components/TopNavBar";
+import PrimaryButton from "../components/PrimaryButton";
+import api from "../api";
+import AddNewGroupStyle from "../styles/AddNewGroupStyle";
 
 const AddNewProject = () => {
   const navigate = useNavigate();
-  const [groupName, setGroupName] = useState('');
-  const [teacherEmail, setTeacherEmail] = useState('');
-  const [groupmateEmails, setGroupmateEmails] = useState('');
+  const [groupName, setGroupName] = useState("");
+  const [teacherEmail, setTeacherEmail] = useState("");
+  const [groupmateEmails, setGroupmateEmails] = useState("");
   const [showCancelPopup, setShowCancelPopup] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleSubmit = async () => {
-    setError('');
+    setError("");
 
     if (!groupName.trim()) {
       setError("Group name is required");
@@ -28,8 +28,8 @@ const AddNewProject = () => {
     }
 
     const emails = groupmateEmails
-      .split(',')
-      .map(e => e.trim())
+      .split(",")
+      .map((e) => e.trim())
       .filter(Boolean);
 
     try {
@@ -37,7 +37,7 @@ const AddNewProject = () => {
         userId: user._id,
         name: groupName,
         teacherEmail,
-        groupmateEmails: emails
+        groupmateEmails: emails,
       });
 
       alert("Group created successfully!");
@@ -52,27 +52,25 @@ const AddNewProject = () => {
 
   const confirmCancel = () => {
     setShowCancelPopup(false);
-    navigate('/home');
+    navigate("/home");
   };
 
   return (
     <div style={AddNewGroupStyle.container}>
       <TopNavBar />
 
-      <div style={AddNewGroupStyle.layout}>
-        <main style={AddNewGroupStyle.main}>
-          <div style={AddNewGroupStyle.formPanel}>
-            <h2 style={AddNewGroupStyle.title}>Add New Group</h2>
-            <hr style={{ border: 'none', borderTop: '1px solid #d1d5db', marginBottom: '1rem' }} />
+      <main style={{ ...AddNewGroupStyle.main, marginLeft: 0 }}>
+        <div style={AddNewGroupStyle.formPanel}>
+          <h2 style={AddNewGroupStyle.title}>Add New Project</h2>
 
-            <label style={AddNewGroupStyle.label}>Group Name</label>
-            <input
-              type="text"
-              style={AddNewGroupStyle.input}
-              value={groupName}
-              onChange={(e) => setGroupName(e.target.value)}
-              placeholder="Enter group name"
-            />
+          <label style={AddNewGroupStyle.label}>Project Name</label>
+          <input
+            type="text"
+            style={AddNewGroupStyle.input}
+            value={groupName}
+            onChange={(e) => setGroupName(e.target.value)}
+            placeholder="Enter project name"
+          />
 
             <label style={AddNewGroupStyle.label}>Teacher Email (optional)</label>
             <input
@@ -83,24 +81,15 @@ const AddNewProject = () => {
               placeholder="Enter teacher email"
             />
 
-            <label style={AddNewGroupStyle.label}>Groupmate Emails</label>
-            <textarea
-              style={{
-                ...AddNewGroupStyle.textarea,
-                height: '100px',
-                lineHeight: '1.5',
-                padding: '0.75rem',
-              }}
-              value={groupmateEmails}
-              onChange={(e) => setGroupmateEmails(e.target.value)}
-              placeholder="Enter emails separated by commas"
-            />
+          <label style={AddNewGroupStyle.label}>Groupmate Emails</label>
+          <textarea
+            style={{ ...AddNewGroupStyle.input, height: "80px" }}
+            value={groupmateEmails}
+            onChange={(e) => setGroupmateEmails(e.target.value)}
+            placeholder="Enter emails separated by commas"
+          />
 
-            {error && (
-              <div style={{ color: 'red', marginTop: '1rem', textAlign: 'center' }}>
-                {error}
-              </div>
-            )}
+          {error && <div style={{ color: "red", marginTop: 10 }}>{error}</div>}
 
             <div style={AddNewGroupStyle.actionButtons}>
               <PrimaryButton text="Cancel" onClick={handleCancel} />
