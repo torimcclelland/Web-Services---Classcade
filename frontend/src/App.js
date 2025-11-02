@@ -14,6 +14,7 @@ import Stats from './screens/Stats';
 import Zoom from './screens/Zoom';
 import StorePage from './screens/Store';
 import AddNewProject from './screens/AddNewProject';
+import AddNewTask from './screens/AddNewTask';
 
 export default function App() {
   return (
@@ -99,6 +100,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <StorePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/add-task"
+          element={
+            <ProtectedRoute>
+              <AddNewTask />
             </ProtectedRoute>
           }
         />
