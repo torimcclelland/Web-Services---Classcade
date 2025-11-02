@@ -9,7 +9,7 @@ import { useProject } from "../context/ProjectContext";
 
 const TimeTracking = () => {
   const navigate = useNavigate();
-  const { currentProject } = useProject();
+  const { selectedProject } = useProject();
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState("");
   const [minutes, setMinutes] = useState("");
@@ -19,13 +19,12 @@ const TimeTracking = () => {
 
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // Fetch tasks for current project
   useEffect(() => {
     const fetchTasks = async () => {
-      if (!currentProject?._id || !user?._id) return;
+      if (!selectedProject?._id || !user?._id) return;
 
       try {
-        const res = await api.get(`/api/task/${currentProject._id}`);
+        const res = await api.get(`/api/task/${selectedProject._id}`);
         setTasks(res.data || []);
       } catch (err) {
         console.error("Failed to fetch tasks:", err);
@@ -34,7 +33,7 @@ const TimeTracking = () => {
     };
 
     fetchTasks();
-  }, [currentProject, user]);
+  }, [selectedProject, user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -71,7 +70,7 @@ const TimeTracking = () => {
         <main style={TimeTrackingStyle.main}>
           <div style={TimeTrackingStyle.formPanel}>
             <h2 style={TimeTrackingStyle.title}>
-              Time Tracking ({currentProject?.name})
+              Time Tracking ({selectedProject?.name})
             </h2>
 
             {error && <p style={{ color: "red" }}>{error}</p>}
@@ -94,7 +93,7 @@ const TimeTracking = () => {
             <label style={TimeTrackingStyle.label}>Minutes</label>
             <input
               type="number"
-              style={{ ...TimeTrackingStyle.input, width: "80px" }} // smaller width
+              style={{ ...TimeTrackingStyle.input, width: "80px" }}
               value={minutes}
               onChange={(e) => setMinutes(e.target.value)}
             />
