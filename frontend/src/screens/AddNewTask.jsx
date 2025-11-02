@@ -1,41 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import TopNavBar from '../components/TopNavBar';
-import SideBar from '../components/Sidebar';
-import PrimaryButton from '../components/PrimaryButton';
-import AddNewTaskStyle from '../styles/AddNewTaskStyle';
-import api from '../api';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import TopNavBar from "../components/TopNavBar";
+import SideBar from "../components/Sidebar";
+import PrimaryButton from "../components/PrimaryButton";
+import AddNewTaskStyle from "../styles/AddNewTaskStyle";
+import api from "../api";
 import { useProject } from "../context/ProjectContext";
 
 const AddNewTask = () => {
   const navigate = useNavigate();
 
-  const { currentProject } = useProject();
-  const user = JSON.parse(localStorage.getItem('user'));
+  const { selectedProject } = useProject();
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  const [taskName, setTaskName] = useState('');
-  const [description, setDescription] = useState('');
-  const [dueDate, setDueDate] = useState('');
-  const [error, setError] = useState('');
+  const [taskName, setTaskName] = useState("");
+  const [description, setDescription] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!currentProject) {
+    if (!selectedProject) {
       alert("Please select a project first.");
-      navigate('/home');
+      navigate("/home");
     }
-  }, [currentProject, navigate]);
+  }, [selectedProject, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (!taskName) {
-      setError('Task Name is required');
+      setError("Task Name is required");
       return;
     }
 
     try {
-      await api.post(`/api/task/${currentProject._id}`, {
+      await api.post(`/api/task/${selectedProject._id}`, {
         name: taskName,
         description,
         assignedTo: user._id,
@@ -43,11 +43,11 @@ const AddNewTask = () => {
         status: "Not Started",
       });
 
-      alert('Task added successfully!');
-      navigate('/tasks');
+      alert("Task added successfully!");
+      navigate("/tasks");
     } catch (err) {
-      console.error('Failed to create task:', err);
-      setError(err.response?.data?.error || 'Failed to create task.');
+      console.error("Failed to create task:", err);
+      setError(err.response?.data?.error || "Failed to create task.");
     }
   };
 
@@ -59,10 +59,10 @@ const AddNewTask = () => {
         <main style={AddNewTaskStyle.main}>
           <div style={AddNewTaskStyle.formPanel}>
             <h2 style={AddNewTaskStyle.title}>
-              Add Task to: {currentProject?.name}
+              Add Task to: {selectedProject?.name}
             </h2>
 
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {error && <p style={{ color: "red" }}>{error}</p>}
 
             <label style={AddNewTaskStyle.label}>Task Name</label>
             <input
@@ -75,7 +75,7 @@ const AddNewTask = () => {
 
             <label style={AddNewTaskStyle.label}>Description</label>
             <textarea
-              style={{ ...AddNewTaskStyle.input, height: '80px' }}
+              style={{ ...AddNewTaskStyle.input, height: "80px" }}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe the task"
@@ -90,7 +90,7 @@ const AddNewTask = () => {
             />
 
             <div style={AddNewTaskStyle.actionButtons}>
-              <PrimaryButton text="Cancel" onClick={() => navigate('/tasks')} />
+              <PrimaryButton text="Cancel" onClick={() => navigate("/tasks")} />
               <PrimaryButton text="Create Task" onClick={handleSubmit} />
             </div>
           </div>

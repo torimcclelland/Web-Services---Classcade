@@ -1,31 +1,28 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useContext } from "react";
 
 const ProjectContext = createContext();
 
 export const ProjectProvider = ({ children }) => {
-  const [currentProject, setCurrentProject] = useState(() => {
-    return JSON.parse(localStorage.getItem("selectedProject")) || null;
-  });
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [loadingProject, setLoadingProject] = useState(true);
 
   useEffect(() => {
-    if (currentProject) {
-      localStorage.setItem("selectedProject", JSON.stringify(currentProject));
-    } else {
-      localStorage.removeItem("selectedProject");
+    const stored = localStorage.getItem("selectedProject");
+    if (stored) setSelectedProject(JSON.parse(stored));
+    setLoadingProject(false);
+  }, []);
+
+  useEffect(() => {
+    if (selectedProject) {
+      localStorage.setItem("selectedProject", JSON.stringify(selectedProject));
     }
-  }, [currentProject]);
+  }, [selectedProject]);
 
   return (
-    <ProjectContext.Provider value={{ currentProject, setCurrentProject }}>
+    <ProjectContext.Provider value={{ selectedProject, setSelectedProject, loadingProject }}>
       {children}
     </ProjectContext.Provider>
   );
 };
 
-export const useProject = () => {
-  const ctx = useContext(ProjectContext);
-  if (!ctx) {
-    throw new Error("useProject must be used within a ProjectProvider");
-  }
-  return ctx;
-};
+export const useProject = () => useContext(ProjectContext);

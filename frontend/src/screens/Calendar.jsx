@@ -1,12 +1,12 @@
 // My Calendar Screen
 
-import React, { useState } from 'react';
-import Sidebar from '../components/Sidebar';
-import TopNavBar from '../components/TopNavBar';
-import CalendarStyle from '../styles/CalendarStyle';
+import React, { useState } from "react";
+import Sidebar from "../components/Sidebar";
+import TopNavBar from "../components/TopNavBar";
+import CalendarStyle from "../styles/CalendarStyle";
 
 const Calendar = () => {
-  const [viewMode, setViewMode] = useState('week'); // 'week' or 'month'
+  const [viewMode, setViewMode] = useState("week"); // 'week' or 'month'
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const startOfWeek = (date) => {
@@ -15,18 +15,19 @@ const Calendar = () => {
     return new Date(date.setDate(diff));
   };
 
-  const startOfMonth = (date) => new Date(date.getFullYear(), date.getMonth(), 1);
+  const startOfMonth = (date) =>
+    new Date(date.getFullYear(), date.getMonth(), 1);
 
   const nextPeriod = () => {
     const newDate = new Date(currentDate);
-    if (viewMode === 'week') newDate.setDate(newDate.getDate() + 7);
+    if (viewMode === "week") newDate.setDate(newDate.getDate() + 7);
     else newDate.setMonth(newDate.getMonth() + 1);
     setCurrentDate(newDate);
   };
 
   const prevPeriod = () => {
     const newDate = new Date(currentDate);
-    if (viewMode === 'week') newDate.setDate(newDate.getDate() - 7);
+    if (viewMode === "week") newDate.setDate(newDate.getDate() - 7);
     else newDate.setMonth(newDate.getMonth() - 1);
     setCurrentDate(newDate);
   };
@@ -41,7 +42,11 @@ const Calendar = () => {
     }
     return days.map((d) => (
       <div key={d.toDateString()} style={CalendarStyle.dayHeader}>
-        {d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+        {d.toLocaleDateString("en-US", {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+        })}
       </div>
     ));
   };
@@ -74,12 +79,17 @@ const Calendar = () => {
         <main style={CalendarStyle.main}>
           <div style={CalendarStyle.header}>
             <h2 style={CalendarStyle.title}>
-              {viewMode === 'week'
-                ? `Week of ${startOfWeek(new Date(currentDate)).toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
+              {viewMode === "week"
+                ? `Week of ${startOfWeek(
+                    new Date(currentDate)
+                  ).toLocaleDateString("en-US", {
+                    month: "long",
+                    day: "numeric",
                   })}`
-                : `${currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`}
+                : `${currentDate.toLocaleDateString("en-US", {
+                    month: "long",
+                    year: "numeric",
+                  })}`}
             </h2>
             <div style={CalendarStyle.controls}>
               <button style={CalendarStyle.navButton} onClick={prevPeriod}>
@@ -91,20 +101,20 @@ const Calendar = () => {
               <button
                 style={{
                   ...CalendarStyle.toggleButton,
-                  backgroundColor: viewMode === 'week' ? '#1e3a8a' : '#e5e7eb',
-                  color: viewMode === 'week' ? 'white' : '#1e3a8a',
+                  backgroundColor: viewMode === "week" ? "#1e3a8a" : "#e5e7eb",
+                  color: viewMode === "week" ? "white" : "#1e3a8a",
                 }}
-                onClick={() => setViewMode('week')}
+                onClick={() => setViewMode("week")}
               >
                 Week
               </button>
               <button
                 style={{
                   ...CalendarStyle.toggleButton,
-                  backgroundColor: viewMode === 'month' ? '#1e3a8a' : '#e5e7eb',
-                  color: viewMode === 'month' ? 'white' : '#1e3a8a',
+                  backgroundColor: viewMode === "month" ? "#1e3a8a" : "#e5e7eb",
+                  color: viewMode === "month" ? "white" : "#1e3a8a",
                 }}
-                onClick={() => setViewMode('month')}
+                onClick={() => setViewMode("month")}
               >
                 Month
               </button>
@@ -112,13 +122,15 @@ const Calendar = () => {
           </div>
 
           <div style={CalendarStyle.calendarPanel}>
-            {viewMode === 'week' ? (
+            {viewMode === "week" ? (
               <>
                 <div style={CalendarStyle.weekGrid}>{renderWeekDays()}</div>
                 <div style={CalendarStyle.weekBody}>
                   {[...Array(12)].map((_, hour) => (
                     <div key={hour} style={CalendarStyle.timeRow}>
-                      <div style={CalendarStyle.timeLabel}>{`${hour + 8}:00`}</div>
+                      <div style={CalendarStyle.timeLabel}>{`${
+                        hour + 8
+                      }:00`}</div>
                       <div style={CalendarStyle.timeCells}>
                         {[...Array(7)].map((_, day) => (
                           <div key={day} style={CalendarStyle.timeCell}></div>

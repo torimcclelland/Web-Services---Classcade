@@ -1,38 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import TopNavBar from '../components/TopNavBar';
-import SideBar from '../components/Sidebar';
-import ProfileCircle from '../components/ProfileCircle';
-import PrimaryButton from '../components/PrimaryButton';
-import MyTasksStyle from '../styles/MyTasksStyle';
-import api from '../api';
-import { useProject } from '../context/ProjectContext';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import TopNavBar from "../components/TopNavBar";
+import SideBar from "../components/Sidebar";
+import ProfileCircle from "../components/ProfileCircle";
+import PrimaryButton from "../components/PrimaryButton";
+import MyTasksStyle from "../styles/MyTasksStyle";
+import api from "../api";
+import { useProject } from "../context/ProjectContext";
 
-const swimlanes = ['Not Started', 'In Progress', 'Under Review', 'Done'];
+const swimlanes = ["Not Started", "In Progress", "Under Review", "Done"];
 
 const MyTasks = () => {
   const navigate = useNavigate();
   const [tasks, setTasks] = useState([]);
-  const user = JSON.parse(localStorage.getItem('user'));
-  const { currentProject } = useProject();
+  const user = JSON.parse(localStorage.getItem("user"));
+  const { selectedProject } = useProject();
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      if (!currentProject?._id || !user?._id) return;
+    if (!selectedProject?._id) {
+      navigate("/home");
+      return;
+    }
 
+    const fetchTasks = async () => {
       try {
-        const res = await api.get(`/api/task/${currentProject._id}`);
+        const res = await api.get(`/api/task/${selectedProject._id}`);
         setTasks(res.data || []);
       } catch (err) {
-        console.error('Failed to fetch tasks:', err);
+        console.error("Failed to fetch tasks:", err);
       }
     };
 
     fetchTasks();
-  }, [currentProject, user]);
+  }, [selectedProject, navigate]);
 
-  const getTasksByStatus = (status) =>
-    tasks.filter(task => task.status === status);
+  const getTasksByStatus = (lane) =>
+    tasks.filter((task) => task.status === lane);
 
   return (
     <div style={MyTasksStyle.container}>
@@ -42,10 +45,13 @@ const MyTasks = () => {
 
         <main style={MyTasksStyle.main}>
           <div style={MyTasksStyle.header}>
-            <h2>My Tasks ({currentProject?.name})</h2>
+            <h2>My Tasks ({selectedProject?.name})</h2>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <PrimaryButton text="Add Task" onClick={() => navigate('/add-task')} />
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <PrimaryButton
+                text="Add Task"
+                onClick={() => navigate("/add-task")}
+              />
               <ProfileCircle
                 avatarUrl="https://plus.unsplash.com/premium_photo-1732757787074-0f95bf19cf73?ixlib=rb-4.1.0&auto=format&fit=crop&q=60&w=500"
                 size={48}
@@ -58,10 +64,18 @@ const MyTasks = () => {
               <div key={lane} style={MyTasksStyle.swimlane}>
                 <h3 style={MyTasksStyle.swimlaneTitle}>{lane}</h3>
 
+                {getTasksByStatus(lane).length === 0 && (
+                  <p style={{ fontStyle: "italic", opacity: 0.6 }}>
+                    No tasks yet
+                  </p>
+                )}
+
                 {getTasksByStatus(lane).map((task) => (
                   <div key={task._id} style={MyTasksStyle.taskCard}>
                     <h4 style={MyTasksStyle.taskTitle}>{task.name}</h4>
-                    <p style={MyTasksStyle.taskDescription}>{task.description}</p>
+                    <p style={MyTasksStyle.taskDescription}>
+                      {task.description}
+                    </p>
                     {task.dueDate && (
                       <p style={MyTasksStyle.taskDueDate}>
                         Due: {new Date(task.dueDate).toLocaleDateString()}
