@@ -47,7 +47,7 @@ const TimeTracking = () => {
     try {
       if (!projectId) return;
 
-      const res = await api.get(`/api/task/project/${projectId}`);
+      const res = await api.get(`/api/task/getByProject/${projectId}`);
       setTasks(res.data || []);
     } catch (err) {
       console.error("Error fetching tasks:", err);
