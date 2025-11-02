@@ -270,6 +270,18 @@ router.delete('/:id/time/:userId', async (req, res) => {
 router.get('/user/:userId', async (req, res) => {
   try {
     const projects = await Project.find({ members: req.params.userId })
+      .select('_id name');
+
+    res.json(projects);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to get user projects' });
+  }
+});
+
+// Get all projects for a specific user with details
+router.get('/user/:userId/details', async (req, res) => {
+  try {
+    const projects = await Project.find({ members: req.params.userId })
       .populate('members', 'username firstName lastName email');
 
     res.json(projects);
