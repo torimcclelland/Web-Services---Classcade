@@ -129,6 +129,9 @@ const HomePage = () => {
   const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
   const [firstName, setFirstName] = useState('');
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const [hoveredNewBtn, setHoveredNewBtn] = useState(false);
+  const [hoveredLogout, setHoveredLogout] = useState(false);
 
   const { setCurrentProject } = useProject();
 
@@ -191,11 +194,23 @@ const HomePage = () => {
           {groups.map((g, index) => (
             <div 
               key={g._id || index}
-              style={styles.card}
+              style={{
+                ...styles.card,
+                backgroundColor: hoveredCard === index ? '#f5f5f5' : '#fff',
+                transition: 'background-color 0.2s ease'
+              }}
               onClick={() => handleCardClick(g)}
+              onMouseEnter={() => setHoveredCard(index)}
+              onMouseLeave={() => setHoveredCard(null)}
             >
               <div style={styles.cardLeft}>
-                <div style={styles.badge}>{index + 1}.</div>
+                <div style={{
+                  ...styles.badge,
+                  backgroundColor: hoveredCard === index ? '#f5f5f5' : '#fff',
+                  transition: 'background-color 0.2s ease'
+                }}>
+                  {index + 1}.
+                </div>
                 <div style={styles.cardContent}>
                   <div style={styles.cardTitle}>{g.name}</div>
                   <div style={styles.cardMeta}>
@@ -209,8 +224,14 @@ const HomePage = () => {
         </div>
 
         <button 
-          style={styles.newGroupBtn} 
+          style={{
+            ...styles.newGroupBtn,
+            backgroundColor: hoveredNewBtn ? '#f4f4f4ff' : '#fff',
+            transition: 'background-color 0.2s ease'
+          }}
           onClick={() => navigate("/addnewproject")}
+          onMouseEnter={() => setHoveredNewBtn(true)}
+          onMouseLeave={() => setHoveredNewBtn(false)}
         >
           + New Group
         </button>
