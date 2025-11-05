@@ -4,6 +4,7 @@ export const ZoomContainer = styled.div`
   display: flex;
   flex-direction: column;
   height: 100vh;
+  backgroundColor: "#DDF9EA";
 `;
 
 export const MainContent = styled.div`
@@ -11,6 +12,7 @@ export const MainContent = styled.div`
   padding: 20px;   // adds breathing room inside the content area
   display: flex;
   flex-direction: column;
+  background: #DDF9EA;  // Mint green background
 `;
 
 
@@ -25,11 +27,11 @@ export const PageTitle = styled.h1`
   font-size: 2rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
-  color: #333;
+  backgroundColor: "#DDF9EA";
 `;
 
 export const ZoomHeader = styled.div`
-  background-color: #ffffff;
+  backgroundColor: "#DDF9EA";
   border-radius: 12px;
   padding: 2rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);

@@ -12,7 +12,7 @@ const MyTasksStyle = {
   main: {
     flex: 1,
     padding: "2rem",
-    backgroundColor: "#f3f4f6",
+    backgroundColor: "#DDF9EA",
     overflowX: "auto",
   },
   header: {
@@ -27,7 +27,7 @@ const MyTasksStyle = {
   },
   swimlane: {
     flex: "1 1 0",
-    backgroundColor: "#e0f7e9",
+    backgroundColor: "#f3f4f6",
     padding: "1rem",
     borderRadius: "12px",
     minWidth: "250px",

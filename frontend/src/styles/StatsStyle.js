@@ -64,7 +64,7 @@ export const MainContent = styled.div`
   flex: 1;
   padding: 2rem;
   position: relative;
-  background-color: #f9f9fb;
+  background: #DDF9EA;  // Mint green background
   overflow-y: auto;
 `;
 

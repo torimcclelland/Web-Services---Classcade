@@ -13,7 +13,7 @@ export const TimeTrackingStyle = {
   main: {
     flex: 1,
     padding: '2rem',
-    backgroundColor: '#f3f4f6', 
+    backgroundColor: '#ddf9ea', 
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'flex-start',
