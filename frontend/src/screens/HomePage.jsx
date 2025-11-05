@@ -4,11 +4,11 @@ import Logo from "../assets/Logo.png";
 import LogoutImg from "../assets/Logout.png";
 import api from "../api";
 import { useProject } from "../context/ProjectContext";
-import HomePageStyle from '../styles/HomePageStyle';
+import HomePageStyle from "../styles/HomePageStyle";
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const [groups, setGroups] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [firstName, setFirstName] = useState("");
   const [hoveredCard, setHoveredCard] = useState(null);
   const [hoveredNewBtn, setHoveredNewBtn] = useState(false);
@@ -22,7 +22,7 @@ const HomePage = () => {
       if (!user?._id) return;
 
       const res = await api.get(`/api/project/user/${user._id}/details`);
-      setGroups(res.data || []);
+      setProjects(res.data || []);
     } catch (e) {
       console.error("Error fetching projects", e);
     }
@@ -70,11 +70,11 @@ const HomePage = () => {
           Welcome to CLASSCADE{firstName ? `, ${firstName}` : ""}!
         </h1>
         <div style={HomePageStyle.subtitle}>
-          Click a group or create a new one to get started
+          Click a project or create a new one to get started
         </div>
 
         <div style={HomePageStyle.list}>
-          {groups.map((g, index) => (
+          {projects.map((g, index) => (
             <div
               key={g._id || index}
               style={{
@@ -114,7 +114,7 @@ const HomePage = () => {
 
         <button
           style={{
-            ...HomePageStyle.newGroupBtn,
+            ...HomePageStyle.newProjectBtn,
             backgroundColor: hoveredNewBtn ? "#f4f4f4ff" : "#fff",
             transition: "background-color 0.2s ease",
           }}
@@ -122,7 +122,7 @@ const HomePage = () => {
           onMouseEnter={() => setHoveredNewBtn(true)}
           onMouseLeave={() => setHoveredNewBtn(false)}
         >
-          + New Group
+          + New Project
         </button>
       </div>
     </div>

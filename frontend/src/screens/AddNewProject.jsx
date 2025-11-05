@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import TopNavBar from "../components/TopNavBar";
 import PrimaryButton from "../components/PrimaryButton";
 import api from "../api";
-import AddNewGroupStyle from "../styles/AddNewGroupStyle";
+import AddNewProjectStyle from "../styles/AddNewProjectStyle";
 
 const AddNewProject = () => {
   const navigate = useNavigate();
-  const [groupName, setGroupName] = useState("");
+  const [projectName, setProjectName] = useState("");
   const [teacherEmail, setTeacherEmail] = useState("");
   const [groupmateEmails, setGroupmateEmails] = useState("");
   const [showCancelPopup, setShowCancelPopup] = useState(false);
@@ -16,8 +16,8 @@ const AddNewProject = () => {
   const handleSubmit = async () => {
     setError("");
 
-    if (!groupName.trim()) {
-      setError("Group name is required");
+    if (!projectName.trim()) {
+      setError("Project name is required");
       return;
     }
 
@@ -35,12 +35,12 @@ const AddNewProject = () => {
     try {
       await api.post("/api/project/create", {
         userId: user._id,
-        name: groupName,
+        name: projectName,
         teacherEmail,
         groupmateEmails: emails,
       });
 
-      alert("Group created successfully!");
+      alert("Project created successfully!");
       navigate("/home");
     } catch (err) {
       console.error(err);
@@ -56,34 +56,36 @@ const AddNewProject = () => {
   };
 
   return (
-    <div style={AddNewGroupStyle.container}>
+    <div style={AddNewProjectStyle.container}>
       <TopNavBar />
 
-      <main style={{ ...AddNewGroupStyle.main, marginLeft: 0 }}>
-        <div style={AddNewGroupStyle.formPanel}>
-          <h2 style={AddNewGroupStyle.title}>Add New Project</h2>
+      <main style={{ ...AddNewProjectStyle.main, marginLeft: 0 }}>
+        <div style={AddNewProjectStyle.formPanel}>
+          <h2 style={AddNewProjectStyle.title}>Add New Project</h2>
 
-          <label style={AddNewGroupStyle.label}>Project Name</label>
+          <label style={AddNewProjectStyle.label}>Project Name</label>
           <input
             type="text"
-            style={AddNewGroupStyle.input}
-            value={groupName}
-            onChange={(e) => setGroupName(e.target.value)}
+            style={AddNewProjectStyle.input}
+            value={projectName}
+            onChange={(e) => setProjectName(e.target.value)}
             placeholder="Enter project name"
           />
 
-          <label style={AddNewGroupStyle.label}>Teacher Email (optional)</label>
+          <label style={AddNewProjectStyle.label}>
+            Teacher Email (optional)
+          </label>
           <input
             type="email"
-            style={AddNewGroupStyle.input}
+            style={AddNewProjectStyle.input}
             value={teacherEmail}
             onChange={(e) => setTeacherEmail(e.target.value)}
             placeholder="Enter teacher email"
           />
 
-          <label style={AddNewGroupStyle.label}>Groupmate Emails</label>
+          <label style={AddNewProjectStyle.label}>Groupmate Emails</label>
           <textarea
-            style={{ ...AddNewGroupStyle.input, height: "80px" }}
+            style={{ ...AddNewProjectStyle.input, height: "80px" }}
             value={groupmateEmails}
             onChange={(e) => setGroupmateEmails(e.target.value)}
             placeholder="Enter emails separated by commas"
@@ -91,7 +93,7 @@ const AddNewProject = () => {
 
           {error && <div style={{ color: "red", marginTop: 10 }}>{error}</div>}
 
-          <div style={AddNewGroupStyle.actionButtons}>
+          <div style={AddNewProjectStyle.actionButtons}>
             <PrimaryButton text="Cancel" onClick={handleCancel} />
             <PrimaryButton text="Create" onClick={handleSubmit} />
           </div>
@@ -99,12 +101,12 @@ const AddNewProject = () => {
       </main>
 
       {showCancelPopup && (
-        <div style={AddNewGroupStyle.overlay}>
-          <div style={AddNewGroupStyle.popup}>
-            <p style={AddNewGroupStyle.popupText}>
+        <div style={AddNewProjectStyle.overlay}>
+          <div style={AddNewProjectStyle.popup}>
+            <p style={AddNewProjectStyle.popupText}>
               Are you sure you want to cancel?
             </p>
-            <div style={AddNewGroupStyle.popupButtons}>
+            <div style={AddNewProjectStyle.popupButtons}>
               <PrimaryButton text="Yes" onClick={confirmCancel} />
               <PrimaryButton
                 text="No"

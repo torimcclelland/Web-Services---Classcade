@@ -41,7 +41,7 @@ const TopNavBar = () => {
         <FaHome size={24} />
       </button>
 
-      <div style={TopNavBarStyle.groupTabs}>
+      <div style={TopNavBarStyle.projectTabs}>
         {projects.map((proj) => {
           const isActive = selectedProject?._id === proj._id;
 
@@ -49,7 +49,7 @@ const TopNavBar = () => {
             <div
               key={proj._id}
               style={{
-                ...TopNavBarStyle.groupTab,
+                ...TopNavBarStyle.projectTab,
                 ...(isActive ? TopNavBarStyle.activeTab : {}),
               }}
               onClick={() => handleSelectProject(proj)}

@@ -86,7 +86,7 @@ const HomePageStyle = {
   metaText: {
     fontStyle: "italic",
   },
-  newGroupBtn: {
+  newProjectBtn: {
     marginLeft: 20,
     padding: "12px 24px",
     backgroundColor: "#fff",
