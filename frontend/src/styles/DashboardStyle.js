@@ -1,6 +1,6 @@
 const DashboardStyle = {
   container: {
-    backgroundColor: "#f3f4f6",
+    backgroundColor: "#ddf9ea",
     display: "flex",
     flexDirection: "column",
     height: "100vh",
