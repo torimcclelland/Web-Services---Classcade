@@ -5,7 +5,7 @@ const { createMeeting } = require('../controllers/zoomController');
 // GET /api/zoom/create → Launch Zoom meeting
 router.get('/create', async (req, res) => {
   try {
-    const userId = req.user?.id || 'mockUserId'; // Replace with real auth logic
+    const userId = req.user?.id || '69038607d8d8d5f275a6f3ca'; // Replace with real auth logic
     const meeting = await createMeeting(userId);
     res.json({ join_url: meeting.join_url });
   } catch (err) {
