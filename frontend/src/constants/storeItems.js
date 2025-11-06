@@ -18,6 +18,9 @@ import icon15 from '../assets/icon15.png';
 // Default icon (always available to all users)
 export const DEFAULT_ICON = { id: 'default', name: 'Default', price: 0, image: iconBlank };
 
+// Default banner (always available to all users)
+export const DEFAULT_BANNER = { id: 'default', name: 'Default', price: 0, color: '#DDF9EA' };
+
 export const ALL_ICONS = [
   { id: 'i1', name: 'Man 1', price: .99, image: icon1 },
   { id: 'i2', name: 'Woman 1', price: .99, image: icon2 },
@@ -65,4 +68,18 @@ export const getUserIcon = (selectedIconId) => {
   
   const icon = ALL_ICONS.find(i => i.id === selectedIconId);
   return icon ? icon.image : DEFAULT_ICON.image;
+};
+
+/**
+ * Helper function to get the banner color for a user
+ * @param {string|null} selectedBannerId - The ID of the selected banner from user data
+ * @returns {string} The color hex code for the banner
+ */
+export const getUserBanner = (selectedBannerId) => {
+  if (!selectedBannerId || selectedBannerId === 'default') {
+    return DEFAULT_BANNER.color;
+  }
+  
+  const banner = ALL_BANNERS.find(b => b.id === selectedBannerId);
+  return banner ? banner.color : DEFAULT_BANNER.color;
 };

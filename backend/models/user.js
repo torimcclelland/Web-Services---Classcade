@@ -56,7 +56,7 @@ const userSchema = new mongoose.Schema({
   },
   selectedBanner: {
     type: String,
-    default: null
+    default: 'default'
   },
   selectedBackdrop: {
     type: String,

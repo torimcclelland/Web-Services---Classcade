@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import TextField from './TextField';
 import PrimaryButton from './PrimaryButton';
 import SecondaryButton from './SecondaryButton';
-import { ALL_ICONS, ALL_BANNERS, ALL_BACKDROPS, DEFAULT_ICON } from '../constants/storeItems';
+import { ALL_ICONS, ALL_BANNERS, ALL_BACKDROPS, DEFAULT_ICON, DEFAULT_BANNER } from '../constants/storeItems';
 import EditProfileStyle from "../styles/EditProfileStyle";
 
 const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
@@ -34,7 +34,7 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
         confirmPassword: '',
       });
       setSelectedIcon(userData.selectedIcon || 'default');
-      setSelectedBanner(userData.selectedBanner || null);
+      setSelectedBanner(userData.selectedBanner || 'default');
       setSelectedBackdrop(userData.selectedBackdrop || null);
       setErrors({});
       setSaveMessage({ type: '', text: '' });
@@ -63,7 +63,7 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
       confirmPassword: '',
     });
     setSelectedIcon(userData?.selectedIcon || 'default');
-    setSelectedBanner(userData?.selectedBanner || null);
+    setSelectedBanner(userData?.selectedBanner || 'default');
     setSelectedBackdrop(userData?.selectedBackdrop || null);
     setErrors({});
     setSaveMessage({ type: '', text: '' });
@@ -147,7 +147,9 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
   };
 
   const getOwnedBanners = () => {
-    return ALL_BANNERS.filter(banner => userData?.ownedBanners?.includes(banner.id));
+    // Always include the default banner as the first option
+    const ownedBanners = ALL_BANNERS.filter(banner => userData?.ownedBanners?.includes(banner.id));
+    return [DEFAULT_BANNER, ...ownedBanners];
   };
 
   const getOwnedBackdrops = () => {
@@ -308,24 +310,20 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
               <div style={EditProfileStyle.customizationSection}>
                 <h3 style={EditProfileStyle.sectionTitle}>Profile Banners</h3>
                 <div style={EditProfileStyle.itemGrid}>
-                  {getOwnedBanners().length === 0 ? (
-                    <p style={EditProfileStyle.noItems}>No banners owned. Visit the store to purchase!</p>
-                  ) : (
-                    getOwnedBanners().map(banner => (
-                      <div
-                        key={banner.id}
-                        style={{
-                          ...EditProfileStyle.itemCard,
-                          ...(selectedBanner === banner.id ? EditProfileStyle.selectedItem : {}),
-                        }}
-                        onClick={() => setSelectedBanner(banner.id)}
-                      >
-                        <div style={{ ...EditProfileStyle.bannerPreview, backgroundColor: banner.color }} />
-                        <p style={EditProfileStyle.itemName}>{banner.name}</p>
-                        {selectedBanner === banner.id && <div style={EditProfileStyle.checkmark}>✓</div>}
-                      </div>
-                    ))
-                  )}
+                  {getOwnedBanners().map(banner => (
+                    <div
+                      key={banner.id}
+                      style={{
+                        ...EditProfileStyle.itemCard,
+                        ...(selectedBanner === banner.id ? EditProfileStyle.selectedItem : {}),
+                      }}
+                      onClick={() => setSelectedBanner(banner.id)}
+                    >
+                      <div style={{ ...EditProfileStyle.bannerPreview, backgroundColor: banner.color }} />
+                      <p style={EditProfileStyle.itemName}>{banner.name}</p>
+                      {selectedBanner === banner.id && <div style={EditProfileStyle.checkmark}>✓</div>}
+                    </div>
+                  ))}
                 </div>
               </div>
 

@@ -4,14 +4,30 @@ import TopNavBarStyle from "../styles/TopNavBarStyle";
 import { FaHome } from "react-icons/fa";
 import api from "../api";
 import { useProject } from "../context/ProjectContext";
+import { getUserBanner } from "../constants/storeItems";
 
 const TopNavBar = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
+  const [bannerColor, setBannerColor] = useState('#DDF9EA');
 
   const { selectedProject, setSelectedProject } = useProject();
 
   const user = JSON.parse(localStorage.getItem("user"));
+
+  // Get user's selected banner color
+  const updateBannerColor = () => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        setBannerColor(getUserBanner(user.selectedBanner));
+      }
+    } catch (error) {
+      console.error('Error getting banner color:', error);
+      setBannerColor('#DDF9EA'); // fallback to default
+    }
+  };
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -25,6 +41,16 @@ const TopNavBar = () => {
     };
 
     fetchProjects();
+    updateBannerColor();
+
+    // Listen for user updates
+    window.addEventListener('userUpdated', updateBannerColor);
+    window.addEventListener('storage', updateBannerColor);
+
+    return () => {
+      window.removeEventListener('userUpdated', updateBannerColor);
+      window.removeEventListener('storage', updateBannerColor);
+    };
   }, [user]);
 
   const goToHome = () => navigate("/home");
@@ -36,7 +62,7 @@ const TopNavBar = () => {
   };
 
   return (
-    <div style={TopNavBarStyle.topNavbar}>
+    <div style={{ ...TopNavBarStyle.topNavbar, backgroundColor: bannerColor }}>
       <button style={TopNavBarStyle.homeBtn} onClick={goToHome}>
         <FaHome size={24} />
       </button>
