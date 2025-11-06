@@ -1,3 +1,4 @@
+import iconBlank from '../assets/iconBlank.png';
 import icon1 from '../assets/icon1.png';
 import icon2 from '../assets/icon2.png';
 import icon3 from '../assets/icon3.png';
@@ -13,6 +14,9 @@ import icon12 from '../assets/icon12.png';
 import icon13 from '../assets/icon13.png';
 import icon14 from '../assets/icon14.png';
 import icon15 from '../assets/icon15.png';
+
+// Default icon (always available to all users)
+export const DEFAULT_ICON = { id: 'default', name: 'Default', price: 0, image: iconBlank };
 
 export const ALL_ICONS = [
   { id: 'i1', name: 'Man 1', price: .99, image: icon1 },
@@ -48,3 +52,17 @@ export const ALL_BACKDROPS = [
   { id: 'd5', name: 'Star Burst', price: 2.49, type: 'star', color: '#FFD93D' },
   { id: 'd6', name: 'Flame', price: 2.99, type: 'flame', color: '#EC4899' },
 ];
+
+/**
+ * Helper function to get the icon image URL for a user
+ * @param {string|null} selectedIconId - The ID of the selected icon from user data
+ * @returns {string} The image URL/path for the icon
+ */
+export const getUserIcon = (selectedIconId) => {
+  if (!selectedIconId || selectedIconId === 'default') {
+    return DEFAULT_ICON.image;
+  }
+  
+  const icon = ALL_ICONS.find(i => i.id === selectedIconId);
+  return icon ? icon.image : DEFAULT_ICON.image;
+};

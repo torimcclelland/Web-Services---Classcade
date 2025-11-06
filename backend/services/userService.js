@@ -110,7 +110,8 @@ router.put("/:id/updateselections", async (req, res) => {
     if (!user) return res.status(404).json({ error: "User not found" });
 
     // Validate that user owns the items they're trying to select
-    if (selectedIcon && !user.ownedIcons.includes(selectedIcon)) {
+    // Default icon is always allowed
+    if (selectedIcon && selectedIcon !== 'default' && !user.ownedIcons.includes(selectedIcon)) {
       return res.status(400).json({ error: "You don't own this icon" });
     }
     if (selectedBanner && !user.ownedBanners.includes(selectedBanner)) {

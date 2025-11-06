@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import TextField from './TextField';
 import PrimaryButton from './PrimaryButton';
 import SecondaryButton from './SecondaryButton';
-import { ALL_ICONS, ALL_BANNERS, ALL_BACKDROPS } from '../constants/storeItems';
+import { ALL_ICONS, ALL_BANNERS, ALL_BACKDROPS, DEFAULT_ICON } from '../constants/storeItems';
 import EditProfileStyle from "../styles/EditProfileStyle";
 
 const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
@@ -33,7 +33,7 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
         password: '',
         confirmPassword: '',
       });
-      setSelectedIcon(userData.selectedIcon || null);
+      setSelectedIcon(userData.selectedIcon || 'default');
       setSelectedBanner(userData.selectedBanner || null);
       setSelectedBackdrop(userData.selectedBackdrop || null);
       setErrors({});
@@ -62,7 +62,7 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
       password: '',
       confirmPassword: '',
     });
-    setSelectedIcon(userData?.selectedIcon || null);
+    setSelectedIcon(userData?.selectedIcon || 'default');
     setSelectedBanner(userData?.selectedBanner || null);
     setSelectedBackdrop(userData?.selectedBackdrop || null);
     setErrors({});
@@ -141,7 +141,9 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
   };
 
   const getOwnedIcons = () => {
-    return ALL_ICONS.filter(icon => userData?.ownedIcons?.includes(icon.id));
+    // Always include the default icon as the first option
+    const ownedIcons = ALL_ICONS.filter(icon => userData?.ownedIcons?.includes(icon.id));
+    return [DEFAULT_ICON, ...ownedIcons];
   };
 
   const getOwnedBanners = () => {
@@ -285,24 +287,20 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
               <div style={EditProfileStyle.customizationSection}>
                 <h3 style={EditProfileStyle.sectionTitle}>Profile Icons</h3>
                 <div style={EditProfileStyle.itemGrid}>
-                  {getOwnedIcons().length === 0 ? (
-                    <p style={EditProfileStyle.noItems}>No icons owned. Visit the store to purchase!</p>
-                  ) : (
-                    getOwnedIcons().map(icon => (
-                      <div
-                        key={icon.id}
-                        style={{
-                          ...EditProfileStyle.itemCard,
-                          ...(selectedIcon === icon.id ? EditProfileStyle.selectedItem : {}),
-                        }}
-                        onClick={() => setSelectedIcon(icon.id)}
-                      >
-                        <img src={icon.image} alt={icon.name} style={EditProfileStyle.iconImage} />
-                        <p style={EditProfileStyle.itemName}>{icon.name}</p>
-                        {selectedIcon === icon.id && <div style={EditProfileStyle.checkmark}>✓</div>}
-                      </div>
-                    ))
-                  )}
+                  {getOwnedIcons().map(icon => (
+                    <div
+                      key={icon.id}
+                      style={{
+                        ...EditProfileStyle.itemCard,
+                        ...(selectedIcon === icon.id ? EditProfileStyle.selectedItem : {}),
+                      }}
+                      onClick={() => setSelectedIcon(icon.id)}
+                    >
+                      <img src={icon.image} alt={icon.name} style={EditProfileStyle.iconImage} />
+                      <p style={EditProfileStyle.itemName}>{icon.name}</p>
+                      {selectedIcon === icon.id && <div style={EditProfileStyle.checkmark}>✓</div>}
+                    </div>
+                  ))}
                 </div>
               </div>
 

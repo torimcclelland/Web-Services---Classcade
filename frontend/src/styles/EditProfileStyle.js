@@ -122,6 +122,7 @@ const EditProfileStyle = {
   itemCard: {
     position: 'relative',
     padding: '1rem',
+    overflow: 'visible',
     border: '2px solid #e5e7eb',
     borderRadius: '8px',
     cursor: 'pointer',
@@ -134,11 +135,14 @@ const EditProfileStyle = {
     backgroundColor: '#eff6ff',
   },
   iconImage: {
-    width: '60px',
-    height: '60px',
-    objectFit: 'cover',
-    borderRadius: '50%',
+    width: '72px',
+    height: '72px',
+    objectFit: 'contain',
+    borderRadius: '0',
     margin: '0 auto 0.5rem',
+    display: 'block',
+    position: 'relative',
+    zIndex: 200,
   },
   bannerPreview: {
     width: '100%',

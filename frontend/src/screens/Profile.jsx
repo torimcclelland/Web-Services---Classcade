@@ -138,9 +138,9 @@ const Profile = () => {
       // Fetch updated user data
       await fetchUserData();
 
-      // Update localStorage
       const updatedUserResponse = await api.get(`/api/user/${user._id}`);
       localStorage.setItem('user', JSON.stringify(updatedUserResponse.data));
+      window.dispatchEvent(new Event('userUpdated'));
 
       setShowEditModal(false);
       setPopupMessage('Profile updated successfully!');
@@ -254,7 +254,6 @@ const Profile = () => {
             {/* Profile Header with Circle */}
             <div style={ProfileStyle.profileHeader}>
               <ProfileCircle 
-                avatarUrl="https://plus.unsplash.com/premium_photo-1732757787074-0f95bf19cf73?ixlib=rb-4.1.0&auto=format&fit=crop&q=60&w=500" 
                 size={120} 
                 alt={`${userData.firstName} ${userData.lastName}`}
               />
