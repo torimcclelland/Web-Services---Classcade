@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import TextField from './TextField';
 import PrimaryButton from './PrimaryButton';
 import SecondaryButton from './SecondaryButton';
@@ -8,17 +8,39 @@ import EditProfileStyle from "../styles/EditProfileStyle";
 const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
   const [activeTab, setActiveTab] = useState('personal'); // 'personal' or 'customization'
   const [formData, setFormData] = useState({
-    firstName: userData?.firstName || '',
-    lastName: userData?.lastName || '',
-    email: userData?.email || '',
-    username: userData?.username || '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    username: '',
     password: '',
     confirmPassword: '',
   });
-  const [selectedIcon, setSelectedIcon] = useState(userData?.selectedIcon || null);
-  const [selectedBanner, setSelectedBanner] = useState(userData?.selectedBanner || null);
-  const [selectedBackdrop, setSelectedBackdrop] = useState(userData?.selectedBackdrop || null);
+  const [selectedIcon, setSelectedIcon] = useState(null);
+  const [selectedBanner, setSelectedBanner] = useState(null);
+  const [selectedBackdrop, setSelectedBackdrop] = useState(null);
   const [errors, setErrors] = useState({});
+  const [saveMessage, setSaveMessage] = useState({ type: '', text: '' }); // 'success' or 'error'
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Reset form data when modal opens or userData changes
+  useEffect(() => {
+    if (isOpen && userData) {
+      setFormData({
+        firstName: userData.firstName || '',
+        lastName: userData.lastName || '',
+        email: userData.email || '',
+        username: userData.username || '',
+        password: '',
+        confirmPassword: '',
+      });
+      setSelectedIcon(userData.selectedIcon || null);
+      setSelectedBanner(userData.selectedBanner || null);
+      setSelectedBackdrop(userData.selectedBackdrop || null);
+      setErrors({});
+      setSaveMessage({ type: '', text: '' });
+      setActiveTab('personal');
+    }
+  }, [isOpen, userData]);
 
   if (!isOpen) return null;
 
@@ -28,6 +50,25 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
+  };
+
+  const handleCancel = () => {
+    // Reset all form data to original values
+    setFormData({
+      firstName: userData?.firstName || '',
+      lastName: userData?.lastName || '',
+      email: userData?.email || '',
+      username: userData?.username || '',
+      password: '',
+      confirmPassword: '',
+    });
+    setSelectedIcon(userData?.selectedIcon || null);
+    setSelectedBanner(userData?.selectedBanner || null);
+    setSelectedBackdrop(userData?.selectedBackdrop || null);
+    setErrors({});
+    setSaveMessage({ type: '', text: '' });
+    setActiveTab('personal');
+    onClose();
   };
 
   const validatePersonalInfo = () => {
@@ -58,8 +99,14 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = () => {
-    if (activeTab === 'personal' && !validatePersonalInfo()) {
+  const handleSave = async () => {
+    // Clear previous messages
+    setSaveMessage({ type: '', text: '' });
+
+    // Always validate personal info before saving, regardless of which tab is active
+    if (!validatePersonalInfo()) {
+      // If validation fails, switch to personal tab to show errors
+      setActiveTab('personal');
       return;
     }
 
@@ -78,7 +125,19 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
       updates.password = formData.password;
     }
 
-    onSave(updates);
+    setIsSaving(true);
+    const result = await onSave(updates);
+    setIsSaving(false);
+
+    if (result && result.success) {
+      setSaveMessage({ type: 'success', text: 'Profile updated successfully!' });
+      // Close modal after a brief delay to show success message
+      setTimeout(() => {
+        onClose();
+      }, 1000);
+    } else if (result && result.error) {
+      setSaveMessage({ type: 'error', text: result.error });
+    }
   };
 
   const getOwnedIcons = () => {
@@ -98,8 +157,22 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
       <div style={EditProfileStyle.modal}>
         <div style={EditProfileStyle.header}>
           <h2 style={EditProfileStyle.title}>Edit Profile</h2>
-          <button style={EditProfileStyle.closeButton} onClick={onClose}>×</button>
+          <button style={EditProfileStyle.closeButton} onClick={handleCancel}>×</button>
         </div>
+
+        {/* Save Message Banner */}
+        {saveMessage.text && (
+          <div style={{
+            padding: '1rem',
+            backgroundColor: saveMessage.type === 'success' ? '#d4edda' : '#f8d7da',
+            color: saveMessage.type === 'success' ? '#155724' : '#721c24',
+            borderBottom: `1px solid ${saveMessage.type === 'success' ? '#c3e6cb' : '#f5c6cb'}`,
+            textAlign: 'center',
+            fontWeight: 500,
+          }}>
+            {saveMessage.text}
+          </div>
+        )}
 
         {/* Tabs */}
         <div style={EditProfileStyle.tabs}>
@@ -288,11 +361,18 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
 
         {/* Footer Buttons */}
         <div style={EditProfileStyle.footer}>
-          <button style={EditProfileStyle.cancelButton} onClick={onClose}>
+          <button style={EditProfileStyle.cancelButton} onClick={handleCancel} disabled={isSaving}>
             Cancel
           </button>
-          <button style={EditProfileStyle.saveButton} onClick={handleSave}>
-            Save Changes
+          <button 
+            style={{
+              ...EditProfileStyle.saveButton,
+              ...(isSaving ? { opacity: 0.6, cursor: 'not-allowed' } : {})
+            }} 
+            onClick={handleSave}
+            disabled={isSaving}
+          >
+            {isSaving ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
       </div>

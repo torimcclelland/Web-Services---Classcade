@@ -95,21 +95,21 @@ const Profile = () => {
 
       const user = JSON.parse(storedUser);
 
-      // Update personal info
-      if (updates.firstName || updates.lastName) {
+      // Only update if values have changed
+      if (updates.firstName !== userData.firstName || updates.lastName !== userData.lastName) {
         await api.put(`/api/user/${user._id}/updatename`, {
           firstName: updates.firstName,
           lastName: updates.lastName,
         });
       }
 
-      if (updates.email) {
+      if (updates.email !== userData.email) {
         await api.put(`/api/user/${user._id}/updateemail`, {
           email: updates.email,
         });
       }
 
-      if (updates.username) {
+      if (updates.username !== userData.username) {
         await api.put(`/api/user/${user._id}/updateusername`, {
           username: updates.username,
         });
@@ -121,8 +121,13 @@ const Profile = () => {
         });
       }
 
-      // Update selected customizations
-      if (updates.selectedIcon !== undefined || updates.selectedBanner !== undefined || updates.selectedBackdrop !== undefined) {
+      // Update selected customizations (only if changed)
+      const customizationsChanged = 
+        updates.selectedIcon !== userData.selectedIcon ||
+        updates.selectedBanner !== userData.selectedBanner ||
+        updates.selectedBackdrop !== userData.selectedBackdrop;
+
+      if (customizationsChanged) {
         await api.put(`/api/user/${user._id}/updateselections`, {
           selectedIcon: updates.selectedIcon,
           selectedBanner: updates.selectedBanner,
@@ -140,10 +145,12 @@ const Profile = () => {
       setShowEditModal(false);
       setPopupMessage('Profile updated successfully!');
       setTimeout(() => setPopupMessage(''), 3000);
+      
+      return { success: true };
     } catch (error) {
       console.error('Error updating profile:', error);
-      setPopupMessage(error.response?.data?.error || 'Failed to update profile');
-      setTimeout(() => setPopupMessage(''), 3000);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to update profile';
+      return { success: false, error: errorMessage };
     }
   };
 
