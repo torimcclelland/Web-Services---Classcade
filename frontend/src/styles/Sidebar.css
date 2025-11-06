@@ -8,6 +8,7 @@
   --cc-expanded-width: 260px;
   --cc-radius-lg: 18px;
   --cc-radius-md: 12px;
+  --cc-mint-green: #ddf9ea;
 }
 
 .cc-sidebar {
@@ -16,6 +17,9 @@
   width: var(--cc-expanded-width);
   margin: 16px 16px 40px 10px;
   z-index: 10;
+  background: var(--cc-mint-green); /* ✅ Mint green background */
+  padding: 20px; /* Optional: adds spacing around the inner sidebar */
+  border-radius: var(--cc-radius-lg); /* Optional: smooth outer corners */
 }
 
 .cc-sidebar__inner {
