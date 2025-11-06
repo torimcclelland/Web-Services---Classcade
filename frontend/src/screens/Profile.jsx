@@ -13,6 +13,7 @@ const Profile = () => {
   const [userData, setUserData] = useState(null);
   const [userStats, setUserStats] = useState({ totalProjects: 0, completedTasks: 0 });
   const [loading, setLoading] = useState(true);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -87,8 +88,45 @@ const Profile = () => {
   }
 
   const handleDeletAccountClick = () => {
+    setConfirmDelete(true);
+  };
 
-  }
+  const performDeleteAccount = async () => {
+    const currentUser = localStorage.getItem('user');
+    if (!currentUser) {
+      setPopupMessage('No user logged in.');
+      setTimeout(() => setPopupMessage(''), 3000);
+      setConfirmDelete(false);
+      return;
+    }
+
+    let user;
+    try {
+      user = JSON.parse(currentUser);
+    } catch (err) {
+      console.error('Invalid user in localStorage', err);
+      setPopupMessage('Unable to delete account.');
+      setTimeout(() => setPopupMessage(''), 3000);
+      setConfirmDelete(false);
+      return;
+    }
+
+    try {
+      await api.delete(`/api/user/${user._id}`);
+      localStorage.removeItem('user');
+      setPopupMessage('Account successfully deleted.');
+      setConfirmDelete(false);
+      setTimeout(() => {
+        setPopupMessage('');
+        navigate('/');
+      }, 1200);
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      setPopupMessage('Failed to delete account. Try again later.');
+      setConfirmDelete(false);
+      setTimeout(() => setPopupMessage(''), 3000);
+    }
+  };
 
   if (loading) {
     return (
@@ -199,6 +237,26 @@ const Profile = () => {
         <div style={ProfileStyle.overlay}>
           <div style={ProfileStyle.popup}>
             <p style={ProfileStyle.popupText}>{popupMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {confirmDelete && (
+        <div style={ProfileStyle.overlay}>
+          <div style={ProfileStyle.popup}>
+            <p style={ProfileStyle.popupText}>Are you sure you want to delete your account? This action cannot be undone.</p>
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '1rem' }}>
+              <PrimaryButton
+                text="Cancel"
+                onClick={() => setConfirmDelete(false)}
+              >
+              </PrimaryButton>
+              <SecondaryButton
+                text="Delete"
+                onClick={performDeleteAccount}
+              >
+              </SecondaryButton>
+            </div>
           </div>
         </div>
       )}

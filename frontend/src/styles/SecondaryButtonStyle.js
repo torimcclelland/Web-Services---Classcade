@@ -1,6 +1,6 @@
 export const SecondaryButtonStyle = {
   secondaryButton: {
-    backgroundColor: '#ef0404',
+    backgroundColor: '#d01414ff',
     color: '#ffffff',
     border: 'none',
     padding: '0.65rem 1.4rem',
