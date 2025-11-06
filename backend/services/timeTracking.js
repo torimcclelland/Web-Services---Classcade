@@ -1,29 +1,45 @@
-// routes/timeTracking.js
-import express from 'express';
-import TimeEntry from '../models/timeEntry.js';
-import authMiddleware from '../middleware/auth.js';
+const express = require("express");
+const TimeEntry = require("../models/timeEntry");
 
 const router = express.Router();
 
-// POST /time-tracking
-router.post('/', authMiddleware, async (req, res) => {
+router.post("/", async (req, res) => {
   try {
-    const { projectId, taskId, minutes, completed } = req.body;
+    const { userId, projectId, taskId, minutes, completed } = req.body;
+
+    if (!userId || !projectId || !taskId || !minutes) {
+      return res.status(400).json({
+        message: "userId, projectId, taskId, and minutes are required",
+      });
+    }
 
     const newEntry = new TimeEntry({
-      user: req.user.id,
+      user: userId,
       project: projectId,
       task: taskId,
       minutes,
-      completed,
+      completed: completed || false,
     });
 
     const savedEntry = await newEntry.save();
     res.status(201).json(savedEntry);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Time tracking error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-export default router;
+router.get("/:projectId", async (req, res) => {
+  try {
+    const entries = await TimeEntry.find({ project: req.params.projectId })
+      .populate("user", "firstName lastName email")
+      .populate("task", "name");
+
+    res.json(entries);
+  } catch (err) {
+    console.error("Error fetching time logs:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+module.exports = router;
