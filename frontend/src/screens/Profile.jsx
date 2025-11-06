@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import TopNavBar from '../components/TopNavBar';
 import PrimaryButton from '../components/PrimaryButton';
 import SecondaryButton from '../components/SecondaryButton';
+import EditProfile from '../components/EditProfile';
 import ProfileStyle from '../styles/ProfileStyle';
 import ProfileCircle from '../components/ProfileCircle';
 import SideBar from '../components/Sidebar';
@@ -14,6 +15,7 @@ const Profile = () => {
   const [userStats, setUserStats] = useState({ totalProjects: 0, completedTasks: 0 });
   const [loading, setLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -76,6 +78,73 @@ const Profile = () => {
   const handleButtonClick = (message) => {
     setPopupMessage(message);
     setTimeout(() => setPopupMessage(''), 1200);
+  };
+
+  const handleEditInfo = () => {
+    setShowEditModal(true);
+  };
+
+  const handleSaveProfile = async (updates) => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (!storedUser) {
+        setPopupMessage('No user logged in');
+        setTimeout(() => setPopupMessage(''), 3000);
+        return;
+      }
+
+      const user = JSON.parse(storedUser);
+
+      // Update personal info
+      if (updates.firstName || updates.lastName) {
+        await api.put(`/api/user/${user._id}/updatename`, {
+          firstName: updates.firstName,
+          lastName: updates.lastName,
+        });
+      }
+
+      if (updates.email) {
+        await api.put(`/api/user/${user._id}/updateemail`, {
+          email: updates.email,
+        });
+      }
+
+      if (updates.username) {
+        await api.put(`/api/user/${user._id}/updateusername`, {
+          username: updates.username,
+        });
+      }
+
+      if (updates.password) {
+        await api.put(`/api/user/${user._id}/updatepassword`, {
+          password: updates.password,
+        });
+      }
+
+      // Update selected customizations
+      if (updates.selectedIcon !== undefined || updates.selectedBanner !== undefined || updates.selectedBackdrop !== undefined) {
+        await api.put(`/api/user/${user._id}/updateselections`, {
+          selectedIcon: updates.selectedIcon,
+          selectedBanner: updates.selectedBanner,
+          selectedBackdrop: updates.selectedBackdrop,
+        });
+      }
+
+      // Fetch updated user data
+      await fetchUserData();
+
+      // Update localStorage
+      const updatedUserResponse = await api.get(`/api/user/${user._id}`);
+      localStorage.setItem('user', JSON.stringify(updatedUserResponse.data));
+
+      setShowEditModal(false);
+      setPopupMessage('Profile updated successfully!');
+      setTimeout(() => setPopupMessage(''), 3000);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setPopupMessage(error.response?.data?.error || 'Failed to update profile');
+      setTimeout(() => setPopupMessage(''), 3000);
+    }
   };
 
   const handleStoreClick = () => {
@@ -218,7 +287,7 @@ const Profile = () => {
               />
               <PrimaryButton
                 text="Edit Info"
-                onClick={() => handleButtonClick('Editing Info')}
+                onClick={handleEditInfo}
               />
               <PrimaryButton
                 text="Store"
@@ -260,6 +329,14 @@ const Profile = () => {
           </div>
         </div>
       )}
+
+      {/* Edit Profile */}
+      <EditProfile
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        userData={userData}
+        onSave={handleSaveProfile}
+      />
     </div>
   );
 };
