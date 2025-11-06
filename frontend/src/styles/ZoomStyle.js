@@ -4,12 +4,12 @@ export const ZoomContainer = styled.div`
   display: flex;
   flex-direction: column;
   height: 100vh;
-  backgroundColor: "#DDF9EA";
+  backgroundColor: "white";
 `;
 
 export const MainContent = styled.div`
   flex: 1;
-  padding: 20px;   // adds breathing room inside the content area
+  padding: 20px;
   display: flex;
   flex-direction: column;
   background: #DDF9EA;  // Mint green background
@@ -21,33 +21,35 @@ export const ProfileRow = styled.div`
   justify-content: flex-end;
   margin-top: 20px;   // pushes it down from the top nav
   margin-bottom: 10px;
+  backgroundColor: "white;
 `;
 
 export const PageTitle = styled.h1`
   font-size: 2rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
-  backgroundColor: "#DDF9EA";
+  backgroundColor: "white";
 `;
 
 export const ZoomHeader = styled.div`
-  backgroundColor: "#DDF9EA";
+  background-color: white; //makes the content rectangle stand out
   border-radius: 12px;
   padding: 2rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   display: flex;
   flex-direction: column;
   align-items: center;
+
 `;
 
 export const ZoomMessage = styled.p`
   font-size: 1.2rem;
   text-align: center;
   margin-bottom: 1.5rem;
-  color: #444;
+  color: "white";
 
   strong {
-    color: #222;
+    color: "white";
   }
 `;
 
@@ -76,5 +78,6 @@ export const ZoomButton = styled.button`
 export const ContentRow = styled.div`
   display: flex;
   flex: 1;
+  backgroundColor: "white";
 `;
 

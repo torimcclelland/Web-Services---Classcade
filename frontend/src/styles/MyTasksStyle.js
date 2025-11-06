@@ -1,6 +1,6 @@
 const MyTasksStyle = {
   container: {
-    backgroundColor: "#f3f4f6",
+    backgroundColor: "white",
     display: "flex",
     flexDirection: "column",
     height: "100vh",
@@ -39,12 +39,13 @@ const MyTasksStyle = {
     marginBottom: "1rem",
   },
   taskCard: {
-    backgroundColor: "#fff",
+    backgroundColor: "white",
     padding: "0.75rem",
     borderRadius: "8px",
     marginBottom: "1rem",
-    boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-  },
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    border: "1px solid #e0e0e0",
+  },  
   taskTitle: {
     fontWeight: "600",
     marginBottom: "0.5rem",

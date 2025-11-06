@@ -129,6 +129,10 @@ const Dashboard = () => {
                 text="Schedule Meeting"
                 onClick={() => navigate("/zoom")}
               />
+              <PrimaryButton
+                text="Invite Members"
+                onClick={() => navigate("/addnewproject")}
+              />
             </div>
           </div>
         </main>
