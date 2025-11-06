@@ -10,109 +10,118 @@ import MyTasks from "./screens/MyTasks";
 import Calendar from "./screens/Calendar";
 import SignUp from "./screens/SignUp";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Stats from './screens/Stats';
-import Zoom from './screens/Zoom';
-import StorePage from './screens/Store';
-import AddNewProject from './screens/AddNewProject';
-import AddNewTask from './screens/AddNewTask';
+import Stats from "./screens/Stats";
+import Zoom from "./screens/Zoom";
+import StorePage from "./screens/Store";
+import AddNewProject from "./screens/AddNewProject";
+import AddNewTask from "./screens/AddNewTask";
+import ProjectSettings from "./screens/ProjectSettings";
 
 export default function App() {
   return (
-  <ProjectProvider>
-    <Router>
-      <Routes>
-        <Route path="/" element={<LogInPage />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route
-          path="/home"
-          element={
-            <ProtectedRoute>
-              <HomePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/timetracking"
-          element={
-            <ProtectedRoute>
-              <TimeTracking />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/tasks"
-          element={
-            <ProtectedRoute>
-              <MyTasks />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/calendar"
-          element={
-            <ProtectedRoute>
-              <Calendar />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/addnewproject"
-          element={
-            <ProtectedRoute>
-              <AddNewProject />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/stats"
-          element={
-            <ProtectedRoute>
-              <Stats />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/zoom"
-          element={
-            <ProtectedRoute>
-              <Zoom />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/store"
-          element={
-            <ProtectedRoute>
-              <StorePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/add-task"
-          element={
-            <ProtectedRoute>
-              <AddNewTask />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </Router>
-  </ProjectProvider>
+    <ProjectProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<LogInPage />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/timetracking"
+            element={
+              <ProtectedRoute>
+                <TimeTracking />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tasks"
+            element={
+              <ProtectedRoute>
+                <MyTasks />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/calendar"
+            element={
+              <ProtectedRoute>
+                <Calendar />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/addnewproject"
+            element={
+              <ProtectedRoute>
+                <AddNewProject />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/stats"
+            element={
+              <ProtectedRoute>
+                <Stats />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/zoom"
+            element={
+              <ProtectedRoute>
+                <Zoom />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/store"
+            element={
+              <ProtectedRoute>
+                <StorePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/add-task"
+            element={
+              <ProtectedRoute>
+                <AddNewTask />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <ProjectSettings />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Router>
+    </ProjectProvider>
   );
 }
