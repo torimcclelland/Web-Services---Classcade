@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import TopNavBar from '../components/TopNavBar';
 import PrimaryButton from '../components/PrimaryButton';
+import SecondaryButton from '../components/SecondaryButton';
 import ProfileStyle from '../styles/ProfileStyle';
 import ProfileCircle from '../components/ProfileCircle';
 import SideBar from '../components/Sidebar';
@@ -83,6 +84,10 @@ const Profile = () => {
   const handleLogout = () => {
     localStorage.removeItem('user');
     navigate('/');
+  }
+
+  const handleDeletAccountClick = () => {
+
   }
 
   if (loading) {
@@ -169,6 +174,10 @@ const Profile = () => {
 
             {/* Action Buttons */}
             <div style={ProfileStyle.actionButtons}>
+            <SecondaryButton
+                text="Delete Account"
+                onClick={() => handleDeletAccountClick()}
+              />
               <PrimaryButton
                 text="Edit Info"
                 onClick={() => handleButtonClick('Editing Info')}
