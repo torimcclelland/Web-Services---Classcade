@@ -50,10 +50,8 @@ const Zoom = () => {
             <ZoomMessage>
               FirstName LastName,<br />
               you have <strong>3 upcoming Zoom meeting(s)</strong>.<br />
-              Browse our downloadable background library!
             </ZoomMessage>
             <ButtonRow>
-              <ZoomButton color="blue">Shop</ZoomButton>
               <ZoomButton color="green" onClick={handleLaunchZoom}>
                 Launch Zoom
               </ZoomButton>
