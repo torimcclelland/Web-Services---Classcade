@@ -9,13 +9,13 @@ const styles = {
   container: {
     backgroundColor: "#DDF9EA",
     minHeight: "100vh",
+    width: "100%",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    position: "fixed",
-    inset: 0,
     padding: 24,
+    overflowY: "auto",
     boxSizing: "border-box",
   },
   title: {
@@ -59,14 +59,7 @@ const LogIn = () => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (localStorage.getItem("user")) {
-      navigate("/home");
-    }
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prevOverflow;
-    };
+    if (localStorage.getItem("user")) navigate("/home");
   }, []);
 
   const handleLogin = async (e) => {
@@ -88,7 +81,6 @@ const LogIn = () => {
   return (
     <div style={styles.container}>
       <img src={Logo} alt="Logo" style={{ width: 150, marginBottom: 20 }} />
-
       <div style={styles.title}>Welcome Back</div>
 
       <form style={styles.form} onSubmit={handleLogin}>
@@ -98,7 +90,6 @@ const LogIn = () => {
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
-
         <TextField
           label="Password"
           placeholder="Enter your password"
