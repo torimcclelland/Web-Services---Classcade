@@ -83,3 +83,17 @@ export const getUserBanner = (selectedBannerId) => {
   const banner = ALL_BANNERS.find(b => b.id === selectedBannerId);
   return banner ? banner.color : DEFAULT_BANNER.color;
 };
+
+/**
+ * Helper function to get the backdrop data for a user
+ * @param {string|null} selectedBackdropId - The ID of the selected backdrop from user data
+ * @returns {object|null} The backdrop object with type and color, or null if no backdrop
+ */
+export const getUserBackdrop = (selectedBackdropId) => {
+  if (!selectedBackdropId) {
+    return null;
+  }
+  
+  const backdrop = ALL_BACKDROPS.find(b => b.id === selectedBackdropId);
+  return backdrop || null;
+};

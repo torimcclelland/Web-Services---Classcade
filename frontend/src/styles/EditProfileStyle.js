@@ -156,6 +156,22 @@ const EditProfileStyle = {
     borderRadius: '50%',
     margin: '0 auto 0.5rem',
   },
+  backdropPreviewContainer: {
+    position: 'relative',
+    width: '100px',
+    height: '100px',
+    margin: '0 auto 0.5rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backdropIconPreview: {
+    width: '60px',
+    height: '60px',
+    objectFit: 'contain',
+    position: 'relative',
+    zIndex: 2,
+  },
   itemName: {
     fontSize: '0.875rem',
     color: '#374151',

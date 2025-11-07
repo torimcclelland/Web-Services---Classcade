@@ -42,6 +42,7 @@ const ProfileStyle = {
     display: 'flex',
     flexDirection: 'column',
     gap: '0.5rem',
+    paddingLeft: '1rem',
   },
   profileName: {
     fontSize: '2rem',

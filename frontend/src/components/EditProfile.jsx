@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import TextField from './TextField';
 import PrimaryButton from './PrimaryButton';
 import SecondaryButton from './SecondaryButton';
-import { ALL_ICONS, ALL_BANNERS, ALL_BACKDROPS, DEFAULT_ICON, DEFAULT_BANNER } from '../constants/storeItems';
+import { ALL_ICONS, ALL_BANNERS, ALL_BACKDROPS, DEFAULT_ICON, DEFAULT_BANNER, getUserIcon } from '../constants/storeItems';
 import EditProfileStyle from "../styles/EditProfileStyle";
+import star from '../assets/star.png';
+import flame from '../assets/fire.png';
 
 const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
   const [activeTab, setActiveTab] = useState('personal'); // 'personal' or 'customization'
@@ -153,6 +155,100 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
 
   const getOwnedBackdrops = () => {
     return ALL_BACKDROPS.filter(backdrop => userData?.ownedBackdrops?.includes(backdrop.id));
+  };
+
+  // Render backdrop based on type
+  const renderBackdrop = (type, color) => {
+    const backdropStyle = {
+      position: 'absolute',
+      zIndex: 1,
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+    };
+
+    switch(type) {
+      case 'circle':
+        return <div style={{
+          ...backdropStyle,
+          width: 70,
+          height: 70,
+          borderRadius: '50%',
+          border: `4px solid ${color}`,
+        }} />;
+      
+      case 'star':
+        return (
+          <img
+            src={star}
+            alt="star backdrop"
+            style={{
+              ...backdropStyle,
+              width: 100,
+              height: 100,
+              objectFit: 'contain',
+              pointerEvents: 'none',
+            }}
+          />
+        );
+      
+      case 'hexagon':
+        return <div style={{
+          ...backdropStyle,
+          width: 80,
+          height: 70,
+          backgroundColor: color,
+          clipPath: 'polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%)',
+          opacity: 0.8,
+        }} />;
+      
+      case 'doublering':
+        return <>
+          <div style={{
+            ...backdropStyle,
+            width: 80,
+            height: 80,
+            borderRadius: '50%',
+            border: `3px solid ${color}`,
+          }} />
+          <div style={{
+            ...backdropStyle,
+            width: 64,
+            height: 64,
+            borderRadius: '50%',
+            border: `2px solid ${color}`,
+          }} />
+        </>;
+      
+      case 'diamond':
+        return <div style={{
+          ...backdropStyle,
+          width: 65,
+          height: 65,
+          backgroundColor: color,
+          transform: 'translate(-50%, -50%) rotate(45deg)',
+          opacity: 0.7,
+        }} />;
+      
+      case 'flame':
+        return (
+          <img
+            src={flame}
+            alt="fire backdrop"
+            style={{
+              ...backdropStyle,
+              width: 70,
+              height: 70,
+              transform: 'translate(-50%, calc(-50% - 18px))',
+              objectFit: 'contain',
+              pointerEvents: 'none',
+            }}
+          />
+        );
+      
+      default:
+        return null;
+    }
   };
 
   return (
@@ -330,6 +426,25 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
               <div style={EditProfileStyle.customizationSection}>
                 <h3 style={EditProfileStyle.sectionTitle}>Profile Backdrops</h3>
                 <div style={EditProfileStyle.itemGrid}>
+                  {/* None option - always available */}
+                  <div
+                    style={{
+                      ...EditProfileStyle.itemCard,
+                      ...(selectedBackdrop === null ? EditProfileStyle.selectedItem : {}),
+                    }}
+                    onClick={() => setSelectedBackdrop(null)}
+                  >
+                    <div style={EditProfileStyle.backdropPreviewContainer}>
+                      <img 
+                        src={getUserIcon(selectedIcon)} 
+                        alt="User icon without backdrop" 
+                        style={EditProfileStyle.backdropIconPreview}
+                      />
+                    </div>
+                    <p style={EditProfileStyle.itemName}>None</p>
+                    {selectedBackdrop === null && <div style={EditProfileStyle.checkmark}>✓</div>}
+                  </div>
+                  
                   {getOwnedBackdrops().length === 0 ? (
                     <p style={EditProfileStyle.noItems}>No backdrops owned. Visit the store to purchase!</p>
                   ) : (
@@ -342,7 +457,14 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
                         }}
                         onClick={() => setSelectedBackdrop(backdrop.id)}
                       >
-                        <div style={{ ...EditProfileStyle.backdropPreview, backgroundColor: backdrop.color }} />
+                        <div style={EditProfileStyle.backdropPreviewContainer}>
+                          {renderBackdrop(backdrop.type, backdrop.color)}
+                          <img 
+                            src={getUserIcon(selectedIcon)} 
+                            alt="User icon with backdrop" 
+                            style={EditProfileStyle.backdropIconPreview}
+                          />
+                        </div>
                         <p style={EditProfileStyle.itemName}>{backdrop.name}</p>
                         {selectedBackdrop === backdrop.id && <div style={EditProfileStyle.checkmark}>✓</div>}
                       </div>
