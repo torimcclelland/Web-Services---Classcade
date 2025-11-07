@@ -190,8 +190,8 @@ const ProfileCircle = ({ avatarUrl, name, size = 48, alt = 'User avatar' }) => {
 
   return (
     <Wrapper onClick={goToProfile}>
-      {backdrop && renderBackdrop(backdrop.type, backdrop.color, size)}
       <Circle size={size}>
+        {backdrop && renderBackdrop(backdrop.type, backdrop.color, size)}
         <Avatar src={iconUrl} alt={alt} />
       </Circle>
       {name && <Name>{name}</Name>}
