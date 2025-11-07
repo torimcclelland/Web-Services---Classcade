@@ -8,7 +8,7 @@
   --cc-expanded-width: 260px;
   --cc-radius-lg: 18px;
   --cc-radius-md: 12px;
-  --cc-mint-green: #ddf9ea;
+  --cc-light-gray: #f3f4f6;
 }
 
 .cc-sidebar {
@@ -17,9 +17,9 @@
   width: var(--cc-expanded-width);
   margin: 16px 16px 40px 10px;
   z-index: 10;
-  background: var(--cc-mint-green); /* ✅ Mint green background */
-  padding: 20px; /* Optional: adds spacing around the inner sidebar */
-  border-radius: var(--cc-radius-lg); /* Optional: smooth outer corners */
+  background: var(--cc-light-gray);
+  padding: 20px;
+  border-radius: var(--cc-radius-lg);
 }
 
 .cc-sidebar__inner {
@@ -39,7 +39,7 @@
   object-fit: contain;
   margin-right: 12px;
 
-  filter: drop-shadow(0px 0px 4px rgba(0,0,0,0.25)); /* equal shadow all around */
+  filter: drop-shadow(0px 0px 4px rgba(0,0,0,0.25));
   border-radius: 8px;
 }
 
@@ -115,7 +115,6 @@
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.06);
 }
 
-/* Responsive (collapse to icon-only) */
 @media (max-width: 980px) {
   .cc-sidebar {
     width: var(--cc-icon-only-width);

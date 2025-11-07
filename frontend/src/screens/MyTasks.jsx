@@ -53,7 +53,6 @@ const MyTasks = () => {
                 onClick={() => navigate("/add-task")}
               />
               <ProfileCircle
-                avatarUrl="https://plus.unsplash.com/premium_photo-1732757787074-0f95bf19cf73?ixlib=rb-4.1.0&auto=format&fit=crop&q=60&w=500"
                 size={48}
               />
             </div>

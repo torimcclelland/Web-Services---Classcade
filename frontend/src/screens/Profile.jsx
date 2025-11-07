@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import TopNavBar from '../components/TopNavBar';
 import PrimaryButton from '../components/PrimaryButton';
 import SecondaryButton from '../components/SecondaryButton';
+import EditProfile from '../components/EditProfile';
 import ProfileStyle from '../styles/ProfileStyle';
 import ProfileCircle from '../components/ProfileCircle';
 import SideBar from '../components/Sidebar';
@@ -14,6 +15,7 @@ const Profile = () => {
   const [userStats, setUserStats] = useState({ totalProjects: 0, completedTasks: 0 });
   const [loading, setLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -78,6 +80,80 @@ const Profile = () => {
     setTimeout(() => setPopupMessage(''), 1200);
   };
 
+  const handleEditInfo = () => {
+    setShowEditModal(true);
+  };
+
+  const handleSaveProfile = async (updates) => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (!storedUser) {
+        setPopupMessage('No user logged in');
+        setTimeout(() => setPopupMessage(''), 3000);
+        return;
+      }
+
+      const user = JSON.parse(storedUser);
+
+      // Only update if values have changed
+      if (updates.firstName !== userData.firstName || updates.lastName !== userData.lastName) {
+        await api.put(`/api/user/${user._id}/updatename`, {
+          firstName: updates.firstName,
+          lastName: updates.lastName,
+        });
+      }
+
+      if (updates.email !== userData.email) {
+        await api.put(`/api/user/${user._id}/updateemail`, {
+          email: updates.email,
+        });
+      }
+
+      if (updates.username !== userData.username) {
+        await api.put(`/api/user/${user._id}/updateusername`, {
+          username: updates.username,
+        });
+      }
+
+      if (updates.password) {
+        await api.put(`/api/user/${user._id}/updatepassword`, {
+          password: updates.password,
+        });
+      }
+
+      // Update selected customizations (only if changed)
+      const customizationsChanged = 
+        updates.selectedIcon !== userData.selectedIcon ||
+        updates.selectedBanner !== userData.selectedBanner ||
+        updates.selectedBackdrop !== userData.selectedBackdrop;
+
+      if (customizationsChanged) {
+        await api.put(`/api/user/${user._id}/updateselections`, {
+          selectedIcon: updates.selectedIcon,
+          selectedBanner: updates.selectedBanner,
+          selectedBackdrop: updates.selectedBackdrop,
+        });
+      }
+
+      // Fetch updated user data
+      await fetchUserData();
+
+      const updatedUserResponse = await api.get(`/api/user/${user._id}`);
+      localStorage.setItem('user', JSON.stringify(updatedUserResponse.data));
+      window.dispatchEvent(new Event('userUpdated'));
+
+      setShowEditModal(false);
+      setPopupMessage('Profile updated successfully!');
+      setTimeout(() => setPopupMessage(''), 1000);
+      
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to update profile';
+      return { success: false, error: errorMessage };
+    }
+  };
+
   const handleStoreClick = () => {
     navigate('/store');
   }
@@ -135,10 +211,15 @@ const Profile = () => {
         <div style={ProfileStyle.layout}>
           <SideBar />
           <main style={ProfileStyle.main}>
-            <div style={ProfileStyle.profilePanel}>
-              <div style={{ textAlign: 'center', padding: '50px' }}>
-                <p>Loading profile...</p>
-              </div>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              height: '100%',
+              fontSize: '1.2rem',
+              color: '#000'
+            }}>
+              Loading...
             </div>
           </main>
         </div>
@@ -178,7 +259,6 @@ const Profile = () => {
             {/* Profile Header with Circle */}
             <div style={ProfileStyle.profileHeader}>
               <ProfileCircle 
-                avatarUrl="https://plus.unsplash.com/premium_photo-1732757787074-0f95bf19cf73?ixlib=rb-4.1.0&auto=format&fit=crop&q=60&w=500" 
                 size={120} 
                 alt={`${userData.firstName} ${userData.lastName}`}
               />
@@ -218,7 +298,7 @@ const Profile = () => {
               />
               <PrimaryButton
                 text="Edit Info"
-                onClick={() => handleButtonClick('Editing Info')}
+                onClick={handleEditInfo}
               />
               <PrimaryButton
                 text="Store"
@@ -260,6 +340,14 @@ const Profile = () => {
           </div>
         </div>
       )}
+
+      {/* Edit Profile */}
+      <EditProfile
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        userData={userData}
+        onSave={handleSaveProfile}
+      />
     </div>
   );
 };

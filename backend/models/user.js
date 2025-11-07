@@ -52,11 +52,11 @@ const userSchema = new mongoose.Schema({
   },
   selectedIcon: {
     type: String,
-    default: null
+    default: 'default'
   },
   selectedBanner: {
     type: String,
-    default: null
+    default: 'default'
   },
   selectedBackdrop: {
     type: String,

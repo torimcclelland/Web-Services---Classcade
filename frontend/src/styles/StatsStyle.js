@@ -1,6 +1,7 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
 export const StatsContainer = styled.div`
+  background-color: #f3f4f6;
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -26,7 +27,7 @@ export const ChartBox = styled.div`
   background: white;
   border-radius: 12px;
   padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -36,7 +37,7 @@ export const SummaryBox = styled.div`
   background: white;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 `;
 
 export const SummaryItem = styled.p`
@@ -73,5 +74,3 @@ export const ProfileRow = styled.div`
   justify-content: flex-end;
   margin-bottom: 1rem;
 `;
-
-

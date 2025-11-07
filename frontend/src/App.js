@@ -1,6 +1,8 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { UserProvider } from "./context/UserContext";
 import { ProjectProvider } from "./context/ProjectContext";
+
 import DashboardPage from "./screens/Dashboard";
 import LogInPage from "./screens/LogIn";
 import HomePage from "./screens/HomePage";
@@ -16,112 +18,132 @@ import StorePage from "./screens/Store";
 import AddNewProject from "./screens/AddNewProject";
 import AddNewTask from "./screens/AddNewTask";
 import ProjectSettings from "./screens/ProjectSettings";
+import MessagesOverview from "./screens/MessagesOverview";
+import MessageThread from "./screens/MessageThread";
 
 export default function App() {
   return (
-    <ProjectProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<LogInPage />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route
-            path="/home"
-            element={
-              <ProtectedRoute>
-                <HomePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/timetracking"
-            element={
-              <ProtectedRoute>
-                <TimeTracking />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/tasks"
-            element={
-              <ProtectedRoute>
-                <MyTasks />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/calendar"
-            element={
-              <ProtectedRoute>
-                <Calendar />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/addnewproject"
-            element={
-              <ProtectedRoute>
-                <AddNewProject />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/stats"
-            element={
-              <ProtectedRoute>
-                <Stats />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/zoom"
-            element={
-              <ProtectedRoute>
-                <Zoom />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/store"
-            element={
-              <ProtectedRoute>
-                <StorePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/add-task"
-            element={
-              <ProtectedRoute>
-                <AddNewTask />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <ProjectSettings />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </Router>
-    </ProjectProvider>
+    <UserProvider>
+      <ProjectProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<LogInPage />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route
+              path="/home"
+              element={
+                <ProtectedRoute>
+                  <HomePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/timetracking"
+              element={
+                <ProtectedRoute>
+                  <TimeTracking />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tasks"
+              element={
+                <ProtectedRoute>
+                  <MyTasks />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/calendar"
+              element={
+                <ProtectedRoute>
+                  <Calendar />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/addnewproject"
+              element={
+                <ProtectedRoute>
+                  <AddNewProject />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/stats"
+              element={
+                <ProtectedRoute>
+                  <Stats />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/zoom"
+              element={
+                <ProtectedRoute>
+                  <Zoom />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/store"
+              element={
+                <ProtectedRoute>
+                  <StorePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/add-task"
+              element={
+                <ProtectedRoute>
+                  <AddNewTask />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <ProjectSettings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/messages"
+              element={
+                <ProtectedRoute>
+                  <MessagesOverview />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/messages/:conversationId"
+              element={
+                <ProtectedRoute>
+                  <MessageThread />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </Router>
+      </ProjectProvider>
+    </UserProvider>
   );
 }

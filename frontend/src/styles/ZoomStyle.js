@@ -1,6 +1,7 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
 export const ZoomContainer = styled.div`
+  background-color: #f3f4f6;
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -15,11 +16,10 @@ export const MainContent = styled.div`
   background: #DDF9EA;  // Mint green background
 `;
 
-
 export const ProfileRow = styled.div`
   display: flex;
   justify-content: flex-end;
-  margin-top: 20px;   // pushes it down from the top nav
+  margin-top: 20px; // pushes it down from the top nav
   margin-bottom: 10px;
   backgroundColor: "white;
 `;
@@ -35,7 +35,7 @@ export const ZoomHeader = styled.div`
   background-color: white; //makes the content rectangle stand out
   border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -60,7 +60,7 @@ export const ButtonRow = styled.div`
 
 export const ZoomButton = styled.button`
   background-color: ${({ color }) =>
-    color === 'blue' ? '#3b82f6' : color === 'green' ? '#10b981' : '#ccc'};
+    color === "blue" ? "#3b82f6" : color === "green" ? "#10b981" : "#ccc"};
   color: white;
   padding: 0.75rem 1.5rem;
   border: none;
@@ -71,7 +71,7 @@ export const ZoomButton = styled.button`
 
   &:hover {
     background-color: ${({ color }) =>
-      color === 'blue' ? '#2563eb' : color === 'green' ? '#059669' : '#aaa'};
+      color === "blue" ? "#2563eb" : color === "green" ? "#059669" : "#aaa"};
   }
 `;
 
@@ -80,4 +80,3 @@ export const ContentRow = styled.div`
   flex: 1;
   backgroundColor: "white";
 `;
-
