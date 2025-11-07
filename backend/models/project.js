@@ -10,7 +10,6 @@ const projectSchema = new mongoose.Schema({
   },
   dueDate: { type: Date },
   members: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-  goalTime: { type: Number, required: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
