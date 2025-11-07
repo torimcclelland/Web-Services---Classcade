@@ -21,14 +21,19 @@ router.post('/', async (req, res) => {
   }
 });
 
-// List messages (optionally filter by conversationId)
+
 router.get('/', async (req, res) => {
   try {
     const { conversationId, limit = 50, before } = req.query;
     const q = {};
     if (conversationId) q.conversationId = conversationId;
     if (before) q.createdAt = { $lt: new Date(before) };
-    const items = await Chat.find(q).sort({ createdAt: -1 }).limit(Number(limit));
+
+    const items = await Chat.find(q)
+      .sort({ createdAt: -1 })
+      .limit(Number(limit))
+      .populate("sender", "firstName lastName avatar");
+
     res.json(items);
   } catch (err) {
     res.status(500).json({ error: 'Server error fetching messages' });
@@ -112,6 +117,23 @@ router.post('/:messageId/reaction', async (req, res) => {
     res.status(500).json({ error: 'Server error adding reaction' });
   }
 });
+
+router.post('/:messageId/read', async (req, res) => {
+  const { userId } = req.body;
+  if (!userId) return res.status(400).json({ error: 'userId required' });
+
+  try {
+    const updated = await Chat.findByIdAndUpdate(
+      req.params.messageId,
+      { $addToSet: { readBy: { user: userId, readAt: new Date() } } },
+      { new: true }
+    );
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: 'Error marking message as read' });
+  }
+});
+
 
 // Remove a reaction
 router.delete('/:messageId/reaction/:userId', async (req, res) => {

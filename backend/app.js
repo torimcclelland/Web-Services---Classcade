@@ -4,6 +4,10 @@ const cors = require("cors");
 const swaggerUi = require("swagger-ui-express");
 const swaggerJsdoc = require("swagger-jsdoc");
 const connectDB = require("./db");
+const http = require("http");
+const { Server } = require("socket.io");
+const Chat = require("./models/chat");
+
 
 const taskRoutes = require("./services/taskService");
 const projectRoutes = require("./services/projectService");
@@ -85,9 +89,39 @@ app.use("/", zoomApiDocsRoutes);
 const startServer = async () => {
   try {
     await connectDB();
-    app.listen(PORT, () =>
-      console.log(`Server running on http://localhost:${PORT}`)
-    );
+    const server = http.createServer(app);
+    const io = new Server(server, {
+      cors: {
+        origin: '*',
+        methods: ['GET', 'POST']
+      }
+    });
+
+    io.on('connection', socket => {
+      console.log('Socket connected:', socket.id);
+
+      socket.on('joinRoom', roomId => {
+        socket.join(roomId);
+        console.log(`Socket ${socket.id} joined room ${roomId}`);
+      });
+
+      socket.on('sendMessage', async msg => {
+        try {
+          const saved = await Chat.create(msg);
+          io.to(msg.conversationId).emit('receiveMessage', saved);
+        } catch (err) {
+          console.error('Error saving message:', err);
+        }
+      });
+
+      socket.on('disconnect', () => {
+        console.log('Socket disconnected:', socket.id);
+      });
+    });
+
+    server.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
   } catch (err) {
     console.error("Failed to start server:", err);
     process.exit(1);
