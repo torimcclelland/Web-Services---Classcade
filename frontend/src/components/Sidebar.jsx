@@ -10,7 +10,7 @@ import {
   FaChartBar,
   FaCamera,
   FaShoppingBag,
-  FaUser
+  FaUser,
 } from "react-icons/fa";
 
 import Logo from "../assets/Logo.png";
@@ -40,7 +40,7 @@ export default function Sidebar() {
     { key: "zoom", label: "Zoom", icon: <FaCamera />, path: "/zoom" },
     { key: "store", label: "Shop", icon: <FaShoppingBag />, path: "/store" },
     { key: "settings", label: "Settings", icon: <FaCog />, path: "/settings" },
-    { key: "messages", label: "Messages", icon: <FaUser />, path: "/messages" },
+    { key: "messages", label: "Messages", icon: <FaComments />, path: "/messages" },
   ];
 
   return (
