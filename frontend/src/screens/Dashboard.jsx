@@ -46,7 +46,7 @@ const Dashboard = () => {
   const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
   const upcomingTask = tasks.find((t) => t.status !== "Done");
   const projectDueDate = selectedProject?.dueDate
-    ? new Date(selectedProject.dueDate).toLocaleDateString()
+    ? selectedProject.dueDate.slice(0, 10)
     : "Not set";
 
   return (

@@ -10,55 +10,60 @@ import { useProject } from "../context/ProjectContext";
 const TimeTracking = () => {
   const navigate = useNavigate();
   const { selectedProject } = useProject();
+
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState("");
   const [minutes, setMinutes] = useState("");
   const [completed, setCompleted] = useState(false);
-  const [error, setError] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
+  const [popup, setPopup] = useState("");
 
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      if (!selectedProject?._id || !user?._id) return;
+    if (!selectedProject?._id) return;
 
+    const fetchTasks = async () => {
       try {
         const res = await api.get(`/api/task/${selectedProject._id}`);
         setTasks(res.data || []);
       } catch (err) {
         console.error("Failed to fetch tasks:", err);
-        setError("Failed to load tasks for this project.");
+        showPopup("Error loading tasks.");
       }
     };
 
     fetchTasks();
-  }, [selectedProject, user]);
+  }, [selectedProject]);
+
+  const showPopup = (msg) => {
+    setPopup(msg);
+    setTimeout(() => setPopup(""), 2000);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setSuccessMsg("");
 
     if (!selectedTask || !minutes) {
-      setError("Please select a task and enter minutes.");
+      showPopup("Please select task & minutes");
       return;
     }
 
     try {
       await api.post(`/api/time-tracking`, {
+        userId: user._id,
+        projectId: selectedProject._id,
         taskId: selectedTask,
         minutes: Number(minutes),
         completed,
       });
 
-      setSuccessMsg("Time successfully logged!");
+      showPopup("Time logged");
       setMinutes("");
       setCompleted(false);
       setSelectedTask("");
     } catch (err) {
       console.error("Failed to log time:", err);
-      setError("Failed to submit time.");
+      showPopup("Error logging time");
     }
   };
 
@@ -72,9 +77,6 @@ const TimeTracking = () => {
             <h2 style={TimeTrackingStyle.title}>
               Time Tracking ({selectedProject?.name})
             </h2>
-
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            {successMsg && <p style={{ color: "green" }}>{successMsg}</p>}
 
             <label style={TimeTrackingStyle.label}>Select Task</label>
             <select
@@ -93,7 +95,7 @@ const TimeTracking = () => {
             <label style={TimeTrackingStyle.label}>Minutes</label>
             <input
               type="number"
-              style={{ ...TimeTrackingStyle.input, width: "80px" }}
+              style={{ ...TimeTrackingStyle.input, width: "100px" }}
               value={minutes}
               onChange={(e) => setMinutes(e.target.value)}
             />
@@ -126,6 +128,12 @@ const TimeTracking = () => {
           </div>
         </main>
       </div>
+
+      {popup && (
+        <div style={TimeTrackingStyle.popupContainer}>
+          <div style={TimeTrackingStyle.popupMessage}>{popup}</div>
+        </div>
+      )}
     </div>
   );
 };
