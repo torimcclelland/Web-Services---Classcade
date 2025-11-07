@@ -144,7 +144,7 @@ const Profile = () => {
 
       setShowEditModal(false);
       setPopupMessage('Profile updated successfully!');
-      setTimeout(() => setPopupMessage(''), 3000);
+      setTimeout(() => setPopupMessage(''), 1000);
       
       return { success: true };
     } catch (error) {
@@ -211,10 +211,15 @@ const Profile = () => {
         <div style={ProfileStyle.layout}>
           <SideBar />
           <main style={ProfileStyle.main}>
-            <div style={ProfileStyle.profilePanel}>
-              <div style={{ textAlign: 'center', padding: '50px' }}>
-                <p>Loading profile...</p>
-              </div>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              height: '100%',
+              fontSize: '1.2rem',
+              color: '#000'
+            }}>
+              Loading...
             </div>
           </main>
         </div>

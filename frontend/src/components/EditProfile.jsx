@@ -22,7 +22,6 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
   const [saveMessage, setSaveMessage] = useState({ type: '', text: '' }); // 'success' or 'error'
   const [isSaving, setIsSaving] = useState(false);
 
-  // Reset form data when modal opens or userData changes
   useEffect(() => {
     if (isOpen && userData) {
       setFormData({
@@ -40,7 +39,7 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
       setSaveMessage({ type: '', text: '' });
       setActiveTab('personal');
     }
-  }, [isOpen, userData]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
