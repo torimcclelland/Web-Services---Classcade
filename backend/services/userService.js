@@ -85,6 +85,60 @@ router.put("/:id/updateemail", async (req, res) => {
   }
 });
 
+router.put("/:id/updatepassword", async (req, res) => {
+  try {
+    const { password } = req.body;
+    if (!password || password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { password },
+      { new: true }
+    ).select("-password");
+    if (!updatedUser) return res.status(404).send("User not found.");
+    res.json(updatedUser);
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
+});
+
+router.put("/:id/updateselections", async (req, res) => {
+  try {
+    const { selectedIcon, selectedBanner, selectedBackdrop } = req.body;
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Validate that user owns the items they're trying to select
+    // Default icon and banner are always allowed
+    if (selectedIcon && selectedIcon !== 'default' && !user.ownedIcons.includes(selectedIcon)) {
+      return res.status(400).json({ error: "You don't own this icon" });
+    }
+    if (selectedBanner && selectedBanner !== 'default' && !user.ownedBanners.includes(selectedBanner)) {
+      return res.status(400).json({ error: "You don't own this banner" });
+    }
+    if (selectedBackdrop && !user.ownedBackdrops.includes(selectedBackdrop)) {
+      return res.status(400).json({ error: "You don't own this backdrop" });
+    }
+
+    // Update selections
+    const updateData = {};
+    if (selectedIcon !== undefined) updateData.selectedIcon = selectedIcon;
+    if (selectedBanner !== undefined) updateData.selectedBanner = selectedBanner;
+    if (selectedBackdrop !== undefined) updateData.selectedBackdrop = selectedBackdrop;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    ).select("-password");
+
+    res.json(updatedUser);
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
+});
+
 router.delete("/:id", async (req, res) => {
   try {
     const deletedUser = await User.findByIdAndDelete(req.params.id);

@@ -6,21 +6,8 @@ import TopNavBar from '../components/TopNavBar';
 import ProfileCircle from '../components/ProfileCircle';
 import Sidebar from '../components/Sidebar';
 import api from '../api';
+import { ALL_ICONS, ALL_BANNERS, ALL_BACKDROPS } from '../constants/storeItems';
 import Logo from '../assets/Logo.png';
-import icon1 from '../assets/icon1.png'
-import icon2 from '../assets/icon2.png'
-import icon3 from '../assets/icon3.png'
-import icon4 from '../assets/icon4.png'
-import icon5 from '../assets/icon5.png'
-import icon6 from '../assets/icon6.png'
-import icon7 from '../assets/icon7.png'
-import icon8 from '../assets/icon8.png'
-import icon9 from '../assets/icon9.png'
-import icon10 from '../assets/icon10.png'
-import icon11 from '../assets/icon11.png'
-import icon12 from '../assets/icon12.png'
-import icon13 from '../assets/icon13.png'
-import icon14 from '../assets/icon14.png'
 import icon15 from '../assets/icon15.png'
 import iconBlank from '../assets/iconBlank.png'
 import star from '../assets/star.png'
@@ -38,42 +25,6 @@ const Store = () => {
   const [availableBanners, setAvailableBanners] = useState([]);
   const [availableBackdrops, setAvailableBackdrops] = useState([]);
 
-  // All possible items in the store
-  const allIcons = [
-    { id: 'i1', name: 'Man 1', price: .99, image: icon1 },
-    { id: 'i2', name: 'Woman 1', price: .99, image: icon2 },
-    { id: 'i3', name: 'Woman 2', price: .99, image: icon3 },
-    { id: 'i4', name: 'Girl 1', price: .99, image: icon4 },
-    { id: 'i5', name: 'Boy 1', price: .99, image: icon5 },
-    { id: 'i6', name: 'Man 2', price: .99, image: icon6 },
-    { id: 'i7', name: 'Woman 3', price: .99, image: icon7 },
-    { id: 'i8', name: 'Girl 2', price: 1.99, image: icon8 },
-    { id: 'i9', name: 'Woman 4', price: 1.99, image: icon9 },
-    { id: 'i10', name: 'Rabbit', price: 1.99, image: icon10 },
-    { id: 'i11', name: 'Wolf', price: 1.99, image: icon11 },
-    { id: 'i12', name: 'Cat', price: 1.99, image: icon12 },
-    { id: 'i13', name: 'Unicorn', price: 2.99, image: icon13 },
-    { id: 'i14', name: 'Panda', price: 2.99, image: icon14 },
-    { id: 'i15', name: 'T-Rex', price: 3.99, image: icon15 },
-  ];
-
-  const allBanners = [
-    { id: 'b1', name: 'Red Banner', price: 1.99, color: '#FF5252' },
-    { id: 'b2', name: 'Blue Banner', price: 1.99, color: '#8dccffff' },
-    { id: 'b3', name: 'Green Banner', price: 1.99, color: '#43ca47ff' },
-    { id: 'b4', name: 'Purple Banner', price: 2.49, color: '#9C27B0' },
-    { id: 'b5', name: 'Orange Banner', price: 2.49, color: '#FF9800' },
-  ];
-
-  const allBackdrops = [
-    { id: 'd1', name: 'Circle Ring', price: 1.49, type: 'circle', color: '#FF6B6B' },
-    { id: 'd2', name: 'Diamond', price: 1.49, type: 'diamond', color: '#A855F7' },
-    { id: 'd3', name: 'Hexagon', price: 1.49, type: 'hexagon', color: '#6BCB77' },
-    { id: 'd4', name: 'Double Ring', price: 1.49, type: 'doublering', color: '#4D96FF' },
-    { id: 'd5', name: 'Star Burst', price: 2.49, type: 'star', color: '#FFD93D' },
-    { id: 'd6', name: 'Flame', price: 2.99, type: 'flame', color: '#EC4899' },
-  ];
-
   // Fetch user's owned items and filter available items
   useEffect(() => {
     const fetchUserItems = async () => {
@@ -81,9 +32,9 @@ const Store = () => {
         const userData = JSON.parse(localStorage.getItem('user'));
         if (!userData || !userData._id) {
           // show all items by default
-          setAvailableIcons(allIcons);
-          setAvailableBanners(allBanners);
-          setAvailableBackdrops(allBackdrops);
+          setAvailableIcons(ALL_ICONS);
+          setAvailableBanners(ALL_BANNERS);
+          setAvailableBackdrops(ALL_BACKDROPS);
           return;
         }
 
@@ -96,16 +47,16 @@ const Store = () => {
         const ownedBannerIds = user.ownedBanners || [];
         const ownedBackdropIds = user.ownedBackdrops || [];
 
-        setAvailableIcons(allIcons.filter(icon => !ownedIconIds.includes(icon.id)));
-        setAvailableBanners(allBanners.filter(banner => !ownedBannerIds.includes(banner.id)));
-        setAvailableBackdrops(allBackdrops.filter(backdrop => !ownedBackdropIds.includes(backdrop.id)));
+        setAvailableIcons(ALL_ICONS.filter(icon => !ownedIconIds.includes(icon.id)));
+        setAvailableBanners(ALL_BANNERS.filter(banner => !ownedBannerIds.includes(banner.id)));
+        setAvailableBackdrops(ALL_BACKDROPS.filter(backdrop => !ownedBackdropIds.includes(backdrop.id)));
 
       } catch (error) {
         console.error('Error fetching user items:', error);
         // On error, show all items
-        setAvailableIcons(allIcons);
-        setAvailableBanners(allBanners);
-        setAvailableBackdrops(allBackdrops);
+        setAvailableIcons(ALL_ICONS);
+        setAvailableBanners(ALL_BANNERS);
+        setAvailableBackdrops(ALL_BACKDROPS);
       }
     };
 
@@ -325,7 +276,7 @@ const Store = () => {
         <Sidebar />
         <div style={storeStyles.main}>
           <div style={storeStyles.profileIcon}>
-            <ProfileCircle avatarUrl="https://plus.unsplash.com/premium_photo-1732757787074-0f95bf19cf73?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8dXNlciUyMGF2YXRhcnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=500" size={64} />
+            <ProfileCircle size={64} />
           </div>
 
       <div style={storeStyles.content}>
