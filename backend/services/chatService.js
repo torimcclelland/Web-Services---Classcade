@@ -21,21 +21,33 @@ router.post('/', async (req, res) => {
   }
 });
 
-
+// Get messages - updated to populate sender info
 router.get('/', async (req, res) => {
   try {
-    const { conversationId, limit = 50, before } = req.query;
+    const { conversationId, userId, limit = 50, before } = req.query;
     const q = {};
-    if (conversationId) q.conversationId = conversationId;
+    
+    if (conversationId) {
+      q.conversationId = conversationId;
+    } else if (userId) {
+      // Find messages where user is sender or recipient
+      q.$or = [
+        { sender: userId },
+        { recipients: userId }
+      ];
+    }
+    
     if (before) q.createdAt = { $lt: new Date(before) };
 
     const items = await Chat.find(q)
       .sort({ createdAt: -1 })
       .limit(Number(limit))
-      .populate("sender", "firstName lastName avatar");
+      .populate("sender", "firstName lastName avatar email")
+      .populate("recipients", "firstName lastName avatar email");
 
     res.json(items);
   } catch (err) {
+    console.error('Error fetching messages:', err);
     res.status(500).json({ error: 'Server error fetching messages' });
   }
 });
@@ -43,7 +55,9 @@ router.get('/', async (req, res) => {
 // Get message by id
 router.get('/:id', async (req, res) => {
   try {
-    const item = await Chat.findById(req.params.id);
+    const item = await Chat.findById(req.params.id)
+      .populate("sender", "firstName lastName avatar email")
+      .populate("recipients", "firstName lastName avatar email");
     if (!item) return res.status(404).json({ message: 'Message not found' });
     res.json(item);
   } catch (err) {
@@ -84,7 +98,7 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// Delete a conversation
+// Delete a conversation (all messages for a project)
 router.delete('/conversation/:conversationId', async (req, res) => {
   try {
     const { conversationId } = req.params;
@@ -97,6 +111,24 @@ router.delete('/conversation/:conversationId', async (req, res) => {
   }
 });
 
+// Mark message as read
+router.post('/:messageId/read', async (req, res) => {
+  const { userId } = req.body;
+  if (!userId) return res.status(400).json({ error: 'userId required' });
+
+  try {
+    const updated = await Chat.findByIdAndUpdate(
+      req.params.messageId,
+      { $addToSet: { readBy: { user: userId, readAt: new Date() } } },
+      { new: true }
+    );
+    if (!updated) return res.status(404).json({ message: 'Message not found' });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: 'Error marking message as read' });
+  }
+});
+
 // Add a reaction
 router.post('/:messageId/reaction', async (req, res) => {
   const { messageId } = req.params;
@@ -105,7 +137,9 @@ router.post('/:messageId/reaction', async (req, res) => {
     return res.status(400).json({ error: 'user (id) and type (string) are required' });
 
   try {
+    // Remove existing reaction from this user first
     await Chat.findByIdAndUpdate(messageId, { $pull: { reactions: { user } } });
+    // Add new reaction
     const updated = await Chat.findByIdAndUpdate(
       messageId,
       { $push: { reactions: { user, type, createdAt: new Date() } } },
@@ -117,23 +151,6 @@ router.post('/:messageId/reaction', async (req, res) => {
     res.status(500).json({ error: 'Server error adding reaction' });
   }
 });
-
-router.post('/:messageId/read', async (req, res) => {
-  const { userId } = req.body;
-  if (!userId) return res.status(400).json({ error: 'userId required' });
-
-  try {
-    const updated = await Chat.findByIdAndUpdate(
-      req.params.messageId,
-      { $addToSet: { readBy: { user: userId, readAt: new Date() } } },
-      { new: true }
-    );
-    res.json(updated);
-  } catch (err) {
-    res.status(500).json({ error: 'Error marking message as read' });
-  }
-});
-
 
 // Remove a reaction
 router.delete('/:messageId/reaction/:userId', async (req, res) => {

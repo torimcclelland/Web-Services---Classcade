@@ -97,27 +97,43 @@ const startServer = async () => {
       }
     });
 
-    io.on('connection', socket => {
-      console.log('Socket connected:', socket.id);
+    // Replace the existing socket.io setup in server.js with this:
 
-      socket.on('joinRoom', roomId => {
-        socket.join(roomId);
-        console.log(`Socket ${socket.id} joined room ${roomId}`);
-      });
+io.on('connection', socket => {
+  console.log('Socket connected:', socket.id);
 
-      socket.on('sendMessage', async msg => {
-        try {
-          const saved = await Chat.create(msg);
-          io.to(msg.conversationId).emit('receiveMessage', saved);
-        } catch (err) {
-          console.error('Error saving message:', err);
-        }
-      });
+  socket.on('joinRoom', roomId => {
+    socket.join(roomId);
+    console.log(`Socket ${socket.id} joined room ${roomId}`);
+  });
 
-      socket.on('disconnect', () => {
-        console.log('Socket disconnected:', socket.id);
-      });
-    });
+  socket.on('sendMessage', async msg => {
+    try {
+      // Save the message to database
+      const saved = await Chat.create(msg);
+      
+      // CRITICAL: Populate the sender and recipients with user details before emitting
+      const populated = await Chat.findById(saved._id)
+        .populate('sender', 'firstName lastName avatar email')
+        .populate('recipients', 'firstName lastName avatar email');
+      
+      // Log to debug
+      console.log('Populated sender:', populated.sender);
+      
+      // Emit to everyone in the room (the project/conversationId)
+      io.to(msg.conversationId).emit('receiveMessage', populated);
+      
+      console.log(`Message sent to project ${msg.conversationId}:`, populated._id);
+    } catch (err) {
+      console.error('Error saving message:', err);
+      socket.emit('messageError', { error: 'Failed to send message' });
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Socket disconnected:', socket.id);
+  });
+});
 
     server.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
