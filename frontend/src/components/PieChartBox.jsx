@@ -1,28 +1,20 @@
-import React from 'react';
-import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+import React from "react";
+import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 
-const data = [
-  { name: 'Red', value: 30 },
-  { name: 'Blue', value: 10 },
-  { name: 'Green', value: 15 },
-  { name: 'Yellow', value: 25 },
-  { name: 'Purple', value: 20 },
+const COLORS = [
+  "#1e3a8a",
+  "#10b981",
+  "#f59e0b",
+  "#3b82f6",
+  "#ef4444",
+  "#6366f1",
 ];
 
-const COLORS = ['#FF4C4C', '#4C9EFF', '#4CAF50', '#FFD700', '#A020F0'];
-
-const PieChartBox = () => (
+const PieChartBox = ({ data }) => (
   <PieChart width={300} height={300}>
-    <Pie
-      data={data}
-      cx="50%"
-      cy="50%"
-      outerRadius={100}
-      label
-      dataKey="value"
-    >
-      {data.map((entry, index) => (
-        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+    <Pie data={data} dataKey="value" cx="50%" cy="50%" outerRadius={100} label>
+      {data.map((entry, i) => (
+        <Cell key={entry.userId} fill={COLORS[i % COLORS.length]} />
       ))}
     </Pie>
     <Tooltip />

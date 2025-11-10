@@ -1,76 +1,139 @@
-import styled from "styled-components";
+const StatsStyle = {
+  container: {
+    backgroundColor: "#f3f4f6",
+    display: "flex",
+    flexDirection: "column",
+    height: "100vh",
+  },
 
-export const StatsContainer = styled.div`
-  background-color: #f3f4f6;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-`;
+  layout: {
+    display: "flex",
+    flex: 1,
+  },
 
-export const PageTitle = styled.h1`
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  color: #333;
-`;
+  main: {
+    flex: 1,
+    padding: "2rem",
+    backgroundColor: "#ddf9ea",
+    overflowY: "auto",
+  },
 
-export const ChartsWrapper = styled.div`
-  display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
-  margin-bottom: 2rem;
-`;
+  title: {
+    fontSize: 28,
+    fontWeight: 700,
+    marginBottom: "1.5rem",
+    color: "#1f2937",
+    textAlign: "center",
+  },
 
-export const ChartBox = styled.div`
-  flex: 1;
-  min-width: 300px;
-  background: white;
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
+  card: {
+    backgroundColor: "#e5e7eb",
+    padding: "2rem",
+    borderRadius: "12px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+    marginBottom: "2rem",
+  },
 
-export const SummaryBox = styled.div`
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-`;
+  chartsWrapper: {
+    display: "flex",
+    gap: "2rem",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    marginBottom: "2rem",
+  },
 
-export const SummaryItem = styled.p`
-  font-size: 1rem;
-  margin: 0.5rem 0;
-  color: #555;
+  chartBox: {
+    backgroundColor: "#e5e7eb",
+    padding: "1rem",
+    borderRadius: "12px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+    minWidth: "300px",
+    flex: 1,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
-  strong {
-    color: #222;
-  }
-`;
+  summaryBox: {
+    backgroundColor: "#e5e7eb",
+    padding: "1.5rem",
+    borderRadius: "12px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+    marginBottom: "2rem",
+  },
 
-export const ProfileCircle = styled.div`
-  display: flex;
-  justify-content: right;
-  margin: 1rem 0;
-`;
+  summaryText: {
+    fontSize: "1rem",
+    marginBottom: ".5rem",
+    color: "#111827",
+  },
 
-export const ContentRow = styled.div`
-  display: flex;
-  flex: 1;
-`;
+  select: {
+    width: "250px",
+    padding: "0.6rem .75rem",
+    borderRadius: "6px",
+    border: "1px solid #d1d5db",
+    fontSize: "1rem",
+    fontWeight: 500,
+    marginBottom: "1rem",
+    background: "#fff",
+    color: "#111827",
+  },
 
-export const MainContent = styled.div`
-  flex: 1;
-  padding: 2rem;
-  position: relative;
-  background: #DDF9EA;  // Mint green background
-  overflow-y: auto;
-`;
+  tableWrapper: {
+    backgroundColor: "#e5e7eb",
+    padding: "2rem",
+    borderRadius: "12px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+    overflowX: "auto",
+    marginTop: "1.5rem",
+  },
 
-export const ProfileRow = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 1rem;
-`;
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+    fontSize: "0.95rem",
+  },
+
+  th: {
+    padding: "12px",
+    fontWeight: 700,
+    backgroundColor: "#f3f4f6",
+    borderBottom: "2px solid #d1d5db",
+    textAlign: "left",
+    color: "#1f2937",
+  },
+
+  td: {
+    padding: "12px",
+    borderBottom: "1px solid #d1d5db",
+    color: "#111827",
+  },
+
+  tableRowHover: {
+    backgroundColor: "#f9fafb",
+  },
+
+  toast: {
+    backgroundColor: "#1e3a8a",
+    color: "white",
+    padding: "12px 20px",
+    borderRadius: "8px",
+    fontWeight: 600,
+    boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+    position: "fixed",
+    bottom: "20px",
+    right: "20px",
+    opacity: 1,
+    zIndex: 2000,
+    animation: "fadeOut 2s forwards",
+  },
+
+  "@keyframes fadeOut": {
+    "0%": { opacity: 1, transform: "translateY(0px)" },
+    "80%": { opacity: 1, transform: "translateY(-4px)" },
+    "100%": { opacity: 0, transform: "translateY(-8px)" },
+  },
+};
+
+export default StatsStyle;

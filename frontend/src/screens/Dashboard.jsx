@@ -58,9 +58,7 @@ const Dashboard = () => {
 
         <main style={DashboardStyle.main}>
           <div style={DashboardStyle.profileHeader}>
-            <ProfileCircle
-              size={48}
-            />
+            <ProfileCircle size={48} />
           </div>
 
           <div style={DashboardStyle.statsPanel}>
@@ -127,10 +125,6 @@ const Dashboard = () => {
               <PrimaryButton
                 text="Schedule Meeting"
                 onClick={() => navigate("/zoom")}
-              />
-              <PrimaryButton
-                text="Invite Members"
-                onClick={() => navigate("/addnewproject")}
               />
             </div>
           </div>
