@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import io from "socket.io-client";
 import TopNavBar from "../components/TopNavBar";
 import SideBar from "../components/Sidebar";
@@ -16,6 +16,7 @@ const MessagesOverview = () => {
   const currentUserId = user?._id;
   const [projects, setProjects] = useState([]);
   const [projectMessages, setProjectMessages] = useState({});
+  const [unreadCounts, setUnreadCounts] = useState({}); // Track unread count per project
 
   const fetchUserProjects = async () => {
     try {
@@ -27,11 +28,14 @@ const MessagesOverview = () => {
       
       setProjects(userProjects);
 
-      // For each project, get the latest message
+      // For each project, get the latest message AND unread count
       const messagesMap = {};
+      const unreadMap = {};
+      
       await Promise.all(
         userProjects.map(async (project) => {
           try {
+            // Get latest message
             const msgRes = await api.get("/api/chat", {
               params: { 
                 conversationId: project._id,
@@ -41,6 +45,22 @@ const MessagesOverview = () => {
             if (msgRes.data && msgRes.data.length > 0) {
               messagesMap[project._id] = msgRes.data[0];
             }
+
+            // Get ALL messages to count unread
+            const allMsgsRes = await api.get("/api/chat", {
+              params: { 
+                conversationId: project._id
+              }
+            });
+            
+            // Count unread messages (not sent by current user and not read by current user)
+            const unreadCount = allMsgsRes.data.filter(msg => 
+              msg.sender?._id !== currentUserId && 
+              !msg.readBy?.some(r => r.user?.toString() === currentUserId)
+            ).length;
+            
+            unreadMap[project._id] = unreadCount;
+            
           } catch (err) {
             console.error(`Error fetching messages for project ${project._id}:`, err);
           }
@@ -48,6 +68,7 @@ const MessagesOverview = () => {
       );
       
       setProjectMessages(messagesMap);
+      setUnreadCounts(unreadMap);
     } catch (err) {
       console.error("Error fetching projects:", err);
     }
@@ -57,6 +78,22 @@ const MessagesOverview = () => {
     if (currentUserId) {
       fetchUserProjects();
     }
+  }, [currentUserId]);
+
+  // Re-fetch when component comes back into focus (when navigating back)
+  useEffect(() => {
+    const handleFocus = () => {
+      if (currentUserId) {
+        fetchUserProjects();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    
+    // Also refetch when navigating back to this page
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [currentUserId]);
 
   // Listen for new messages in real-time
@@ -71,6 +108,14 @@ const MessagesOverview = () => {
         ...prev,
         [msg.conversationId]: msg
       }));
+
+      // Increment unread count if the message is from someone else
+      if (msg.sender?._id !== currentUserId) {
+        setUnreadCounts(prev => ({
+          ...prev,
+          [msg.conversationId]: (prev[msg.conversationId] || 0) + 1
+        }));
+      }
     };
 
     socket.on("receiveMessage", handleNewMessage);
@@ -78,9 +123,15 @@ const MessagesOverview = () => {
     return () => {
       socket.off("receiveMessage", handleNewMessage);
     };
-  }, []);
+  }, [currentUserId]);
 
   const handleClick = (projectId) => {
+    // Clear unread count when clicking into the chat
+    setUnreadCounts(prev => ({
+      ...prev,
+      [projectId]: 0
+    }));
+    
     navigate(`/messages/${projectId}`);
   };
 
@@ -109,9 +160,8 @@ const MessagesOverview = () => {
             ) : (
               sortedProjects.map((project) => {
                 const latestMsg = projectMessages[project._id];
-                const hasUnread = latestMsg && 
-                  !latestMsg.readBy?.some(r => r.user?.toString() === currentUserId) &&
-                  latestMsg.sender?._id !== currentUserId;
+                const unreadCount = unreadCounts[project._id] || 0;
+                const hasUnread = unreadCount > 0;
 
                 return (
                   <div
@@ -129,14 +179,40 @@ const MessagesOverview = () => {
                       justifyContent: 'center',
                       color: 'white',
                       fontWeight: 'bold',
-                      fontSize: '18px'
+                      fontSize: '18px',
+                      position: 'relative'
                     }}>
                       {project.name.charAt(0).toUpperCase()}
+                      {hasUnread && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '-2px',
+                          right: '-2px',
+                          width: '16px',
+                          height: '16px',
+                          borderRadius: '50%',
+                          backgroundColor: '#dc3545',
+                          border: '2px solid white',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '10px',
+                          fontWeight: 'bold'
+                        }}>
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </div>
+                      )}
                     </div>
                     <div style={MessagesOverviewStyle.chatText}>
-                      <strong>{project.name}</strong>
+                      <strong style={{ fontWeight: hasUnread ? 'bold' : 'normal' }}>
+                        {project.name}
+                      </strong>
                       {latestMsg ? (
-                        <span style={{ color: '#666', fontSize: '0.9em' }}>
+                        <span style={{ 
+                          color: '#666', 
+                          fontSize: '0.9em',
+                          fontWeight: hasUnread ? '600' : 'normal'
+                        }}>
                           {latestMsg.sender?._id === currentUserId ? 'You: ' : 
                            `${latestMsg.sender?.firstName || 'Someone'}: `}
                           {latestMsg.content.slice(0, 40)}
@@ -148,9 +224,6 @@ const MessagesOverview = () => {
                         </span>
                       )}
                     </div>
-                    {hasUnread && (
-                      <div style={MessagesOverviewStyle.unreadDot} />
-                    )}
                   </div>
                 );
               })

@@ -114,11 +114,22 @@ const MessageThread = () => {
                  msg.sender?._id !== currentUserId
         );
 
-        await Promise.all(
-          unreadMessages.map((msg) =>
-            api.post(`/api/chat/${msg._id}/read`, { userId: currentUserId })
-          )
-        );
+        if (unreadMessages.length > 0) {
+          await Promise.all(
+            unreadMessages.map((msg) =>
+              api.post(`/api/chat/${msg._id}/read`, { userId: currentUserId })
+            )
+          );
+          
+          // Emit event to notify that messages were read (for real-time updates)
+          if (socket && socket.connected) {
+            socket.emit("messagesRead", { 
+              conversationId, 
+              userId: currentUserId,
+              count: unreadMessages.length 
+            });
+          }
+        }
 
       } catch (err) {
         console.error("Error loading message history:", err);
@@ -204,7 +215,15 @@ const MessageThread = () => {
             )}
           </div>
 
-          <div style={MessageThreadStyle.chatWindow}>
+          <div style={{
+            ...MessageThreadStyle.chatWindow,
+            height: '500px', // Fixed reasonable height
+            maxHeight: 'calc(100vh - 300px)', // Don't exceed viewport
+            overflowY: 'auto', // Enable scrolling
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '20px'
+          }}>
             {messages.length === 0 ? (
               <div style={{ 
                 textAlign: 'center', 
