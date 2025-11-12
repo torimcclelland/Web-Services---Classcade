@@ -12,7 +12,7 @@ const DashboardStyle = {
   main: {
     flex: 1,
     padding: "2rem",
-    backgroundColor: "#f3f4f6",
+    backgroundColor: "#ddf9ea",
   },
   statsPanel: {
     backgroundColor: "#e5e7eb",
