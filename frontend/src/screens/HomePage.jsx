@@ -102,9 +102,7 @@ const HomePage = () => {
                     <div style={HomePageStyle.metaText}>
                       Members: {g.members?.length || 0}
                     </div>
-                    <div style={HomePageStyle.metaText}>
-                      Status: {g.status || "N/A"}
-                    </div>
+
                   </div>
                 </div>
               </div>
