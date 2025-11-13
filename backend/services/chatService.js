@@ -117,14 +117,33 @@ router.post('/:messageId/read', async (req, res) => {
   if (!userId) return res.status(400).json({ error: 'userId required' });
 
   try {
+    console.log(`Marking message ${req.params.messageId} as read by user ${userId}`);
+    
+    const message = await Chat.findById(req.params.messageId);
+    if (!message) {
+      console.log('Message not found:', req.params.messageId);
+      return res.status(404).json({ message: 'Message not found' });
+    }
+    
+    console.log('Message before update:', {
+      id: message._id,
+      readBy: message.readBy
+    });
+    
     const updated = await Chat.findByIdAndUpdate(
       req.params.messageId,
       { $addToSet: { readBy: { user: userId, readAt: new Date() } } },
       { new: true }
     );
-    if (!updated) return res.status(404).json({ message: 'Message not found' });
+    
+    console.log('Message after update:', {
+      id: updated._id,
+      readBy: updated.readBy
+    });
+    
     res.json(updated);
   } catch (err) {
+    console.error('Error marking message as read:', err);
     res.status(500).json({ error: 'Error marking message as read' });
   }
 });

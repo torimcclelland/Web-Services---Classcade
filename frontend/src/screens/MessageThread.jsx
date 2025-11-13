@@ -40,28 +40,41 @@ const MessageThread = () => {
       });
     }
 
-    // Make sure we're connected before joining
-    if (socket.connected) {
-      socket.emit("joinRoom", conversationId);
-    } else {
-      socket.on('connect', () => {
+    // Function to join room once connected
+    const joinRoom = () => {
+      if (socket.connected) {
         socket.emit("joinRoom", conversationId);
-      });
-    }
+        console.log('Joined room:', conversationId);
+      } else {
+        console.log('Waiting for socket connection...');
+        socket.once('connect', () => {
+          socket.emit("joinRoom", conversationId);
+          console.log('Joined room after connection:', conversationId);
+        });
+      }
+    };
+
+    joinRoom();
 
     const handleReceiveMessage = (msg) => {
+      console.log('Received message via socket:', msg);
       setMessages((prev) => {
         // Remove any temporary message with the same content (optimistic update)
         const filtered = prev.filter(m => {
-          const mId = m._id ? m._id.toString() : '';
-          return !mId.startsWith('temp-') || m.content !== msg.content;
+          const mId = m._id || m.id;
+          if (!mId) return true;
+          const mIdStr = mId ? mId.toString() : '';
+          return !mIdStr.startsWith('temp-') || m.content !== msg.content;
         });
         
         // Prevent duplicates of real messages
-        if (filtered.some(m => m._id === msg._id)) {
+        const msgId = msg._id || msg.id;
+        if (filtered.some(m => (m._id || m.id) === msgId)) {
+          console.log('Duplicate message, skipping:', msgId);
           return filtered;
         }
         
+        console.log('Adding new message to state:', msgId);
         return [...filtered, msg];
       });
     };
@@ -70,6 +83,7 @@ const MessageThread = () => {
 
     return () => {
       socket.off("receiveMessage", handleReceiveMessage);
+      socket.off('connect'); // Clean up the connect listener
     };
   }, [conversationId]);
 
@@ -109,17 +123,32 @@ const MessageThread = () => {
         setMessages(sortedMessages);
 
         // Mark unread messages as read
-        const unreadMessages = sortedMessages.filter(
-          msg => !msg.readBy?.some(r => r.user?.toString() === currentUserId) &&
-                 msg.sender?._id !== currentUserId
-        );
+        const unreadMessages = sortedMessages.filter(msg => {
+          const msgId = msg._id || msg.id; // Handle both _id and id
+          const isUnread = !msg.readBy?.some(r => r.user?.toString() === currentUserId);
+          const notMine = msg.sender?._id !== currentUserId;
+          console.log('Message:', msgId, 'Unread?', isUnread, 'Not mine?', notMine, 'ReadBy:', msg.readBy);
+          return isUnread && notMine;
+        });
+
+        console.log('Found', unreadMessages.length, 'unread messages to mark as read');
 
         if (unreadMessages.length > 0) {
-          await Promise.all(
-            unreadMessages.map((msg) =>
-              api.post(`/api/chat/${msg._id}/read`, { userId: currentUserId })
-            )
-          );
+          // Mark them as read one by one and wait for all to complete
+          for (const msg of unreadMessages) {
+            const msgId = msg._id || msg.id; // Use whichever exists
+            if (!msgId) {
+              console.error('Message has no ID:', msg);
+              continue;
+            }
+            
+            try {
+              await api.post(`/api/chat/${msgId}/read`, { userId: currentUserId });
+              console.log('Marked message as read:', msgId);
+            } catch (err) {
+              console.error('Error marking message as read:', msgId, err);
+            }
+          }
           
           // Emit event to notify that messages were read (for real-time updates)
           if (socket && socket.connected) {
@@ -164,20 +193,24 @@ const MessageThread = () => {
     // Optimistically add message to UI immediately
     const optimisticMessage = {
       _id: `temp-${Date.now()}`, // Temporary ID
+      id: `temp-${Date.now()}`, // Also set id for consistency
       ...msg,
       sender: {
         _id: currentUserId,
         firstName: user.firstName,
         lastName: user.lastName
       },
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      readBy: [] // Initialize as empty array
     };
 
+    console.log('Adding optimistic message:', optimisticMessage);
     setMessages(prev => [...prev, optimisticMessage]);
     setInput("");
     
     // Send via socket
     socket.emit("sendMessage", msg);
+    console.log('Emitted sendMessage event:', msg);
   };
 
   const handleKeyPress = (e) => {
@@ -235,6 +268,9 @@ const MessageThread = () => {
               </div>
             ) : (
               messages.map((msg) => {
+                // Get message ID (handle both _id and id)
+                const msgId = msg._id || msg.id;
+                
                 // Check if current user - handle both populated and unpopulated sender
                 // Compare both _id (if populated) and the raw string (if not)
                 const senderId = msg.sender?._id || msg.sender;
@@ -251,7 +287,7 @@ const MessageThread = () => {
 
                 return (
                   <div 
-                    key={msg._id} 
+                    key={msgId}
                     style={{
                       display: 'flex',
                       justifyContent: isCurrentUser ? 'flex-end' : 'flex-start',

@@ -12,6 +12,7 @@ let socket = null;
 
 const MessagesOverview = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useUser();
   const currentUserId = user?._id;
   const [projects, setProjects] = useState([]);
@@ -54,10 +55,12 @@ const MessagesOverview = () => {
             });
             
             // Count unread messages (not sent by current user and not read by current user)
-            const unreadCount = allMsgsRes.data.filter(msg => 
-              msg.sender?._id !== currentUserId && 
-              !msg.readBy?.some(r => r.user?.toString() === currentUserId)
-            ).length;
+            const unreadCount = allMsgsRes.data.filter(msg => {
+              const msgId = msg._id || msg.id;
+              const senderId = msg.sender?._id || msg.sender;
+              return senderId !== currentUserId && 
+                     !msg.readBy?.some(r => r.user?.toString() === currentUserId);
+            }).length;
             
             unreadMap[project._id] = unreadCount;
             
@@ -78,23 +81,7 @@ const MessagesOverview = () => {
     if (currentUserId) {
       fetchUserProjects();
     }
-  }, [currentUserId]);
-
-  // Re-fetch when component comes back into focus (when navigating back)
-  useEffect(() => {
-    const handleFocus = () => {
-      if (currentUserId) {
-        fetchUserProjects();
-      }
-    };
-
-    window.addEventListener('focus', handleFocus);
-    
-    // Also refetch when navigating back to this page
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, [currentUserId]);
+  }, [currentUserId, location]); // Re-fetch whenever location changes (navigating back)
 
   // Listen for new messages in real-time
   useEffect(() => {
