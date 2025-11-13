@@ -16,7 +16,7 @@ const BarChartBox = ({ data }) => (
       <YAxis />
       <Tooltip />
       <Legend />
-      <Bar dataKey="value" fill="#1e3a8a" />
+      <Bar dataKey="time" fill="#1e3a8a" />
     </BarChart>
   </ResponsiveContainer>
 );
