@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TopNavBar from "../components/TopNavBar";
-import SideBar from "../components/Sidebar";
+import Sidebar from "../components/Sidebar";
 import ProfileCircle from "../components/ProfileCircle";
 import PrimaryButton from "../components/PrimaryButton";
 import MyTasksStyle from "../styles/MyTasksStyle";
@@ -17,13 +17,29 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  useDroppable,
 } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 
 const swimlanes = ["Not Started", "In Progress", "Under Review", "Done"];
+
+const Swimlane = ({ lane, children }) => {
+  const { setNodeRef } = useDroppable({
+    id: lane,
+    data: { lane },
+  });
+
+  return (
+    <div ref={setNodeRef} style={MyTasksStyle.swimlane}>
+      <h3 style={MyTasksStyle.swimlaneTitle}>{lane}</h3>
+      {children}
+    </div>
+  );
+};
 
 const MyTasks = () => {
   const navigate = useNavigate();
@@ -86,7 +102,7 @@ const MyTasks = () => {
     <div style={MyTasksStyle.container}>
       <TopNavBar />
       <div style={MyTasksStyle.layout}>
-        <SideBar />
+        <Sidebar />
 
         <main style={MyTasksStyle.main}>
           <div style={MyTasksStyle.header}>
@@ -103,6 +119,7 @@ const MyTasks = () => {
             collisionDetection={closestCenter}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
+            modifiers={[restrictToWindowEdges]}
           >
             <div style={MyTasksStyle.swimlaneContainer}>
               {swimlanes.map((lane) => (
@@ -111,23 +128,16 @@ const MyTasks = () => {
                   items={getTasksByStatus(lane).map((t) => t._id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  <div
-                    style={MyTasksStyle.swimlane}
-                    data-lane={lane}
-                  >
-
-                    <h3 style={MyTasksStyle.swimlaneTitle}>{lane}</h3>
-
+                  <Swimlane lane={lane}>
                     {getTasksByStatus(lane).length === 0 && (
                       <p style={{ fontStyle: "italic", opacity: 0.6 }}>
                         No tasks yet
                       </p>
                     )}
-
                     {getTasksByStatus(lane).map((task) => (
                       <DraggableCard key={task._id} task={task} />
                     ))}
-                  </div>
+                  </Swimlane>
                 </SortableContext>
               ))}
             </div>

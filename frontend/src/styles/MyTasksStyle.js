@@ -25,6 +25,7 @@ const MyTasksStyle = {
   swimlaneContainer: {
     display: "flex",
     gap: "1.5rem",
+    alignItems: "flex-start",
   },
   swimlane: {
     flex: "1 1 0",
@@ -33,7 +34,9 @@ const MyTasksStyle = {
     borderRadius: "12px",
     minWidth: "250px",
     boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-  },
+    display: "flex",
+    flexDirection: "column",
+  },  
   swimlaneTitle: {
     fontSize: "1.1rem",
     fontWeight: "bold",
