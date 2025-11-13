@@ -1,5 +1,5 @@
 .settings-container {
-  background-color: #f3f4f6;
+  background-color: #ddf9ea;
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -8,6 +8,7 @@
 .settings-layout {
   display: flex;
   flex: 1;
+  background-color: #ddf9ea;
 }
 
 .settings-main {

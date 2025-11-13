@@ -5,8 +5,8 @@ export const ZoomContainer = styled.div`
   display: flex;
   flex-direction: column;
   height: 100vh;
-  backgroundColor: "white";
-`;
+  background: #DDF9EA;
+  `;
 
 export const MainContent = styled.div`
   flex: 1;
@@ -78,5 +78,5 @@ export const ZoomButton = styled.button`
 export const ContentRow = styled.div`
   display: flex;
   flex: 1;
-  backgroundColor: "white";
-`;
+background: #DDF9EA
+;`;

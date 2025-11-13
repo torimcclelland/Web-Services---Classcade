@@ -5,6 +5,7 @@ const storeStyles = {
   },
   layout: {
     display: "flex",
+    backgroundColor: "#ddf9ea",
   },
   main: {
     flex: 1,

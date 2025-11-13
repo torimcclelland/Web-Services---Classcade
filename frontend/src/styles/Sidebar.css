@@ -1,14 +1,12 @@
 :root {
   --cc-blue: #2563EB;
+  --cc-mint: #ddf9ea;
   --cc-blue-hover: #274de4;
   --cc-white: #ffffff;
-  --cc-pill-bg: #ffffff;
-  --cc-pill-text: #1e3a8a;
   --cc-icon-only-width: 76px;
   --cc-expanded-width: 260px;
   --cc-radius-lg: 18px;
   --cc-radius-md: 12px;
-  --cc-light-gray: #f3f4f6;
 }
 
 .cc-sidebar {
@@ -17,7 +15,7 @@
   width: var(--cc-expanded-width);
   margin: 16px 16px 40px 10px;
   z-index: 10;
-  background: var(--cc-light-gray);
+  background: var(--cc-mint);
   padding: 20px;
   border-radius: var(--cc-radius-lg);
 }
@@ -25,7 +23,7 @@
 .cc-sidebar__inner {
   height: 100%;
   background: var(--cc-blue);
-  color: var(--cc-white);
+  color: var(--cc-mint);
   border-radius: var(--cc-radius-lg);
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
   display: flex;
