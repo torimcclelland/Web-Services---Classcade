@@ -19,12 +19,13 @@ const MessageThreadStyle = {
   },
   backButton: {
     marginBottom: "1rem",
-    backgroundColor: "#e5e7eb",
+    backgroundColor: "#ffffffff",
     border: "none",
     padding: "0.5rem 1rem",
     borderRadius: "6px",
     cursor: "pointer",
     alignSelf: "flex-start",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
   },
   chatWindow: {
     flex: 1,

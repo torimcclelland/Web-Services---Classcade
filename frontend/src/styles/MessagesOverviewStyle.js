@@ -29,7 +29,7 @@ const MessagesOverviewStyle = {
   chatItem: {
     display: "flex",
     alignItems: "center",
-    backgroundColor: "#e5e7eb",
+    backgroundColor: "#ffffffff",
     padding: "1rem",
     borderRadius: "8px",
     cursor: "pointer",
