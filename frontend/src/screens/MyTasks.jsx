@@ -7,11 +7,15 @@ import PrimaryButton from "../components/PrimaryButton";
 import MyTasksStyle from "../styles/MyTasksStyle";
 import api from "../api";
 import { useProject } from "../context/ProjectContext";
+import ModalWrapper from "../components/ModalWrapper";
+import AddNewTaskModal from "../screens/AddNewTask";
+
 
 const swimlanes = ["Not Started", "In Progress", "Under Review", "Done"];
 
 const MyTasks = () => {
   const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
   const [tasks, setTasks] = useState([]);
   const user = JSON.parse(localStorage.getItem("user"));
   const { selectedProject } = useProject();
@@ -48,10 +52,10 @@ const MyTasks = () => {
             <h2>My Tasks ({selectedProject?.name})</h2>
 
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <PrimaryButton
-                text="Add Task"
-                onClick={() => navigate("/add-task")}
-              />
+            <PrimaryButton
+              text="Add Task"
+              onClick={() => setShowModal(true)}
+            />
               <ProfileCircle
                 size={48}
               />
@@ -85,6 +89,26 @@ const MyTasks = () => {
               </div>
             ))}
           </div>
+          {showModal && (
+            <ModalWrapper onClose={() => setShowModal(false)}>
+              <AddNewTaskModal
+                onClose={() => setShowModal(false)}
+                onSuccess={() => {
+                  // Refresh tasks after successful creation
+                  const fetchTasks = async () => {
+                    try {
+                      const res = await api.get(`/api/task/${selectedProject._id}`);
+                      setTasks(res.data || []);
+                    } catch (err) {
+                      console.error("Failed to fetch tasks:", err);
+                    }
+                  };
+                  fetchTasks();
+                }}
+              />
+            </ModalWrapper>
+)}
+
         </main>
       </div>
     </div>
