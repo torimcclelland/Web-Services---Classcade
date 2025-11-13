@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { UserProvider } from "./context/UserContext";
 import { ProjectProvider } from "./context/ProjectContext";
 
@@ -18,8 +18,8 @@ import StorePage from "./screens/Store";
 import AddNewProject from "./screens/AddNewProject";
 import AddNewTask from "./screens/AddNewTask";
 import ProjectSettings from "./screens/ProjectSettings";
-import MessagesOverview from "./screens/MessagesOverview";
 import MessageThread from "./screens/MessageThread";
+import MessagesRedirect from "./screens/MessagesRedirect";
 
 export default function App() {
   return (
@@ -125,11 +125,12 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+            {/* Redirect /messages to current project's chat */}
             <Route
               path="/messages"
               element={
                 <ProtectedRoute>
-                  <MessagesOverview />
+                  <MessagesRedirect />
                 </ProtectedRoute>
               }
             />
