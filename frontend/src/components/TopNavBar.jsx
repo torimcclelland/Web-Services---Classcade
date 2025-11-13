@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import TopNavBarStyle from "../styles/TopNavBarStyle";
-import { FaHome } from "react-icons/fa";
+import { 
+  FaHome,
+  FaPlus 
+} from "react-icons/fa";
 import api from "../api";
 import { useProject } from "../context/ProjectContext";
 import { getUserBanner } from "../constants/storeItems";
@@ -29,6 +32,9 @@ const TopNavBar = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [bannerColor, setBannerColor] = useState('#DDF9EA');
+  const [homeHover, setHomeHover] = useState(false);
+  const [hoveredTab, setHoveredTab] = useState(null);
+  const [addBtnHover, setAddBtnHover] = useState(false);
 
   const { selectedProject, setSelectedProject } = useProject();
 
@@ -72,7 +78,7 @@ const TopNavBar = () => {
     };
   }, [user]);
 
-  const goToHome = () => navigate("/home");
+  const goToDashboard = () => navigate("/dashboard");
   const goToAddNewProject = () => navigate("/addnewproject");
 
   const handleSelectProject = (project) => {
@@ -82,7 +88,25 @@ const TopNavBar = () => {
 
   return (
     <div style={{ ...TopNavBarStyle.topNavbar, backgroundColor: bannerColor }}>
-      <button style={TopNavBarStyle.homeBtn} onClick={goToHome}>
+      <button 
+        style={{
+          ...TopNavBarStyle.homeBtn,
+          backgroundColor: homeHover ? '#ffffffe2' : 'transparent',
+          transition: 'none',
+          //borderRadius: '50%',
+          borderRadius: 12,
+          width: 35,
+          height: 35,
+          padding: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          border: 'none',
+        }}
+        onMouseEnter={() => setHomeHover(true)}
+        onMouseLeave={() => setHomeHover(false)}
+        onClick={goToDashboard}
+      >
         <FaHome size={24} />
       </button>
 
@@ -90,6 +114,7 @@ const TopNavBar = () => {
         {projects.map((proj) => {
           const isActive = selectedProject?._id === proj._id;
           const activeTabColor = darkenColor(bannerColor, 25);
+          const isHovered = hoveredTab === proj._id;
 
           return (
             <div
@@ -102,8 +127,14 @@ const TopNavBar = () => {
                       backgroundColor: activeTabColor,
                       color: '#fff',
                     }
-                  : {}),
+                  : {
+                      backgroundColor: isHovered ? '#f6f6f6f1' : '#fff',
+                    }),
+                transition: 'none',
+                cursor: 'pointer',
               }}
+              onMouseEnter={() => !isActive && setHoveredTab(proj._id)}
+              onMouseLeave={() => setHoveredTab(null)}
               onClick={() => handleSelectProject(proj)}
             >
               <span>{proj.name}</span>
@@ -117,8 +148,27 @@ const TopNavBar = () => {
           );
         })}
 
-        <button style={TopNavBarStyle.addTabBtn} onClick={goToAddNewProject}>
-          ＋
+        <button 
+          style={{
+            ...TopNavBarStyle.addTabBtn,
+            backgroundColor: addBtnHover ? '#ffffffe2' : 'transparent',
+            borderRadius: '50%',
+            transform: 'translateY(5px)',
+            bottom: '10px',
+            width: '20px',
+            height: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'none',
+            color: addBtnHover ? '#000' : '#000',
+          }}
+          onMouseEnter={() => setAddBtnHover(true)}
+          onMouseLeave={() => setAddBtnHover(false)}
+          onClick={goToAddNewProject}
+          aria-label="Add new project"
+        >
+          <FaPlus size = {20}/>
         </button>
       </div>
     </div>
