@@ -121,8 +121,6 @@ const TopNavBar = () => {
           ＋
         </button>
       </div>
-
-      <button style={TopNavBarStyle.exitBtn}>✕</button>
     </div>
   );
 };
