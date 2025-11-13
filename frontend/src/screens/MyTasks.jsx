@@ -9,6 +9,8 @@ import api from "../api";
 import { useProject } from "../context/ProjectContext";
 import ModalWrapper from "../components/ModalWrapper";
 import AddNewTaskModal from "../screens/AddNewTask";
+import DraggableCard from "../components/DraggableCard";
+
 import {
   DndContext,
   closestCenter,
@@ -19,10 +21,7 @@ import {
 import {
   SortableContext,
   verticalListSortingStrategy,
-  arrayMove,
 } from "@dnd-kit/sortable";
-import { restrictToParentElement } from "@dnd-kit/modifiers";
-
 
 const swimlanes = ["Not Started", "In Progress", "Under Review", "Done"];
 
@@ -30,9 +29,10 @@ const MyTasks = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [tasks, setTasks] = useState([]);
+  const [activeTaskId, setActiveTaskId] = useState(null);
   const user = JSON.parse(localStorage.getItem("user"));
   const { selectedProject } = useProject();
-  const [activeTaskId, setActiveTaskId] = useState(null);
+  const sensors = useSensors(useSensor(PointerSensor));
 
   useEffect(() => {
     if (!selectedProject?._id) {
@@ -55,6 +55,33 @@ const MyTasks = () => {
   const getTasksByStatus = (lane) =>
     tasks.filter((task) => task.status === lane);
 
+  const handleDragStart = (event) => {
+    setActiveTaskId(event.active.id);
+  };
+
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+    setActiveTaskId(null);
+
+    if (!over || active.id === over.id) return;
+
+    const draggedTask = tasks.find((t) => t._id === active.id);
+    const newStatus = over?.data?.current?.lane;
+
+    if (!newStatus || draggedTask.status === newStatus) return;
+
+    try {
+      await api.put(`/api/task/update/${active.id}`, { status: newStatus });
+      setTasks((prev) =>
+        prev.map((t) =>
+          t._id === active.id ? { ...t, status: newStatus } : t
+        )
+      );
+    } catch (err) {
+      console.error("Failed to update task status:", err);
+    }
+  };
+
   return (
     <div style={MyTasksStyle.container}>
       <TopNavBar />
@@ -66,63 +93,61 @@ const MyTasks = () => {
             <h2>My Tasks ({selectedProject?.name})</h2>
 
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <PrimaryButton
-              text="Add Task"
-              onClick={() => setShowModal(true)}
-            />
-              <ProfileCircle
-                size={48}
-              />
+              <PrimaryButton text="Add Task" onClick={() => setShowModal(true)} />
+              <ProfileCircle size={48} />
             </div>
           </div>
 
-          <div style={MyTasksStyle.swimlaneContainer}>
-            {swimlanes.map((lane) => (
-              <div key={lane} style={MyTasksStyle.swimlane}>
-                <h3 style={MyTasksStyle.swimlaneTitle}>{lane}</h3>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <div style={MyTasksStyle.swimlaneContainer}>
+              {swimlanes.map((lane) => (
+                <SortableContext
+                  key={lane}
+                  items={getTasksByStatus(lane).map((t) => t._id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div
+                    style={MyTasksStyle.swimlane}
+                    data-lane={lane}
+                  >
 
-                {getTasksByStatus(lane).length === 0 && (
-                  <p style={{ fontStyle: "italic", opacity: 0.6 }}>
-                    No tasks yet
-                  </p>
-                )}
+                    <h3 style={MyTasksStyle.swimlaneTitle}>{lane}</h3>
 
-                {getTasksByStatus(lane).map((task) => (
-                  <div key={task._id} style={MyTasksStyle.taskCard}>
-                    <h4 style={MyTasksStyle.taskTitle}>{task.name}</h4>
-                    <p style={MyTasksStyle.taskDescription}>
-                      {task.description}
-                    </p>
-                    {task.dueDate && (
-                      <p style={MyTasksStyle.taskDueDate}>
-                        Due: {new Date(task.dueDate).toLocaleDateString()}
+                    {getTasksByStatus(lane).length === 0 && (
+                      <p style={{ fontStyle: "italic", opacity: 0.6 }}>
+                        No tasks yet
                       </p>
                     )}
+
+                    {getTasksByStatus(lane).map((task) => (
+                      <DraggableCard key={task._id} task={task} />
+                    ))}
                   </div>
-                ))}
-              </div>
-            ))}
-          </div>
+                </SortableContext>
+              ))}
+            </div>
+          </DndContext>
+
           {showModal && (
             <ModalWrapper onClose={() => setShowModal(false)}>
               <AddNewTaskModal
                 onClose={() => setShowModal(false)}
-                onSuccess={() => {
-                  // Refresh tasks after successful creation
-                  const fetchTasks = async () => {
-                    try {
-                      const res = await api.get(`/api/task/${selectedProject._id}`);
-                      setTasks(res.data || []);
-                    } catch (err) {
-                      console.error("Failed to fetch tasks:", err);
-                    }
-                  };
-                  fetchTasks();
+                onSuccess={async () => {
+                  try {
+                    const res = await api.get(`/api/task/${selectedProject._id}`);
+                    setTasks(res.data || []);
+                  } catch (err) {
+                    console.error("Failed to refresh tasks:", err);
+                  }
                 }}
               />
             </ModalWrapper>
-)}
-
+          )}
         </main>
       </div>
     </div>

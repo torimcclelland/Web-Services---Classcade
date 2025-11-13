@@ -2,12 +2,12 @@ import React from "react";
 import { useDraggable } from "@dnd-kit/core";
 
 const DraggableCard = ({ task }) => {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: task._id,
       data: { lane: task.status },
     });
-
+  
   const style = {
     transform: transform
       ? `translate(${transform.x}px, ${transform.y}px)`

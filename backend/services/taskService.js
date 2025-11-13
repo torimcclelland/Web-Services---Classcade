@@ -148,4 +148,21 @@ router.delete("/:projectid/:taskid", async (req, res) => {
   }
 });
 
+// Update a task by ID only (for drag-and-drop)
+router.put("/update/:taskid", async (req, res) => {
+  try {
+    const updated = await Task.findByIdAndUpdate(
+      req.params.taskid,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) return res.status(404).json({ error: "Task not found" });
+    res.json(updated);
+  } catch (err) {
+    console.error("Failed to update task:", err);
+    res.status(500).json({ error: "Failed to update task" });
+  }
+});
+
 module.exports = router;
