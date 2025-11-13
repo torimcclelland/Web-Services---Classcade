@@ -7,7 +7,7 @@ const ProfileStyle = {
   layout: {
     display: "flex",
     flex: 1,
-    backgroundColor: "#f3f4f6",
+    backgroundColor: "#ddf9ea",
   },
   main: {
     flex: 1,

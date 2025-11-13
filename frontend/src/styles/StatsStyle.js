@@ -9,6 +9,7 @@ const StatsStyle = {
   layout: {
     display: "flex",
     flex: 1,
+    backgroundColor: "#ddf9ea",
   },
 
   main: {
