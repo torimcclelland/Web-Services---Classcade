@@ -9,6 +9,19 @@ import api from "../api";
 import { useProject } from "../context/ProjectContext";
 import ModalWrapper from "../components/ModalWrapper";
 import AddNewTaskModal from "../screens/AddNewTask";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { restrictToParentElement } from "@dnd-kit/modifiers";
 
 
 const swimlanes = ["Not Started", "In Progress", "Under Review", "Done"];
@@ -19,6 +32,7 @@ const MyTasks = () => {
   const [tasks, setTasks] = useState([]);
   const user = JSON.parse(localStorage.getItem("user"));
   const { selectedProject } = useProject();
+  const [activeTaskId, setActiveTaskId] = useState(null);
 
   useEffect(() => {
     if (!selectedProject?._id) {

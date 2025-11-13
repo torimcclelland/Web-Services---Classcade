@@ -4,6 +4,8 @@ import AddNewTaskStyle from "../styles/AddNewTaskStyle";
 import api from "../api";
 import { useProject } from "../context/ProjectContext";
 
+const swimlanes = ["Not Started", "In Progress", "Under Review", "Done"];
+
 const AddNewTaskModal = ({ onClose, onSuccess }) => {
   const { selectedProject } = useProject();
   const user = JSON.parse(localStorage.getItem("user"));
@@ -11,29 +13,30 @@ const AddNewTaskModal = ({ onClose, onSuccess }) => {
   const [taskName, setTaskName] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [status, setStatus] = useState("Not Started");
   const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (!taskName) {
+    if (!taskName.trim()) {
       setError("Task Name is required");
       return;
     }
 
     try {
       await api.post(`/api/task/${selectedProject._id}`, {
-        name: taskName,
-        description,
+        name: taskName.trim(),
+        description: description.trim(),
         assignedTo: user._id,
         dueDate: dueDate || null,
-        status: "Not Started",
+        status,
       });
 
       alert("Task added successfully!");
-      onSuccess?.(); // optional callback
-      onClose();
+      onSuccess?.(); // refresh task list in parent
+      onClose();     // close modal
     } catch (err) {
       console.error("Failed to create task:", err);
       setError(err.response?.data?.error || "Failed to create task.");
@@ -46,7 +49,7 @@ const AddNewTaskModal = ({ onClose, onSuccess }) => {
         Add Task to: {selectedProject?.name}
       </h2>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p style={{ color: "red", marginBottom: "1rem" }}>{error}</p>}
 
       <label style={AddNewTaskStyle.label}>Task Name</label>
       <input
@@ -72,6 +75,19 @@ const AddNewTaskModal = ({ onClose, onSuccess }) => {
         value={dueDate}
         onChange={(e) => setDueDate(e.target.value)}
       />
+
+      <label style={AddNewTaskStyle.label}>Status</label>
+      <select
+        style={AddNewTaskStyle.select}
+        value={status}
+        onChange={(e) => setStatus(e.target.value)}
+      >
+        {swimlanes.map((lane) => (
+          <option key={lane} value={lane}>
+            {lane}
+          </option>
+        ))}
+      </select>
 
       <div style={AddNewTaskStyle.actionButtons}>
         <PrimaryButton text="Cancel" onClick={onClose} />
