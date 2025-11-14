@@ -39,6 +39,18 @@ const TimeTracking = () => {
     setTimeout(() => setPopup(""), 2000);
   };
 
+  const handleMinutesChange = (e) => {
+    const v = e.target.value;
+    if (v === "") {
+      setMinutes("");
+      return;
+    }
+    // allow typing decimals but store as integer
+    const n = Math.floor(Number(v));
+    if (Number.isNaN(n)) return;
+    setMinutes(String(Math.max(0, Math.min(999, n))));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -90,9 +102,11 @@ const TimeTracking = () => {
             <label style={TimeTrackingStyle.label}>Minutes</label>
             <input
               type="number"
+              min={0}
+              max={999}
               style={{ ...TimeTrackingStyle.input, width: "100px" }}
               value={minutes}
-              onChange={(e) => setMinutes(e.target.value)}
+              onChange={handleMinutesChange}
             />
 
             <div style={TimeTrackingStyle.row}>

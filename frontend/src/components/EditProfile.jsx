@@ -305,6 +305,7 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
                   <input
                     type="text"
                     name="firstName"
+                    maxLength={45}
                     value={formData.firstName}
                     onChange={handleInputChange}
                     style={EditProfileStyle.input}
@@ -317,6 +318,7 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
                   <input
                     type="text"
                     name="lastName"
+                    maxLength={45}
                     value={formData.lastName}
                     onChange={handleInputChange}
                     style={EditProfileStyle.input}
@@ -329,6 +331,7 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
                   <input
                     type="email"
                     name="email"
+                    maxLength={45}
                     value={formData.email}
                     onChange={handleInputChange}
                     style={EditProfileStyle.input}
@@ -341,6 +344,7 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
                   <input
                     type="text"
                     name="username"
+                    maxLength={45}
                     value={formData.username}
                     onChange={handleInputChange}
                     style={EditProfileStyle.input}
@@ -353,6 +357,7 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
                   <input
                     type="password"
                     name="password"
+                    maxLength={45}
                     value={formData.password}
                     onChange={handleInputChange}
                     style={EditProfileStyle.input}
@@ -365,6 +370,7 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
                   <label style={EditProfileStyle.label}>Confirm New Password</label>
                   <input
                     type="password"
+                    maxLength={45}
                     name="confirmPassword"
                     value={formData.confirmPassword}
                     onChange={handleInputChange}

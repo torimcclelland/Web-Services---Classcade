@@ -212,6 +212,7 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
             <label style={labelStyle}>Project Name</label>
             <input
               type="text"
+              maxLength={20}
               style={inputStyle}
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
@@ -223,6 +224,7 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
             <label style={labelStyle}>Teacher Email (optional)</label>
             <input
               type="email"
+              maxLength={45}
               style={inputStyle}
               value={teacherEmail}
               onChange={(e) => setTeacherEmail(e.target.value)}
@@ -233,6 +235,7 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
           <div style={formGroupStyle}>
             <label style={labelStyle}>Groupmate Emails</label>
             <textarea
+              maxLength={45}
               style={textareaStyle}
               value={groupmateEmails}
               onChange={(e) => setGroupmateEmails(e.target.value)}

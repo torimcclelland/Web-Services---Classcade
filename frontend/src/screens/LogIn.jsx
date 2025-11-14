@@ -115,7 +115,7 @@ const LogIn = () => {
           placeholder="Enter your username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          maxLength={30}
+          maxLength={45}
         />
         
         {/* Password field with eye toggle */}
@@ -126,7 +126,7 @@ const LogIn = () => {
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            maxLength={30}
+            maxLength={45}
           />
           <button
             type="button"

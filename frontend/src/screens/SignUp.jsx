@@ -162,26 +162,26 @@ const SignUp = () => {
           label="First Name"
           value={firstName}
           onChange={(e) => setFirstName(e.target.value)}
-          maxLength={30}
+          maxLength={45}
         />
         <TextField
           label="Last Name"
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
-          maxLength={30}
+          maxLength={45}
         />
         <TextField
           label="Email"
           type="text"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          maxLength={30}
+          maxLength={45}
         />
         <TextField
           label="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          maxLength={30}
+          maxLength={45}
         />
         
         {/* Password field with eye toggle */}
@@ -191,7 +191,7 @@ const SignUp = () => {
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            maxLength={30}
+            maxLength={45}
           />
           <button
             type="button"

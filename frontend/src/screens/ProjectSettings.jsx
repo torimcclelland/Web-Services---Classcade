@@ -125,7 +125,10 @@ const ProjectSettings = () => {
           <div className="settings-grid">
             <div className="settings-panel">
               <label>Project Name</label>
-              <input value={name} onChange={(e) => setName(e.target.value)} />
+              <input 
+                value={name} 
+                maxLength={20}
+                onChange={(e) => setName(e.target.value)} />
 
               <label>Due Date</label>
               <input
