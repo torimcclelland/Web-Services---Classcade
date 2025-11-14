@@ -44,6 +44,7 @@ const TextField = ({
   icon,
   type = 'text',
   name,
+  maxLength,
 }) => {
   return (
     <div style={styles.wrapper}>
@@ -57,6 +58,7 @@ const TextField = ({
           placeholder={placeholder}
           value={value}
           onChange={onChange}
+          maxLength={maxLength}
         />
       </div>
     </div>
