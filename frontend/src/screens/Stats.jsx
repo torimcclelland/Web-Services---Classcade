@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Sidebar from "../components/Sidebar";
-import TopNavbar from "../components/TopNavBar";
-import ProfileCircle from "../components/ProfileCircle";
+import MainLayout from "../components/MainLayout";
 import PieChartBox from "../components/PieChartBox";
 import BarChartBox from "../components/BarChartBox";
 import api from "../api";
@@ -45,10 +43,10 @@ const Stats = () => {
       .filter((e) => e.user._id === m._id)
       .reduce((sum, e) => sum + e.minutes, 0);
 
-    return { name: m.firstName, value: totalMins, userId: m._id };
+    return { name: m.firstName, time: totalMins, userId: m._id };
   });
 
-  const totalProjectMinutes = timeByUser.reduce((a, b) => a + b.value, 0);
+  const totalProjectMinutes = timeByUser.reduce((a, b) => a + b.time, 0);
   const formatHours = (mins) => (mins / 60).toFixed(2);
 
   useEffect(() => {
@@ -58,7 +56,7 @@ const Stats = () => {
     }
 
     const row = timeByUser.find((x) => x.userId === selectedMember);
-    const total = row?.value || 0;
+    const total = row?.time || 0;
     const percent = totalProjectMinutes
       ? ((total / totalProjectMinutes) * 100).toFixed(1)
       : 0;
@@ -67,17 +65,8 @@ const Stats = () => {
   }, [selectedMember, timeData]);
 
   return (
-    <div style={StatsStyle.container}>
-      <TopNavbar />
-      <div style={StatsStyle.layout}>
-        <Sidebar />
-
-        <main style={StatsStyle.main}>
-          <div style={{ display: "flex", justifyContent: "flex-end" }}>
-            <ProfileCircle size={64} />
-          </div>
-
-          <h1 style={StatsStyle.title}>Project Stats</h1>
+    <MainLayout>
+      <h1 style={StatsStyle.title}>Project Stats</h1>
 
           <div style={StatsStyle.chartsWrapper}>
             <div style={StatsStyle.chartBox}>
@@ -97,12 +86,12 @@ const Stats = () => {
 
             <select
               style={StatsStyle.select}
-              value={selectedMember}
-              onChange={(e) => setSelectedMember(e.target.value)}
+              time={selectedMember}
+              onChange={(e) => setSelectedMember(e.target.time)}
             >
-              <option value="">-- Select --</option>
+              <option time="">-- Select --</option>
               {members.map((m) => (
-                <option key={m._id} value={m._id}>
+                <option key={m._id} time={m._id}>
                   {m.firstName} {m.lastName}
                 </option>
               ))}
@@ -145,9 +134,7 @@ const Stats = () => {
               </tbody>
             </table>
           </div>
-        </main>
-      </div>
-    </div>
+    </MainLayout>
   );
 };
 

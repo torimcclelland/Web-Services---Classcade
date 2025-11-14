@@ -1,18 +1,15 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import io from "socket.io-client";
+import { useParams } from "react-router-dom";
 import TopNavBar from "../components/TopNavBar";
 import SideBar from "../components/Sidebar";
+import ProfileCircle from "../components/ProfileCircle";
 import MessageThreadStyle from "../styles/MessageThreadStyle";
 import api from "../api";
 import { useUser } from "../context/UserContext";
-
-// Move socket outside component to prevent reconnections
-let socket = null;
+import socketManager from "../utils/socketManager";
 
 const MessageThread = () => {
   const { conversationId } = useParams(); // This is the projectId
-  const navigate = useNavigate();
   const { user } = useUser();
   const currentUserId = user?._id;
 
@@ -20,44 +17,30 @@ const MessageThread = () => {
   const [input, setInput] = useState("");
   const [project, setProject] = useState(null);
   const [members, setMembers] = useState([]);
+  const [showAllMembers, setShowAllMembers] = useState(false);
   const messagesEndRef = useRef(null);
 
   // Initialize socket connection once
   useEffect(() => {
-    if (!socket) {
-      socket = io("http://localhost:4000", {
-        reconnection: true,
-        reconnectionAttempts: 5,
-        reconnectionDelay: 1000
-      });
-      
-      socket.on('connect', () => {
-        console.log('Socket connected:', socket.id);
-      });
-      
-      socket.on('connect_error', (error) => {
-        console.error('Socket connection error:', error);
-      });
-    }
-
-    // Function to join room once connected
-    const joinRoom = () => {
-      if (socket.connected) {
-        socket.emit("joinRoom", conversationId);
-        console.log('Joined room:', conversationId);
-      } else {
-        console.log('Waiting for socket connection...');
-        socket.once('connect', () => {
-          socket.emit("joinRoom", conversationId);
-          console.log('Joined room after connection:', conversationId);
-        });
-      }
-    };
-
-    joinRoom();
+    console.log('[MessageThread] Setting up for conversation:', conversationId);
+    
+    // Ensure socket is connected
+    socketManager.connect();
+    
+    // Join the room
+    socketManager.joinRoom(conversationId);
 
     const handleReceiveMessage = (msg) => {
-      console.log('Received message via socket:', msg);
+      console.log('[MessageThread] Received message via socket:', msg);
+      console.log('[MessageThread] Current conversation:', conversationId);
+      console.log('[MessageThread] Message conversation:', msg.conversationId);
+      
+      // Only process messages for this conversation
+      if (msg.conversationId !== conversationId) {
+        console.log('[MessageThread] Message is for different conversation, ignoring');
+        return;
+      }
+      
       setMessages((prev) => {
         // Remove any temporary message with the same content (optimistic update)
         const filtered = prev.filter(m => {
@@ -70,20 +53,20 @@ const MessageThread = () => {
         // Prevent duplicates of real messages
         const msgId = msg._id || msg.id;
         if (filtered.some(m => (m._id || m.id) === msgId)) {
-          console.log('Duplicate message, skipping:', msgId);
+          console.log('[MessageThread] Duplicate message, skipping:', msgId);
           return filtered;
         }
         
-        console.log('Adding new message to state:', msgId);
+        console.log('[MessageThread] Adding new message to state:', msgId);
         return [...filtered, msg];
       });
     };
 
-    socket.on("receiveMessage", handleReceiveMessage);
+    socketManager.on("receiveMessage", handleReceiveMessage);
 
     return () => {
-      socket.off("receiveMessage", handleReceiveMessage);
-      socket.off('connect'); // Clean up the connect listener
+      console.log('[MessageThread] Cleaning up socket listeners');
+      socketManager.off("receiveMessage", handleReceiveMessage);
     };
   }, [conversationId]);
 
@@ -111,6 +94,11 @@ const MessageThread = () => {
   // Fetch message history
   useEffect(() => {
     const fetchHistory = async () => {
+      if (!currentUserId) {
+        console.log('Cannot fetch history - no currentUserId');
+        return;
+      }
+
       try {
         const res = await api.get(`/api/chat`, {
           params: { conversationId }
@@ -124,35 +112,38 @@ const MessageThread = () => {
 
         // Mark unread messages as read
         const unreadMessages = sortedMessages.filter(msg => {
-          const msgId = msg._id || msg.id; // Handle both _id and id
+          const msgId = msg._id || msg.id;
           const isUnread = !msg.readBy?.some(r => r.user?.toString() === currentUserId);
-          const notMine = msg.sender?._id !== currentUserId;
-          console.log('Message:', msgId, 'Unread?', isUnread, 'Not mine?', notMine, 'ReadBy:', msg.readBy);
+          const senderId = msg.sender?._id || msg.sender;
+          const notMine = senderId !== currentUserId && senderId?.toString() !== currentUserId?.toString();
+          console.log('Message:', msgId, 'Unread?', isUnread, 'Not mine?', notMine);
           return isUnread && notMine;
         });
 
         console.log('Found', unreadMessages.length, 'unread messages to mark as read');
+        console.log('Current user ID:', currentUserId);
 
         if (unreadMessages.length > 0) {
           // Mark them as read one by one and wait for all to complete
           for (const msg of unreadMessages) {
-            const msgId = msg._id || msg.id; // Use whichever exists
+            const msgId = msg._id || msg.id;
             if (!msgId) {
               console.error('Message has no ID:', msg);
               continue;
             }
             
             try {
+              console.log('Marking message as read:', msgId, 'User:', currentUserId);
               await api.post(`/api/chat/${msgId}/read`, { userId: currentUserId });
-              console.log('Marked message as read:', msgId);
+              console.log('Successfully marked message as read:', msgId);
             } catch (err) {
-              console.error('Error marking message as read:', msgId, err);
+              console.error('Error marking message as read:', msgId, err.response?.data || err);
             }
           }
           
           // Emit event to notify that messages were read (for real-time updates)
-          if (socket && socket.connected) {
-            socket.emit("messagesRead", { 
+          if (socketManager.isConnected()) {
+            socketManager.emit("messagesRead", { 
               conversationId, 
               userId: currentUserId,
               count: unreadMessages.length 
@@ -176,8 +167,14 @@ const MessageThread = () => {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
+    // Check character limit
+    if (input.trim().length > 1000) {
+      alert("Message is too long! Maximum 1000 characters.");
+      return;
+    }
+
     // Check if socket is connected
-    if (!socket || !socket.connected) {
+    if (!socketManager.isConnected()) {
       console.error("Socket not connected");
       alert("Connection lost. Please refresh the page.");
       return;
@@ -209,8 +206,7 @@ const MessageThread = () => {
     setInput("");
     
     // Send via socket
-    socket.emit("sendMessage", msg);
-    console.log('Emitted sendMessage event:', msg);
+    socketManager.emit("sendMessage", msg);
   };
 
   const handleKeyPress = (e) => {
@@ -227,36 +223,100 @@ const MessageThread = () => {
         <SideBar />
         <main style={MessageThreadStyle.main}>
           <div style={MessageThreadStyle.header}>
-            <button 
-              style={MessageThreadStyle.backButton} 
-              onClick={() => navigate('/messages')}
-            >
-              ← Back
-            </button>
             {project && (
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <h3 style={MessageThreadStyle.chatTitle}>
                   {project.name}
                 </h3>
-                <div style={{ fontSize: '0.85em', color: '#666', marginTop: '4px' }}>
-                  {members.length} member{members.length !== 1 ? 's' : ''}
-                  {members.length > 0 && ': '}
-                  {members.slice(0, 3).map(m => m.firstName).join(', ')}
-                  {members.length > 3 && ` +${members.length - 3} more`}
+                <div style={{ 
+                  fontSize: '0.85em', 
+                  color: '#666', 
+                  marginTop: '4px',
+                  position: 'relative'
+                }}>
+                  <span>
+                    {members.length} member{members.length !== 1 ? 's' : ''}
+                    {members.length > 0 && ': '}
+                    {members.slice(0, 3).map(m => m.firstName).join(', ')}
+                    {members.length > 3 && (
+                      <span 
+                        onClick={() => setShowAllMembers(!showAllMembers)}
+                        style={{
+                          color: '#007bff',
+                          cursor: 'pointer',
+                          textDecoration: 'underline',
+                          marginLeft: '2px'
+                        }}
+                      >
+                        +{members.length - 3} more
+                      </span>
+                    )}
+                  </span>
+
+                  {/* Dropdown showing all members */}
+                  {showAllMembers && members.length > 3 && (
+                    <>
+                      {/* Backdrop to close when clicking outside */}
+                      <div 
+                        onClick={() => setShowAllMembers(false)}
+                        style={{
+                          position: 'fixed',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          zIndex: 999
+                        }}
+                      />
+                      
+                      {/* Member list popup */}
+                      <div style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        marginTop: '8px',
+                        backgroundColor: 'white',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                        padding: '12px',
+                        minWidth: '200px',
+                        maxWidth: '300px',
+                        zIndex: 1000,
+                      }}>
+                        <div style={{
+                          fontWeight: '600',
+                          marginBottom: '8px',
+                          color: '#333',
+                          fontSize: '0.9em'
+                        }}>
+                          All Members ({members.length})
+                        </div>
+                        {members.map((member, index) => (
+                          <div 
+                            key={member._id}
+                            style={{
+                              padding: '6px 0',
+                              color: '#555',
+                              fontSize: '0.95em',
+                              borderTop: index > 0 ? '1px solid #f0f0f0' : 'none'
+                            }}
+                          >
+                            {member.firstName} {member.lastName}
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             )}
+            <div style={{ flexShrink: 0 }}>
+              <ProfileCircle size={64} />
+            </div>
           </div>
 
-          <div style={{
-            ...MessageThreadStyle.chatWindow,
-            height: '500px', // Fixed reasonable height
-            maxHeight: 'calc(100vh - 300px)', // Don't exceed viewport
-            overflowY: 'auto', // Enable scrolling
-            display: 'flex',
-            flexDirection: 'column',
-            padding: '20px'
-          }}>
+          <div style={MessageThreadStyle.chatWindow}>
             {messages.length === 0 ? (
               <div style={{ 
                 textAlign: 'center', 
@@ -342,13 +402,45 @@ const MessageThread = () => {
           </div>
 
           <div style={MessageThreadStyle.inputArea}>
-            <input
-              style={MessageThreadStyle.input}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder={`Message ${project?.name || 'project'}...`}
-            />
+            <div style={{ flex: 1, position: 'relative' }}>
+              <textarea
+                style={{
+                  ...MessageThreadStyle.input,
+                  resize: 'none',
+                  minHeight: '40px',
+                  maxHeight: '120px',
+                  overflowY: 'auto',
+                  fontFamily: 'inherit',
+                  fontSize: '14px',
+                  lineHeight: '1.5',
+                  padding: '10px',
+                  paddingRight: '60px',
+                  width: '100%',
+                  boxSizing: 'border-box',
+                }}
+                value={input}
+                onChange={(e) => {
+                  setInput(e.target.value);
+                  // Auto-expand textarea
+                  e.target.style.height = '40px';
+                  e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+                }}
+                onKeyPress={handleKeyPress}
+                placeholder={`Message ${project?.name || 'project'}...`}
+                maxLength={1000}
+                rows={1}
+              />
+              <div style={{
+                position: 'absolute',
+                bottom: '12px',
+                right: '12px',
+                fontSize: '11px',
+                color: input.length > 900 ? '#dc3545' : '#999',
+                pointerEvents: 'none',
+              }}>
+                {input.length}/1000
+              </div>
+            </div>
             <button 
               style={MessageThreadStyle.sendButton} 
               onClick={sendMessage}

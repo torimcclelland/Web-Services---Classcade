@@ -50,6 +50,16 @@ const TopNavBarStyle = {
     backgroundColor: "#C8E6C9",
     fontWeight: "700",
   },
+  tabHover: {
+    backgroundColor: '#2c4fb2',
+    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.15)',
+  },
+  newProjectHover: {
+    backgroundColor: '#dcd4d4ff',
+  },
+  homeHover: {
+    backgroundColor: '#dcd4d4ff',
+  }
 };
 
 export default TopNavBarStyle;

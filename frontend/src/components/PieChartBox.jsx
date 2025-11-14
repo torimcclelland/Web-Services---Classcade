@@ -12,7 +12,7 @@ const COLORS = [
 
 const PieChartBox = ({ data }) => (
   <PieChart width={300} height={300}>
-    <Pie data={data} dataKey="value" cx="50%" cy="50%" outerRadius={100} label>
+    <Pie data={data} dataKey="time" cx="50%" cy="50%" outerRadius={100} label>
       {data.map((entry, i) => (
         <Cell key={entry.userId} fill={COLORS[i % COLORS.length]} />
       ))}

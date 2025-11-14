@@ -19,7 +19,7 @@ export const TimeTrackingStyle = {
     alignItems: 'flex-start',
   },
   formPanel: {
-    backgroundColor: "#e5e7eb",
+    backgroundColor: "#ffffffff",
     padding: "2rem",
     borderRadius: "12px",
     boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
@@ -45,14 +45,14 @@ export const TimeTrackingStyle = {
     width: "100%",
     padding: "0.5rem 0.75rem",
     borderRadius: "6px",
-    border: "1px solid #d1d5db",
+    border: "2px solid #d1d5db",
     fontSize: 16,
   },
   input: {
     width: "100%",
     padding: "0.5rem 0.75rem",
     borderRadius: "6px",
-    border: "1px solid #d1d5db",
+    border: "2px solid #d1d5db",
     fontSize: 16,
   },
   row: {

@@ -16,7 +16,7 @@ const DashboardStyle = {
     backgroundColor: "#ddf9ea",
   },
   statsPanel: {
-    backgroundColor: "#e5e7eb",
+    backgroundColor: "#ffffffff",
     padding: "2rem",
     borderRadius: "12px",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",

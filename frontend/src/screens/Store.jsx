@@ -2,9 +2,7 @@ import React, { useState, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import TextField from '../components/TextField';
 import PrimaryButton from '../components/PrimaryButton';
-import TopNavBar from '../components/TopNavBar';
-import ProfileCircle from '../components/ProfileCircle';
-import Sidebar from '../components/Sidebar';
+import MainLayout from '../components/MainLayout';
 import api from '../api';
 import { ALL_ICONS, ALL_BANNERS, ALL_BACKDROPS } from '../constants/storeItems';
 import Logo from '../assets/Logo.png';
@@ -269,18 +267,9 @@ const Store = () => {
   };
 
   return (
-    <div style={storeStyles.container}>
-      <TopNavBar />
-      
-      <div style={storeStyles.layout}>
-        <Sidebar />
-        <div style={storeStyles.main}>
-          <div style={storeStyles.profileIcon}>
-            <ProfileCircle size={64} />
-          </div>
-
+    <MainLayout showSidebar={true}>
       <div style={storeStyles.content}>
-        <div style={storeStyles.left}>
+        <div style={storeStyles.section}>
           <h1>Icons</h1>
           {availableIcons.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 20px', color: '#fff' }}>
@@ -305,60 +294,60 @@ const Store = () => {
             </div>
           )}
         </div>
-        <div style={storeStyles.rightColumn}>
-            <div style={storeStyles.rightBox}>
-            <h1>Banners</h1>
-            {availableBanners.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '40px 20px', color: '#fff' }}>
-                <h2>No banners available</h2>
-                <p>Check back later for new banners!</p>
-              </div>
-            ) : (
-              <div style={storeStyles.bannersContainer}>
-                {availableBanners.map((banner) => (
-                  <div
-                    key={banner.id}
-                    style={{
-                      ...storeStyles.bannerCard,
-                      backgroundColor: banner.color,
-                      ...(selectedBanner?.id === banner.id ? storeStyles.bannerCardSelected : {})
-                    }}
-                    onClick={() => handleBannerClick(banner)}
-                  >
-                    <div style={storeStyles.bannerPrice}>{banner.price} dollars</div>
+
+        <div style={storeStyles.section}>
+          <h1>Banners</h1>
+          {availableBanners.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px 20px', color: '#fff' }}>
+              <h2>No banners available</h2>
+              <p>Check back later for new banners!</p>
+            </div>
+          ) : (
+            <div style={storeStyles.bannersContainer}>
+              {availableBanners.map((banner) => (
+                <div
+                  key={banner.id}
+                  style={{
+                    ...storeStyles.bannerCard,
+                    backgroundColor: banner.color,
+                    ...(selectedBanner?.id === banner.id ? storeStyles.bannerCardSelected : {})
+                  }}
+                  onClick={() => handleBannerClick(banner)}
+                >
+                  <div style={storeStyles.bannerPrice}>{banner.price} dollars</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div style={storeStyles.section}>
+          <h1>Backdrops</h1>
+          {availableBackdrops.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px 20px', color: '#fff' }}>
+              <h2>No backdrops available</h2>
+              <p>Check back later for new backdrops!</p>
+            </div>
+          ) : (
+            <div style={storeStyles.backdropsGrid}>
+              {availableBackdrops.map((backdrop) => (
+                <div
+                  key={backdrop.id}
+                  style={{
+                    ...storeStyles.backdropCard,
+                    ...(selectedBackdrop?.id === backdrop.id ? storeStyles.backdropCardSelected : {})
+                  }}
+                  onClick={() => handleBackdropClick(backdrop)}
+                >
+                  <div style={storeStyles.backdropContainer}>
+                    {renderBackdrop(backdrop.type, backdrop.color)}
+                    <img src={icon15} alt="icon" style={storeStyles.backdropImage} />
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-          <div style={storeStyles.rightBox}>
-            <h1>Backdrops</h1>
-            {availableBackdrops.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '40px 20px', color: '#fff' }}>
-                <h2>No backdrops available</h2>
-                <p>Check back later for new backdrops!</p>
-              </div>
-            ) : (
-              <div style={storeStyles.backdropsGrid}>
-                {availableBackdrops.map((backdrop) => (
-                  <div
-                    key={backdrop.id}
-                    style={{
-                      ...storeStyles.backdropCard,
-                      ...(selectedBackdrop?.id === backdrop.id ? storeStyles.backdropCardSelected : {})
-                    }}
-                    onClick={() => handleBackdropClick(backdrop)}
-                  >
-                    <div style={storeStyles.backdropContainer}>
-                      {renderBackdrop(backdrop.type, backdrop.color)}
-                      <img src={icon15} alt="icon" style={storeStyles.backdropImage} />
-                    </div>
-                    <div style={storeStyles.backdropPrice}>{backdrop.price} dollars</div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  <div style={storeStyles.backdropPrice}>{backdrop.price} dollars</div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -396,9 +385,7 @@ const Store = () => {
           </div>
         </>
       )}
-        </div>
-      </div>
-    </div>
+    </MainLayout>
   );
 };
 

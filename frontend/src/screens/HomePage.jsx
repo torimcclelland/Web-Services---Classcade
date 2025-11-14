@@ -5,6 +5,7 @@ import LogoutImg from "../assets/Logout.png";
 import api from "../api";
 import { useProject } from "../context/ProjectContext";
 import HomePageStyle from "../styles/HomePageStyle";
+import AddNewProject from "./AddNewProject";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const HomePage = () => {
   const [hoveredCard, setHoveredCard] = useState(null);
   const [hoveredNewBtn, setHoveredNewBtn] = useState(false);
   const [hoveredLogout, setHoveredLogout] = useState(false);
+  const [showAddProjectModal, setShowAddProjectModal] = useState(false);
 
   const { setSelectedProject } = useProject();
 
@@ -55,6 +57,20 @@ const HomePage = () => {
     localStorage.removeItem("selectedProject");
     setSelectedProject(null);
     navigate("/");
+  };
+
+  const handleProjectCreated = (createdProject) => {
+    // If a created project is provided, select it and go to dashboard
+    if (createdProject && createdProject._id) {
+      setSelectedProject(createdProject);
+      // Save selection to localStorage for persistence
+      try { localStorage.setItem('selectedProject', JSON.stringify(createdProject)); } catch (e) {}
+      navigate('/dashboard');
+      return;
+    }
+
+    // Otherwise just refresh the projects list
+    fetchProjects();
   };
 
   return (
@@ -116,13 +132,19 @@ const HomePage = () => {
             backgroundColor: hoveredNewBtn ? "#f4f4f4ff" : "#fff",
             transition: "background-color 0.2s ease",
           }}
-          onClick={() => navigate("/addnewproject")}
+          onClick={() => setShowAddProjectModal(true)}
           onMouseEnter={() => setHoveredNewBtn(true)}
           onMouseLeave={() => setHoveredNewBtn(false)}
         >
           + New Project
         </button>
       </div>
+
+      <AddNewProject 
+        isOpen={showAddProjectModal}
+        onClose={() => setShowAddProjectModal(false)}
+        onProjectCreated={handleProjectCreated}
+      />
     </div>
   );
 };

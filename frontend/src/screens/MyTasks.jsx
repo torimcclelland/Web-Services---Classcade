@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import TopNavBar from "../components/TopNavBar";
-import Sidebar from "../components/Sidebar";
-import ProfileCircle from "../components/ProfileCircle";
+import MainLayout from "../components/MainLayout";
 import PrimaryButton from "../components/PrimaryButton";
 import MyTasksStyle from "../styles/MyTasksStyle";
 import api from "../api";
@@ -102,7 +100,7 @@ const MyTasks = () => {
     <div style={MyTasksStyle.container}>
       <TopNavBar />
       <div style={MyTasksStyle.layout}>
-        <Sidebar />
+        <SideBar />
 
         <main style={MyTasksStyle.main}>
           <div style={MyTasksStyle.header}>
@@ -158,9 +156,7 @@ const MyTasks = () => {
               />
             </ModalWrapper>
           )}
-        </main>
-      </div>
-    </div>
+    </MainLayout>
   );
 };
 

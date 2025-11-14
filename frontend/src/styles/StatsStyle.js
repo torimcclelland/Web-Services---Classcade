@@ -28,7 +28,7 @@ const StatsStyle = {
   },
 
   card: {
-    backgroundColor: "#e5e7eb",
+    backgroundColor: "#ffffffff",
     padding: "2rem",
     borderRadius: "12px",
     boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
@@ -44,7 +44,7 @@ const StatsStyle = {
   },
 
   chartBox: {
-    backgroundColor: "#e5e7eb",
+    backgroundColor: "#ffffffff",
     padding: "1rem",
     borderRadius: "12px",
     boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
@@ -56,7 +56,7 @@ const StatsStyle = {
   },
 
   summaryBox: {
-    backgroundColor: "#e5e7eb",
+    backgroundColor: "#ffffffff",
     padding: "1.5rem",
     borderRadius: "12px",
     boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
@@ -82,7 +82,7 @@ const StatsStyle = {
   },
 
   tableWrapper: {
-    backgroundColor: "#e5e7eb",
+    backgroundColor: "#ffffffff",
     padding: "2rem",
     borderRadius: "12px",
     boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
