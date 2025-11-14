@@ -45,6 +45,7 @@ const MessageThreadStyle = {
     borderRadius: "8px",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
     minHeight: 0,
+    marginBottom: "1rem",
   },
   messageBubble: {
     backgroundColor: "#e5e7eb",
@@ -54,7 +55,6 @@ const MessageThreadStyle = {
   },
   inputArea: {
     display: "flex",
-    marginTop: "1rem",
     gap: "1rem",
     flexShrink: 0,
     position: "relative",

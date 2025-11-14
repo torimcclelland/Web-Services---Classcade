@@ -216,7 +216,13 @@ const MessageThread = () => {
 
   return (
     <MainLayout showSidebar={true}>
-      <div style={MessageThreadStyle.header}>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        height: 'calc(100vh - 140px)',
+        minHeight: 0 
+      }}>
+        <div style={MessageThreadStyle.header}>
             {project && (
               <div style={{ flex: 1, minWidth: 0 }}>
                 <h3 style={MessageThreadStyle.chatTitle}>
@@ -439,6 +445,7 @@ const MessageThread = () => {
               Send
             </button>
           </div>
+        </div>
     </MainLayout>
   );
 };
