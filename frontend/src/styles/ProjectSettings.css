@@ -100,11 +100,11 @@
   font-size: 18px;
   cursor: pointer;
   color: #444;
-  transition: 0.2s ease;
+  transition: none;
 }
 
 .remove-member-btn:hover {
-  color: #1e3a8a;
+  color: #e11d48;
 }
 
 .toast {
