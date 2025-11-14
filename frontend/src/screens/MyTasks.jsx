@@ -8,6 +8,9 @@ import { useProject } from "../context/ProjectContext";
 import ModalWrapper from "../components/ModalWrapper";
 import AddNewTaskModal from "../screens/AddNewTask";
 import DraggableCard from "../components/DraggableCard";
+import TopNavBar from "../components/TopNavBar";
+import Sidebar from "../components/Sidebar";
+import ProfileCircle from "../components/ProfileCircle";
 
 import {
   DndContext,
@@ -87,9 +90,7 @@ const MyTasks = () => {
     try {
       await api.put(`/api/task/update/${active.id}`, { status: newStatus });
       setTasks((prev) =>
-        prev.map((t) =>
-          t._id === active.id ? { ...t, status: newStatus } : t
-        )
+        prev.map((t) => (t._id === active.id ? { ...t, status: newStatus } : t))
       );
     } catch (err) {
       console.error("Failed to update task status:", err);
@@ -100,14 +101,17 @@ const MyTasks = () => {
     <div style={MyTasksStyle.container}>
       <TopNavBar />
       <div style={MyTasksStyle.layout}>
-        <SideBar />
+        <Sidebar />
 
         <main style={MyTasksStyle.main}>
           <div style={MyTasksStyle.header}>
             <h2>My Tasks ({selectedProject?.name})</h2>
 
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <PrimaryButton text="Add Task" onClick={() => setShowModal(true)} />
+              <PrimaryButton
+                text="Add Task"
+                onClick={() => setShowModal(true)}
+              />
               <ProfileCircle size={48} />
             </div>
           </div>
@@ -147,7 +151,9 @@ const MyTasks = () => {
                 onClose={() => setShowModal(false)}
                 onSuccess={async () => {
                   try {
-                    const res = await api.get(`/api/task/${selectedProject._id}`);
+                    const res = await api.get(
+                      `/api/task/${selectedProject._id}`
+                    );
                     setTasks(res.data || []);
                   } catch (err) {
                     console.error("Failed to refresh tasks:", err);
@@ -156,7 +162,9 @@ const MyTasks = () => {
               />
             </ModalWrapper>
           )}
-    </MainLayout>
+        </main>
+      </div>
+    </div>
   );
 };
 
