@@ -37,6 +37,11 @@ const TopNavBar = () => {
   const [hoveredTab, setHoveredTab] = useState(null);
   const [addBtnHover, setAddBtnHover] = useState(false);
   const [showAddProjectModal, setShowAddProjectModal] = useState(false);
+  const [showLeaveConfirmation, setShowLeaveConfirmation] = useState(false);
+  const [projectToLeave, setProjectToLeave] = useState(null);
+  const [isLastMember, setIsLastMember] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [successMessageText, setSuccessMessageText] = useState('');
 
   const { selectedProject, setSelectedProject } = useProject();
 
@@ -107,6 +112,79 @@ const TopNavBar = () => {
     navigate("/dashboard");
   };
 
+  const handleLeaveProjectClick = async (e, project) => {
+    e.stopPropagation();
+    
+    try {
+      // Fetch project details to check member count
+      const response = await api.get(`/api/project/${project._id}/members`);
+      const members = response.data;
+      
+      setProjectToLeave(project);
+      setIsLastMember(members.length === 1);
+      setShowLeaveConfirmation(true);
+    } catch (err) {
+      console.error("Error checking project members:", err);
+    }
+  };
+
+  const confirmLeaveProject = async () => {
+    if (!projectToLeave || !user?._id) return;
+
+    try {
+      const projectName = projectToLeave.name;
+      const wasLastMember = isLastMember;
+
+      if (isLastMember) {
+        // Delete the entire project if user is the last member
+        await api.delete(`/api/project/${projectToLeave._id}`);
+      } else {
+        // Remove user from project members
+        await api.delete(`/api/project/${projectToLeave._id}/members/${user._id}`);
+      }
+
+      // Refresh projects list
+      const res = await api.get(`/api/project/user/${user._id}`);
+      setProjects(res.data);
+
+      // If the project being left is currently selected, clear selection
+      if (selectedProject?._id === projectToLeave._id) {
+        setSelectedProject(null);
+        localStorage.removeItem('selectedProject');
+        navigate('/home');
+      }
+
+      setShowLeaveConfirmation(false);
+      setProjectToLeave(null);
+      setIsLastMember(false);
+
+      // Show success message
+      setSuccessMessageText(
+        wasLastMember 
+          ? `Project "${projectName}" has been deleted.`
+          : `You have left "${projectName}".`
+      );
+      setShowSuccessMessage(true);
+
+      // Auto-hide success message after 3 seconds
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 3000);
+
+    } catch (err) {
+      console.error("Error leaving/deleting project:", err);
+      setShowLeaveConfirmation(false);
+      setProjectToLeave(null);
+      setIsLastMember(false);
+    }
+  };
+
+  const cancelLeaveProject = () => {
+    setShowLeaveConfirmation(false);
+    setProjectToLeave(null);
+    setIsLastMember(false);
+  };
+
   return (
     <>
       <div style={{ ...TopNavBarStyle.topNavbar, backgroundColor: bannerColor }}>
@@ -162,7 +240,7 @@ const TopNavBar = () => {
               <span>{proj.name}</span>
               <button
                 style={isActive ? { ...TopNavBarStyle.closeTabBtn, color: '#fff' } : TopNavBarStyle.closeTabBtn}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => handleLeaveProjectClick(e, proj)}
               >
                 ✕
               </button>
@@ -200,6 +278,176 @@ const TopNavBar = () => {
         onClose={() => setShowAddProjectModal(false)}
         onProjectCreated={handleProjectCreated}
       />
+
+      {/* Leave/Delete Project Confirmation Popup */}
+      {showLeaveConfirmation && (
+        <>
+          <div 
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 2000,
+            }}
+            onClick={cancelLeaveProject}
+          />
+          <div 
+            style={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              backgroundColor: '#ffffff',
+              borderRadius: '12px',
+              padding: '2rem',
+              maxWidth: '400px',
+              width: '90%',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+              zIndex: 2001,
+              textAlign: 'center',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 style={{ 
+              margin: '0 0 1rem 0', 
+              fontSize: '1.5rem', 
+              fontWeight: 600, 
+              color: '#1f2937' 
+            }}>
+              {isLastMember ? 'Delete Project?' : 'Leave Project?'}
+            </h2>
+            <p style={{ 
+              margin: '0 0 1.5rem 0', 
+              fontSize: '1rem', 
+              color: '#374151',
+              lineHeight: '1.5'
+            }}>
+              {isLastMember 
+                ? `You are the only member of "${projectToLeave?.name}". Leaving will permanently delete this project. This action cannot be undone.`
+                : `Are you sure you want to leave "${projectToLeave?.name}"?`
+              }
+            </p>
+            <div style={{ 
+              display: 'flex', 
+              gap: '0.75rem', 
+              justifyContent: 'center' 
+            }}>
+              <button
+                style={{
+                  padding: '0.625rem 1.25rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  backgroundColor: '#fff',
+                  color: '#374151',
+                  fontSize: '1rem',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s',
+                }}
+                onClick={cancelLeaveProject}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#fff'}
+              >
+                Cancel
+              </button>
+              <button
+                style={{
+                  padding: '0.625rem 1.25rem',
+                  border: 'none',
+                  borderRadius: '6px',
+                  backgroundColor: isLastMember ? '#dc2626' : '#1e3a8a',
+                  color: '#fff',
+                  fontSize: '1rem',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s',
+                }}
+                onClick={confirmLeaveProject}
+                onMouseEnter={(e) => e.target.style.backgroundColor = isLastMember ? '#b91c1c' : '#1e40af'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = isLastMember ? '#dc2626' : '#1e3a8a'}
+              >
+                {isLastMember ? 'Delete Project' : 'Leave Project'}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Success Message Popup */}
+      {showSuccessMessage && (
+        <>
+          <div 
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 2000,
+            }}
+            onClick={() => setShowSuccessMessage(false)}
+          />
+          <div 
+            style={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              backgroundColor: '#ffffff',
+              borderRadius: '12px',
+              padding: '2rem',
+              maxWidth: '400px',
+              width: '90%',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+              zIndex: 2001,
+              textAlign: 'center',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              backgroundColor: '#d1fae5',
+              margin: '0 auto 1rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <span style={{
+                fontSize: '2rem',
+                color: '#065f46',
+              }}>✓</span>
+            </div>
+            <h2 style={{ 
+              margin: '0 0 0.5rem 0', 
+              fontSize: '1.5rem', 
+              fontWeight: 600, 
+              color: '#1f2937' 
+            }}>
+              Success!
+            </h2>
+            <p style={{ 
+              margin: '0', 
+              fontSize: '1rem', 
+              color: '#374151',
+              lineHeight: '1.5'
+            }}>
+              {successMessageText}
+            </p>
+          </div>
+        </>
+      )}
     </>
   );
 };
