@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import io from "socket.io-client";
-import MainLayout from "../components/MainLayout";
+import TopNavBar from "../components/TopNavBar";
+import SideBar from "../components/Sidebar";
+import ProfileCircle from "../components/ProfileCircle";
 import MessagesOverviewStyle from "../styles/MessagesOverviewStyle";
 import api from "../api";
 import { useUser } from "../context/UserContext";
@@ -131,8 +133,12 @@ const MessagesOverview = () => {
   });
 
   return (
-    <MainLayout showSidebar={true}>
-      <h2 style={MessagesOverviewStyle.header}>Project Messages</h2>
+    <div style={MessagesOverviewStyle.container}>
+      <TopNavBar />
+      <div style={MessagesOverviewStyle.layout}>
+        <SideBar />
+        <main style={MessagesOverviewStyle.main}>
+          <h2 style={MessagesOverviewStyle.header}>Project Messages</h2>
           <div style={MessagesOverviewStyle.chatList}>
             {sortedProjects.length === 0 ? (
               <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
@@ -210,7 +216,9 @@ const MessagesOverview = () => {
               })
             )}
           </div>
-    </MainLayout>
+        </main>
+      </div>
+    </div>
   );
 };
 
