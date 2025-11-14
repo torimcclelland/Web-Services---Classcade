@@ -85,7 +85,7 @@ const TopNavBar = () => {
     };
   }, [user]);
 
-  const goToDashboard = () => navigate("/dashboard");
+  const goToHome = () => navigate("/home");
   
   const handleProjectCreated = async (createdProject) => {
     // If a created project is provided, select it and go to dashboard
@@ -205,7 +205,7 @@ const TopNavBar = () => {
         }}
         onMouseEnter={() => setHomeHover(true)}
         onMouseLeave={() => setHomeHover(false)}
-        onClick={goToDashboard}
+        onClick={goToHome}
       >
         <FaHome size={24} />
       </button>
