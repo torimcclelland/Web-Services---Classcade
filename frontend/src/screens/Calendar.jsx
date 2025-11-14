@@ -1,8 +1,7 @@
 // My Calendar Screen
 
 import React, { useState } from "react";
-import Sidebar from "../components/Sidebar";
-import TopNavBar from "../components/TopNavBar";
+import MainLayout from "../components/MainLayout";
 import CalendarStyle from "../styles/CalendarStyle";
 
 const Calendar = () => {
@@ -70,14 +69,8 @@ const Calendar = () => {
   };
 
   return (
-    <div style={CalendarStyle.container}>
-      <TopNavBar />
-
-      <div style={CalendarStyle.layout}>
-        <Sidebar />
-
-        <main style={CalendarStyle.main}>
-          <div style={CalendarStyle.header}>
+    <MainLayout showSidebar={true}>
+      <div style={CalendarStyle.header}>
             <h2 style={CalendarStyle.title}>
               {viewMode === "week"
                 ? `Week of ${startOfWeek(
@@ -144,9 +137,7 @@ const Calendar = () => {
               <div style={CalendarStyle.monthGrid}>{renderMonthDays()}</div>
             )}
           </div>
-        </main>
-      </div>
-    </div>
+    </MainLayout>
   );
 };
 

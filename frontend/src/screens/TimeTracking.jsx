@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import TopNavBar from "../components/TopNavBar";
-import SideBar from "../components/Sidebar";
+import MainLayout from "../components/MainLayout";
 import PrimaryButton from "../components/PrimaryButton";
 import TimeTrackingStyle from "../styles/TimeTrackingStyle";
 import api from "../api";
@@ -68,12 +67,8 @@ const TimeTracking = () => {
   };
 
   return (
-    <div style={TimeTrackingStyle.container}>
-      <TopNavBar />
-      <div style={TimeTrackingStyle.layout}>
-        <SideBar />
-        <main style={TimeTrackingStyle.main}>
-          <div style={TimeTrackingStyle.formPanel}>
+    <MainLayout>
+      <div style={TimeTrackingStyle.formPanel}>
             <h2 style={TimeTrackingStyle.title}>
               Time Tracking ({selectedProject?.name})
             </h2>
@@ -126,15 +121,13 @@ const TimeTracking = () => {
               <PrimaryButton text="Submit" onClick={handleSubmit} />
             </div>
           </div>
-        </main>
-      </div>
 
       {popup && (
         <div style={TimeTrackingStyle.popupContainer}>
           <div style={TimeTrackingStyle.popupMessage}>{popup}</div>
         </div>
       )}
-    </div>
+    </MainLayout>
   );
 };
 

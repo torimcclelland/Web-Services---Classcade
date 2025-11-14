@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Sidebar from "../components/Sidebar";
-import TopNavbar from "../components/TopNavBar";
-import ProfileCircle from "../components/ProfileCircle";
+import MainLayout from "../components/MainLayout";
 import PieChartBox from "../components/PieChartBox";
 import BarChartBox from "../components/BarChartBox";
 import api from "../api";
@@ -67,17 +65,8 @@ const Stats = () => {
   }, [selectedMember, timeData]);
 
   return (
-    <div style={StatsStyle.container}>
-      <TopNavbar />
-      <div style={StatsStyle.layout}>
-        <Sidebar />
-
-        <main style={StatsStyle.main}>
-          <div style={{ display: "flex", justifyContent: "flex-end" }}>
-            <ProfileCircle size={64} />
-          </div>
-
-          <h1 style={StatsStyle.title}>Project Stats</h1>
+    <MainLayout>
+      <h1 style={StatsStyle.title}>Project Stats</h1>
 
           <div style={StatsStyle.chartsWrapper}>
             <div style={StatsStyle.chartBox}>
@@ -145,9 +134,7 @@ const Stats = () => {
               </tbody>
             </table>
           </div>
-        </main>
-      </div>
-    </div>
+    </MainLayout>
   );
 };
 

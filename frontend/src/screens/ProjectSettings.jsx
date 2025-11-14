@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import TopNavBar from "../components/TopNavBar";
-import Sidebar from "../components/Sidebar";
+import MainLayout from "../components/MainLayout";
 import PrimaryButton from "../components/PrimaryButton";
 import SecondaryButton from "../components/SecondaryButton";
 import { useProject } from "../context/ProjectContext";
@@ -118,16 +117,10 @@ const ProjectSettings = () => {
   if (!selectedProject) return null;
 
   return (
-    <div className="settings-container">
-      <TopNavBar />
-
+    <MainLayout showSidebar={true}>
       {showToast && <div className="toast show">{toast}</div>}
 
-      <div className="settings-layout">
-        <Sidebar />
-
-        <main className="settings-main">
-          <h2>Project Settings</h2>
+      <h2>Project Settings</h2>
 
           <div className="settings-grid">
             <div className="settings-panel">
@@ -178,8 +171,6 @@ const ProjectSettings = () => {
               <PrimaryButton text="Add Member" onClick={handleAddMember} />
             </div>
           </div>
-        </main>
-      </div>
 
       {confirmDelete && (
         <div className="overlay">
@@ -197,7 +188,7 @@ const ProjectSettings = () => {
           </div>
         </div>
       )}
-    </div>
+    </MainLayout>
   );
 };
 

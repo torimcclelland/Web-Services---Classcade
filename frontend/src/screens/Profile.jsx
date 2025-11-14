@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import TopNavBar from '../components/TopNavBar';
+import MainLayout from '../components/MainLayout';
 import PrimaryButton from '../components/PrimaryButton';
 import SecondaryButton from '../components/SecondaryButton';
 import EditProfile from '../components/EditProfile';
 import ProfileStyle from '../styles/ProfileStyle';
 import ProfileCircle from '../components/ProfileCircle';
-import SideBar from '../components/Sidebar';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 
@@ -206,56 +205,40 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div style={ProfileStyle.container}>
-        <TopNavBar />
-        <div style={ProfileStyle.layout}>
-          <SideBar />
-          <main style={ProfileStyle.main}>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              height: '100%',
-              fontSize: '1.2rem',
-              color: '#000'
-            }}>
-              Loading...
-            </div>
-          </main>
+      <MainLayout showSidebar={true}>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          height: '100%',
+          fontSize: '1.2rem',
+          color: '#000'
+        }}>
+          Loading...
         </div>
-      </div>
+      </MainLayout>
     );
   }
 
   if (!userData) {
     return (
-      <div style={ProfileStyle.container}>
-        <TopNavBar />
-        <div style={ProfileStyle.layout}>
-          <SideBar />
-          <main style={ProfileStyle.main}>
-            <div style={ProfileStyle.profilePanel}>
-              <div style={{ textAlign: 'center', padding: '50px' }}>
-                <p style={{ color: 'red' }}>Failed to load profile data</p>
-                <PrimaryButton 
-                  text="Retry" 
-                  onClick={fetchUserData}
-                />
-              </div>
-            </div>
-          </main>
+      <MainLayout showSidebar={true}>
+        <div style={ProfileStyle.profilePanel}>
+          <div style={{ textAlign: 'center', padding: '50px' }}>
+            <p style={{ color: 'red' }}>Failed to load profile data</p>
+            <PrimaryButton 
+              text="Retry" 
+              onClick={fetchUserData}
+            />
+          </div>
         </div>
-      </div>
+      </MainLayout>
     );
   }
 
   return (
-    <div style={ProfileStyle.container}>
-      <TopNavBar />
-      <div style={ProfileStyle.layout}>
-        <SideBar />
-        <main style={ProfileStyle.main}>
-          <div style={ProfileStyle.profilePanel}>
+    <MainLayout showSidebar={true}>
+      <div style={ProfileStyle.profilePanel}>
             {/* Profile Header with Circle */}
             <div style={ProfileStyle.profileHeader}>
               <ProfileCircle 
@@ -310,8 +293,6 @@ const Profile = () => {
               />
             </div>
           </div>
-        </main>
-      </div>
 
       {popupMessage && (
         <div style={ProfileStyle.overlay}>
@@ -348,7 +329,7 @@ const Profile = () => {
         userData={userData}
         onSave={handleSaveProfile}
       />
-    </div>
+    </MainLayout>
   );
 };
 

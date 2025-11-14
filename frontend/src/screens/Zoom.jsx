@@ -1,12 +1,6 @@
 import React from 'react';
-import Sidebar from '../components/Sidebar';
-import TopNavBar from '../components/TopNavBar';
-import ProfileCircle from '../components/ProfileCircle';
+import MainLayout from '../components/MainLayout';
 import {
-  ZoomContainer,
-  ContentRow,
-  MainContent,
-  ProfileRow,
   ZoomHeader,
   ZoomMessage,
   ButtonRow,
@@ -32,33 +26,21 @@ const Zoom = () => {
   };
 
   return (
-    <ZoomContainer>
-      <TopNavBar />
-      <ContentRow>
-        <Sidebar />
-        <MainContent>
-          <ProfileRow>
-            <ProfileCircle
-              size={64}
-            />
-          </ProfileRow>
+    <MainLayout>
+      <PageTitle>Zoom Portal</PageTitle>
 
-          <PageTitle>Zoom Portal</PageTitle>
-
-          <ZoomHeader>
-            <ZoomMessage>
-              FirstName LastName,<br />
-              you have <strong>3 upcoming Zoom meeting(s)</strong>.<br />
-            </ZoomMessage>
-            <ButtonRow>
-              <ZoomButton color="green" onClick={handleLaunchZoom}>
-                Launch Zoom
-              </ZoomButton>
-            </ButtonRow>
-          </ZoomHeader>
-        </MainContent>
-      </ContentRow>
-    </ZoomContainer>
+      <ZoomHeader>
+        <ZoomMessage>
+          FirstName LastName,<br />
+          you have <strong>3 upcoming Zoom meeting(s)</strong>.<br />
+        </ZoomMessage>
+        <ButtonRow>
+          <ZoomButton color="green" onClick={handleLaunchZoom}>
+            Launch Zoom
+          </ZoomButton>
+        </ButtonRow>
+      </ZoomHeader>
+    </MainLayout>
   );
 };
 

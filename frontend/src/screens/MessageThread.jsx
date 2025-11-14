@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
-import TopNavBar from "../components/TopNavBar";
-import SideBar from "../components/Sidebar";
-import ProfileCircle from "../components/ProfileCircle";
+import MainLayout from "../components/MainLayout";
 import MessageThreadStyle from "../styles/MessageThreadStyle";
 import api from "../api";
 import { useUser } from "../context/UserContext";
@@ -217,12 +215,8 @@ const MessageThread = () => {
   };
 
   return (
-    <div style={MessageThreadStyle.container}>
-      <TopNavBar />
-      <div style={MessageThreadStyle.layout}>
-        <SideBar />
-        <main style={MessageThreadStyle.main}>
-          <div style={MessageThreadStyle.header}>
+    <MainLayout showSidebar={true}>
+      <div style={MessageThreadStyle.header}>
             {project && (
               <div style={{ flex: 1, minWidth: 0 }}>
                 <h3 style={MessageThreadStyle.chatTitle}>
@@ -311,9 +305,6 @@ const MessageThread = () => {
                 </div>
               </div>
             )}
-            <div style={{ flexShrink: 0 }}>
-              <ProfileCircle size={48} />
-            </div>
           </div>
 
           <div style={MessageThreadStyle.chatWindow}>
@@ -448,9 +439,7 @@ const MessageThread = () => {
               Send
             </button>
           </div>
-        </main>
-      </div>
-    </div>
+    </MainLayout>
   );
 };
 

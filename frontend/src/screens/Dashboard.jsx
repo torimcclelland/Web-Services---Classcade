@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import TopNavBar from "../components/TopNavBar";
-import SideBar from "../components/Sidebar";
-import ProfileCircle from "../components/ProfileCircle";
+import MainLayout from "../components/MainLayout";
 import PrimaryButton from "../components/PrimaryButton";
 import DashboardStyle from "../styles/DashboardStyle";
 import api from "../api";
@@ -50,18 +48,8 @@ const Dashboard = () => {
     : "Not set";
 
   return (
-    <div style={DashboardStyle.container}>
-      <TopNavBar />
-
-      <div style={DashboardStyle.layout}>
-        <SideBar />
-
-        <main style={DashboardStyle.main}>
-          <div style={DashboardStyle.profileHeader}>
-            <ProfileCircle size={48} />
-          </div>
-
-          <div style={DashboardStyle.statsPanel}>
+    <MainLayout>
+      <div style={DashboardStyle.statsPanel}>
             <h2>{selectedProject?.name} Dashboard</h2>
 
             <div style={DashboardStyle.statsGrid}>
@@ -128,9 +116,7 @@ const Dashboard = () => {
               />
             </div>
           </div>
-        </main>
-      </div>
-    </div>
+    </MainLayout>
   );
 };
 

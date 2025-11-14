@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import TopNavBar from "../components/TopNavBar";
-import SideBar from "../components/Sidebar";
-import ProfileCircle from "../components/ProfileCircle";
+import MainLayout from "../components/MainLayout";
 import PrimaryButton from "../components/PrimaryButton";
 import MyTasksStyle from "../styles/MyTasksStyle";
 import api from "../api";
@@ -83,20 +81,13 @@ const MyTasks = () => {
   };
 
   return (
-    <div style={MyTasksStyle.container}>
-      <TopNavBar />
-      <div style={MyTasksStyle.layout}>
-        <SideBar />
-
-        <main style={MyTasksStyle.main}>
-          <div style={MyTasksStyle.header}>
-            <h2>My Tasks ({selectedProject?.name})</h2>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <PrimaryButton text="Add Task" onClick={() => setShowModal(true)} />
-              <ProfileCircle size={48} />
-            </div>
-          </div>
+    <MainLayout>
+      <div style={MyTasksStyle.header}>
+        <h2>My Tasks ({selectedProject?.name})</h2>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <PrimaryButton text="Add Task" onClick={() => setShowModal(true)} />
+        </div>
+      </div>
 
           <DndContext
             sensors={sensors}
@@ -148,9 +139,7 @@ const MyTasks = () => {
               />
             </ModalWrapper>
           )}
-        </main>
-      </div>
-    </div>
+    </MainLayout>
   );
 };
 
