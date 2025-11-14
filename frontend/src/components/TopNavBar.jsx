@@ -8,6 +8,7 @@ import {
 import api from "../api";
 import { useProject } from "../context/ProjectContext";
 import { getUserBanner } from "../constants/storeItems";
+import AddNewProject from "../screens/AddNewProject";
 
 // Helper function to darken a hex color for 
 const darkenColor = (hex, percent = 20) => {
@@ -35,6 +36,7 @@ const TopNavBar = () => {
   const [homeHover, setHomeHover] = useState(false);
   const [hoveredTab, setHoveredTab] = useState(null);
   const [addBtnHover, setAddBtnHover] = useState(false);
+  const [showAddProjectModal, setShowAddProjectModal] = useState(false);
 
   const { selectedProject, setSelectedProject } = useProject();
 
@@ -79,7 +81,26 @@ const TopNavBar = () => {
   }, [user]);
 
   const goToDashboard = () => navigate("/dashboard");
-  const goToAddNewProject = () => navigate("/addnewproject");
+  
+  const handleProjectCreated = async (createdProject) => {
+    // If a created project is provided, select it and go to dashboard
+    if (createdProject && createdProject._id) {
+      setSelectedProject(createdProject);
+      try { localStorage.setItem('selectedProject', JSON.stringify(createdProject)); } catch (e) {}
+      setShowAddProjectModal(false);
+      navigate('/dashboard');
+      return;
+    }
+
+    // Otherwise refresh the projects list
+    if (!user?._id) return;
+    try {
+      const res = await api.get(`/api/project/user/${user._id}`);
+      setProjects(res.data);
+    } catch (err) {
+      console.error("Error fetching user projects:", err);
+    }
+  };
 
   const handleSelectProject = (project) => {
     setSelectedProject(project);
@@ -87,7 +108,8 @@ const TopNavBar = () => {
   };
 
   return (
-    <div style={{ ...TopNavBarStyle.topNavbar, backgroundColor: bannerColor }}>
+    <>
+      <div style={{ ...TopNavBarStyle.topNavbar, backgroundColor: bannerColor }}>
       <button 
         style={{
           ...TopNavBarStyle.homeBtn,
@@ -165,13 +187,20 @@ const TopNavBar = () => {
           }}
           onMouseEnter={() => setAddBtnHover(true)}
           onMouseLeave={() => setAddBtnHover(false)}
-          onClick={goToAddNewProject}
+          onClick={() => setShowAddProjectModal(true)}
           aria-label="Add new project"
         >
           <FaPlus size = {20}/>
         </button>
       </div>
-    </div>
+      </div>
+
+      <AddNewProject 
+        isOpen={showAddProjectModal}
+        onClose={() => setShowAddProjectModal(false)}
+        onProjectCreated={handleProjectCreated}
+      />
+    </>
   );
 };
 

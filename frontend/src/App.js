@@ -15,7 +15,6 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Stats from "./screens/Stats";
 import Zoom from "./screens/Zoom";
 import StorePage from "./screens/Store";
-import AddNewProject from "./screens/AddNewProject";
 import AddNewTask from "./screens/AddNewTask";
 import ProjectSettings from "./screens/ProjectSettings";
 import MessageThread from "./screens/MessageThread";
@@ -74,14 +73,6 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <Calendar />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/addnewproject"
-              element={
-                <ProtectedRoute>
-                  <AddNewProject />
                 </ProtectedRoute>
               }
             />
