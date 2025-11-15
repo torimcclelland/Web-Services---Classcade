@@ -19,6 +19,7 @@ import AddNewTask from "./screens/AddNewTask";
 import ProjectSettings from "./screens/ProjectSettings";
 import MessageThread from "./screens/MessageThread";
 import MessagesRedirect from "./screens/MessagesRedirect";
+import Landing from "./screens/Landing";
 
 export default function App() {
   return (
@@ -130,6 +131,14 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <MessageThread />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/landing"
+              element={
+                <ProtectedRoute>
+                  <Landing />
                 </ProtectedRoute>
               }
             />
