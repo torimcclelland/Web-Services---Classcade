@@ -68,72 +68,72 @@ const Stats = () => {
     <MainLayout>
       <h1 style={StatsStyle.title}>Project Stats</h1>
 
-          <div style={StatsStyle.chartsWrapper}>
-            <div style={StatsStyle.chartBox}>
-              <PieChartBox data={timeByUser} />
-            </div>
-            <div style={StatsStyle.chartBox}>
-              <BarChartBox data={timeByUser} />
-            </div>
-          </div>
+      <div style={StatsStyle.chartsWrapper}>
+        <div style={StatsStyle.chartBox}>
+          <PieChartBox data={timeByUser} />
+        </div>
+        <div style={StatsStyle.chartBox}>
+          <BarChartBox data={timeByUser} />
+        </div>
+      </div>
 
-          <div style={StatsStyle.card}>
-            <label
-              style={{ fontWeight: 600, marginBottom: "8px", display: "block" }}
-            >
-              Select Member:
-            </label>
+      <div style={StatsStyle.card}>
+        <label
+          style={{ fontWeight: 600, marginBottom: "8px", display: "block" }}
+        >
+          Select Member:
+        </label>
 
-            <select
-              style={StatsStyle.select}
-              time={selectedMember}
-              onChange={(e) => setSelectedMember(e.target.time)}
-            >
-              <option time="">-- Select --</option>
-              {members.map((m) => (
-                <option key={m._id} time={m._id}>
-                  {m.firstName} {m.lastName}
-                </option>
-              ))}
-            </select>
+        <select
+          style={StatsStyle.select}
+          value={selectedMember}
+          onChange={(e) => setSelectedMember(e.target.value)}
+        >
+          <option value="">-- Select --</option>
+          {members.map((m) => (
+            <option key={m._id} value={m._id}>
+              {m.firstName} {m.lastName}
+            </option>
+          ))}
+        </select>
 
-            <p style={StatsStyle.summaryText}>
-              Total time logged:{" "}
-              <strong>{formatHours(memberStats.total)} hrs</strong>
-            </p>
+        <p style={StatsStyle.summaryText}>
+          Total time logged:{" "}
+          <strong>{formatHours(memberStats.total)} hrs</strong>
+        </p>
 
-            <p style={StatsStyle.summaryText}>
-              Contribution: <strong>{memberStats.percent}%</strong>
-            </p>
-          </div>
+        <p style={StatsStyle.summaryText}>
+          Contribution: <strong>{memberStats.percent}%</strong>
+        </p>
+      </div>
 
-          <div style={StatsStyle.tableWrapper}>
-            <h3 style={{ marginBottom: "1rem" }}>Time Log</h3>
-            <table style={StatsStyle.table}>
-              <thead>
-                <tr>
-                  <th style={StatsStyle.th}>User</th>
-                  <th style={StatsStyle.th}>Task</th>
-                  <th style={StatsStyle.th}>Minutes</th>
-                  <th style={StatsStyle.th}>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {timeData.map((e) => (
-                  <tr key={e._id}>
-                    <td style={StatsStyle.td}>
-                      {e.user.firstName} {e.user.lastName}
-                    </td>
-                    <td style={StatsStyle.td}>{e.task?.name}</td>
-                    <td style={StatsStyle.td}>{e.minutes}</td>
-                    <td style={StatsStyle.td}>
-                      {new Date(e.entryDate).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      <div style={StatsStyle.tableWrapper}>
+        <h3 style={{ marginBottom: "1rem" }}>Time Log</h3>
+        <table style={StatsStyle.table}>
+          <thead>
+            <tr>
+              <th style={StatsStyle.th}>User</th>
+              <th style={StatsStyle.th}>Task</th>
+              <th style={StatsStyle.th}>Minutes</th>
+              <th style={StatsStyle.th}>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {timeData.map((e) => (
+              <tr key={e._id}>
+                <td style={StatsStyle.td}>
+                  {e.user.firstName} {e.user.lastName}
+                </td>
+                <td style={StatsStyle.td}>{e.task?.name}</td>
+                <td style={StatsStyle.td}>{e.minutes}</td>
+                <td style={StatsStyle.td}>
+                  {new Date(e.entryDate).toLocaleDateString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </MainLayout>
   );
 };
