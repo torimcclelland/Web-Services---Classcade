@@ -6,6 +6,7 @@ import api from "../api";
 import { useProject } from "../context/ProjectContext";
 import HomePageStyle from "../styles/HomePageStyle";
 import AddNewProject from "./AddNewProject";
+import ProfileCircle from "../components/ProfileCircle";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -75,6 +76,19 @@ const HomePage = () => {
 
   return (
     <div style={HomePageStyle.page}>
+      <div
+        // profile icon
+        style={{
+          position: "fixed",
+          top: 72,
+          right: 56,
+          zIndex: 9999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      > <ProfileCircle size={64} />
+      </div>
       <div style={HomePageStyle.inner}>
         <button style={HomePageStyle.logoutBtn} onClick={handleLogout}>
           <img src={LogoutImg} alt="logout" style={{ width: 26, height: 31 }} />
