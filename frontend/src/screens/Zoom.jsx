@@ -11,11 +11,11 @@ import {
 const Zoom = () => {
   const handleLaunchZoom = async () => {
     try {
-      const response = await fetch('/api/zoom/create'); // Adjust path if needed
+      const response = await fetch('/api/zoom/create');
       const data = await response.json();
 
       if (data.join_url) {
-        window.open(data.join_url, '_blank'); // Open Zoom meeting in new tab
+        window.open(data.join_url, '_blank');
       } else {
         alert('Failed to launch Zoom meeting.');
       }

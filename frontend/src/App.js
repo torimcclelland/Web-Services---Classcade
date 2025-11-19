@@ -27,8 +27,9 @@ export default function App() {
       <ProjectProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<LogInPage />} />
+            <Route path="/" element={<Landing />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/login" element={<LogInPage/>} />
             <Route
               path="/home"
               element={
@@ -137,9 +138,7 @@ export default function App() {
             <Route
               path="/landing"
               element={
-                <ProtectedRoute>
                   <Landing />
-                </ProtectedRoute>
               }
             />
           </Routes>
