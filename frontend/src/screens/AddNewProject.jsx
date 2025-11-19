@@ -5,16 +5,17 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
   const [projectName, setProjectName] = useState("");
   const [teacherEmail, setTeacherEmail] = useState("");
   const [groupmateEmails, setGroupmateEmails] = useState("");
+  const [dueDate, setDueDate] = useState("");
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      // Reset form when modal opens
       setProjectName("");
       setTeacherEmail("");
       setGroupmateEmails("");
+      setDueDate("");
       setError("");
       setSuccessMessage("");
     }
@@ -29,6 +30,17 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
     if (!projectName.trim()) {
       setError("Project name is required");
       return;
+    }
+
+    if (dueDate) {
+      const tdy = new Date();
+      tdy.setHours(0, 0, 0, 0);
+      const selected = new Date(dueDate);
+
+      if (selected < tdy) {
+        setError("Due date cannot be in the past.");
+        return;
+      }
     }
 
     const user = JSON.parse(localStorage.getItem("user"));
@@ -49,11 +61,11 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
         name: projectName,
         teacherEmail,
         groupmateEmails: emails,
+        dueDate,
       });
 
       setSuccessMessage("Project created successfully!");
-      
-      // Notify parent component and close modal after brief delay
+
       setTimeout(() => {
         if (onProjectCreated) {
           onProjectCreated(response.data);
@@ -72,10 +84,13 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
     setProjectName("");
     setTeacherEmail("");
     setGroupmateEmails("");
+    setDueDate("");
     setError("");
     setSuccessMessage("");
     onClose();
   };
+
+  const today = new Date().toISOString().split("T")[0];
 
   const modalStyle = {
     position: "fixed",
@@ -194,11 +209,11 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
       <div style={contentStyle} onClick={(e) => e.stopPropagation()}>
         <div style={headerStyle}>
           <h2 style={titleStyle}>Add New Project</h2>
-          <button 
-            style={closeButtonStyle} 
+          <button
+            style={closeButtonStyle}
             onClick={handleCancel}
-            onMouseEnter={(e) => e.target.style.color = "#1f2937"}
-            onMouseLeave={(e) => e.target.style.color = "#6b7280"}
+            onMouseEnter={(e) => (e.target.style.color = "#1f2937")}
+            onMouseLeave={(e) => (e.target.style.color = "#6b7280")}
           >
             ×
           </button>
@@ -206,7 +221,9 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
 
         <div style={bodyStyle}>
           {error && <div style={messageStyle(true)}>{error}</div>}
-          {successMessage && <div style={messageStyle(false)}>{successMessage}</div>}
+          {successMessage && (
+            <div style={messageStyle(false)}>{successMessage}</div>
+          )}
 
           <div style={formGroupStyle}>
             <label style={labelStyle}>Project Name</label>
@@ -217,6 +234,17 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
               value={projectName}
               onChange={(e) => setProjectName(e.target.value)}
               placeholder="Enter project name"
+            />
+          </div>
+
+          <div style={formGroupStyle}>
+            <label style={labelStyle}>Project Due Date</label>
+            <input
+              type="date"
+              style={inputStyle}
+              min={today}
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
             />
           </div>
 
@@ -245,15 +273,15 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
         </div>
 
         <div style={footerStyle}>
-          <button 
-            style={buttonStyle(false)} 
+          <button
+            style={buttonStyle(false)}
             onClick={handleCancel}
             disabled={isCreating}
           >
             Cancel
           </button>
-          <button 
-            style={buttonStyle(true)} 
+          <button
+            style={buttonStyle(true)}
             onClick={handleSubmit}
             disabled={isCreating}
           >
