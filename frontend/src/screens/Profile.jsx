@@ -159,7 +159,7 @@ const Profile = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
-    navigate('/');
+    navigate('/login');
   }
 
   const handleDeletAccountClick = () => {

@@ -56,7 +56,7 @@ const HomePage = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("selectedProject");
     setSelectedProject(null);
-    navigate("/");
+    navigate("/login");
   };
 
   const handleProjectCreated = (createdProject) => {
