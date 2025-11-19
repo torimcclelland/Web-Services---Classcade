@@ -47,75 +47,95 @@ const Dashboard = () => {
     ? selectedProject.dueDate.slice(0, 10)
     : "Not set";
 
+  let dueWarning = "";
+  if (selectedProject?.dueDate) {
+    const due = new Date(selectedProject.dueDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      dueWarning = "Overdue!";
+    } else if (diffDays <= 7) {
+      dueWarning = `Due in ${diffDays} days`;
+    }
+  }
+
   return (
     <MainLayout>
       <div style={DashboardStyle.statsPanel}>
-            <h2>{selectedProject?.name} Dashboard</h2>
+        <h2>{selectedProject?.name} Dashboard</h2>
 
-            <div style={DashboardStyle.statsGrid}>
-              <div style={DashboardStyle.statItem}>
-                <label style={DashboardStyle.statLabel}>Overall Progress</label>
-                <div style={DashboardStyle.progressBar}>
-                  <div
-                    style={{
-                      ...DashboardStyle.progressFill,
-                      width: `${progress}%`,
-                      opacity: progress > 0 ? 1 : 0.3,
-                    }}
-                  />
-                </div>
-                <span>{progress}%</span>
-              </div>
-
-              <div style={DashboardStyle.statItem}>
-                <label style={DashboardStyle.statLabel}>Total Tasks</label>
-                <span>{total}</span>
-              </div>
-
-              <div style={DashboardStyle.statItem}>
-                <label style={DashboardStyle.statLabel}>Completed Tasks</label>
-                <span>{completed}</span>
-              </div>
-
-              <div style={DashboardStyle.statItem}>
-                <label style={DashboardStyle.statLabel}>Project Due Date</label>
-                <span>{projectDueDate}</span>
-              </div>
-
-              <div style={DashboardStyle.statItem}>
-                <label style={DashboardStyle.statLabel}>Next Task</label>
-                <span>
-                  {upcomingTask ? upcomingTask.name : "All caught up!"}
-                </span>
-              </div>
-
-              <div style={DashboardStyle.statItem}>
-                <label style={DashboardStyle.statLabel}>
-                  Next Task Due Date
-                </label>
-                <span>
-                  {upcomingTask?.dueDate
-                    ? new Date(upcomingTask.dueDate).toLocaleDateString()
-                    : "No upcoming deadline"}
-                </span>
-              </div>
-            </div>
-
-            <div style={DashboardStyle.actionButtons}>
-              <PrimaryButton
-                text="Detailed Stats"
-                onClick={() => navigate("/stats")}
-              />
-              <PrimaryButton
-                text="Track Time"
-                onClick={() => navigate("/timetracking")}
-              />
-              <PrimaryButton
-                text="Schedule Meeting"
-                onClick={() => navigate("/zoom")}
+        <div style={DashboardStyle.statsGrid}>
+          <div style={DashboardStyle.statItem}>
+            <label style={DashboardStyle.statLabel}>Overall Progress</label>
+            <div style={DashboardStyle.progressBar}>
+              <div
+                style={{
+                  ...DashboardStyle.progressFill,
+                  width: `${progress}%`,
+                  opacity: progress > 0 ? 1 : 0.3,
+                }}
               />
             </div>
+            <span>{progress}%</span>
           </div>
+
+          <div style={DashboardStyle.statItem}>
+            <label style={DashboardStyle.statLabel}>Total Tasks</label>
+            <span>{total}</span>
+          </div>
+
+          <div style={DashboardStyle.statItem}>
+            <label style={DashboardStyle.statLabel}>Completed Tasks</label>
+            <span>{completed}</span>
+          </div>
+
+          <div style={DashboardStyle.statItem}>
+            <label style={DashboardStyle.statLabel}>Project Due Date</label>
+            <span>
+              {projectDueDate}
+              {dueWarning && (
+                <span
+                  style={{ color: "red", marginLeft: 8, fontWeight: "bold" }}
+                >
+                  • {dueWarning}
+                </span>
+              )}
+            </span>{" "}
+          </div>
+
+          <div style={DashboardStyle.statItem}>
+            <label style={DashboardStyle.statLabel}>Next Task</label>
+            <span>{upcomingTask ? upcomingTask.name : "All caught up!"}</span>
+          </div>
+
+          <div style={DashboardStyle.statItem}>
+            <label style={DashboardStyle.statLabel}>Next Task Due Date</label>
+            <span>
+              {upcomingTask?.dueDate
+                ? new Date(upcomingTask.dueDate).toLocaleDateString()
+                : "No upcoming deadline"}
+            </span>
+          </div>
+        </div>
+
+        <div style={DashboardStyle.actionButtons}>
+          <PrimaryButton
+            text="Detailed Stats"
+            onClick={() => navigate("/stats")}
+          />
+          <PrimaryButton
+            text="Track Time"
+            onClick={() => navigate("/timetracking")}
+          />
+          <PrimaryButton
+            text="Schedule Meeting"
+            onClick={() => navigate("/zoom")}
+          />
+        </div>
+      </div>
     </MainLayout>
   );
 };
