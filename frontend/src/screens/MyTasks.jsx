@@ -29,13 +29,20 @@ import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 const swimlanes = ["Not Started", "In Progress", "Under Review", "Done"];
 
 const Swimlane = ({ lane, children }) => {
-  const { setNodeRef } = useDroppable({
+  const { setNodeRef, isOver } = useDroppable({
     id: lane,
     data: { lane },
   });
 
   return (
-    <div ref={setNodeRef} style={MyTasksStyle.swimlane}>
+    <div
+      ref={setNodeRef}
+      style={{
+        ...MyTasksStyle.swimlane,
+        backgroundColor: isOver ? "#f0f8ff" : MyTasksStyle.swimlane.backgroundColor,
+        transition: "background-color 0.2s ease",
+      }}
+    >
       <h3 style={MyTasksStyle.swimlaneTitle}>{lane}</h3>
       {children}
     </div>
@@ -80,17 +87,22 @@ const MyTasks = () => {
     const { active, over } = event;
     setActiveTaskId(null);
 
-    if (!over || active.id === over.id) return;
+    if (!over) return;
 
     const draggedTask = tasks.find((t) => t._id === active.id);
-    const newStatus = over?.data?.current?.lane;
+
+    // Determine new lane: either from card drop or lane drop
+    const newStatus =
+      over.data?.current?.lane || swimlanes.find((lane) => lane === over.id);
 
     if (!newStatus || draggedTask.status === newStatus) return;
 
     try {
       await api.put(`/api/task/update/${active.id}`, { status: newStatus });
       setTasks((prev) =>
-        prev.map((t) => (t._id === active.id ? { ...t, status: newStatus } : t))
+        prev.map((t) =>
+          t._id === active.id ? { ...t, status: newStatus } : t
+        )
       );
     } catch (err) {
       console.error("Failed to update task status:", err);
