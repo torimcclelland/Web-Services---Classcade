@@ -10,7 +10,6 @@ import "../styles/ProjectSettings.css";
 const ProjectSettings = () => {
   const navigate = useNavigate();
   const { selectedProject, setSelectedProject, loadingProject } = useProject();
-
   const [name, setName] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [members, setMembers] = useState([]);
@@ -18,6 +17,8 @@ const ProjectSettings = () => {
   const [toast, setToast] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const today = new Date().toISOString().split("T")[0];
 
   const triggerToast = (text) => {
     setToast(text);
@@ -55,6 +56,17 @@ const ProjectSettings = () => {
   }, [selectedProject]);
 
   const handleUpdate = async () => {
+    if (dueDate) {
+      const selected = new Date(dueDate);
+      const tdy = new Date();
+      tdy.setHours(0, 0, 0, 0);
+
+      if (selected < tdy) {
+        triggerToast("Due date cannot be in the past");
+        return;
+      }
+    }
+
     try {
       await api.put(`/api/project/${selectedProject._id}`, { name, dueDate });
       setSelectedProject({ ...selectedProject, name, dueDate });
@@ -122,58 +134,60 @@ const ProjectSettings = () => {
 
       <h2>Project Settings</h2>
 
-          <div className="settings-grid">
-            <div className="settings-panel">
-              <label>Project Name</label>
-              <input 
-                value={name} 
-                maxLength={20}
-                onChange={(e) => setName(e.target.value)} />
+      <div className="settings-grid">
+        <div className="settings-panel">
+          <label>Project Name</label>
+          <input
+            value={name}
+            maxLength={20}
+            onChange={(e) => setName(e.target.value)}
+          />
 
-              <label>Due Date</label>
-              <input
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-              />
+          <label>Due Date</label>
+          <input
+            type="date"
+            value={dueDate}
+            min={today}
+            onChange={(e) => setDueDate(e.target.value)}
+          />
 
-              <div className="settings-button-row">
-                <PrimaryButton text="Update Project" onClick={handleUpdate} />
-                <SecondaryButton
-                  text="Delete Project"
-                  onClick={() => setConfirmDelete(true)}
-                />
-              </div>
-            </div>
-
-            <div className="settings-panel">
-              <h3>Members</h3>
-
-              <ul className="member-list">
-                {members.map((m) => (
-                  <li key={m._id} className="member-item">
-                    <span>{m.email}</span>
-                    <button
-                      className="remove-member-btn"
-                      onClick={() => handleRemoveMember(m._id, m.email)}
-                    >
-                      ✕
-                    </button>
-                  </li>
-                ))}
-              </ul>
-
-              <label>Add Member by Email</label>
-              <input
-                placeholder="member@example.com"
-                type="email"
-                value={newMemberEmail}
-                onChange={(e) => setNewMemberEmail(e.target.value)}
-              />
-
-              <PrimaryButton text="Add Member" onClick={handleAddMember} />
-            </div>
+          <div className="settings-button-row">
+            <PrimaryButton text="Update Project" onClick={handleUpdate} />
+            <SecondaryButton
+              text="Delete Project"
+              onClick={() => setConfirmDelete(true)}
+            />
           </div>
+        </div>
+
+        <div className="settings-panel">
+          <h3>Members</h3>
+
+          <ul className="member-list">
+            {members.map((m) => (
+              <li key={m._id} className="member-item">
+                <span>{m.email}</span>
+                <button
+                  className="remove-member-btn"
+                  onClick={() => handleRemoveMember(m._id, m.email)}
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          <label>Add Member by Email</label>
+          <input
+            placeholder="member@example.com"
+            type="email"
+            value={newMemberEmail}
+            onChange={(e) => setNewMemberEmail(e.target.value)}
+          />
+
+          <PrimaryButton text="Add Member" onClick={handleAddMember} />
+        </div>
+      </div>
 
       {confirmDelete && (
         <div className="overlay">

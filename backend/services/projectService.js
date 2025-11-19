@@ -6,10 +6,28 @@ const User = require("../models/user");
 // Create project
 router.post("/create", async (req, res) => {
   try {
-    const { name, teacherEmail, groupmateEmails = [], userId } = req.body;
+    const {
+      name,
+      teacherEmail,
+      groupmateEmails = [],
+      userId,
+      dueDate,
+    } = req.body;
 
     if (!name) {
       return res.status(400).json({ error: "Project name is required" });
+    }
+
+    if (dueDate) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const selected = new Date(dueDate);
+      if (selected < today) {
+        return res
+          .status(400)
+          .json({ error: "Due date cannot be in the past" });
+      }
     }
 
     const user = await User.findById(userId);
@@ -18,8 +36,8 @@ router.post("/create", async (req, res) => {
     const emails = [user.email, teacherEmail, ...groupmateEmails].filter(
       Boolean
     );
-
     const users = await User.find({ email: { $in: emails } });
+
     if (users.length === 0)
       return res.status(400).json({ error: "No valid users found" });
 
@@ -28,6 +46,7 @@ router.post("/create", async (req, res) => {
     const project = await Project.create({
       name: name.trim(),
       members: memberIds,
+      dueDate: dueDate || null,
     });
 
     await User.updateMany(
