@@ -86,29 +86,27 @@ const MyTasks = () => {
   const handleDragEnd = async (event) => {
     const { active, over } = event;
     setActiveTaskId(null);
-
+  
     if (!over) return;
-
+  
     const draggedTask = tasks.find((t) => t._id === active.id);
-
-    // Determine new lane: either from card drop or lane drop
-    const newStatus =
-      over.data?.current?.lane || swimlanes.find((lane) => lane === over.id);
-
+    const newStatus = over.data?.current?.lane || swimlanes.find((lane) => lane === over.id);
+  
     if (!newStatus || draggedTask.status === newStatus) return;
-
+  
+    setTasks((prev) =>
+      prev.map((t) =>
+        t._id === active.id ? { ...t, status: newStatus } : t
+      )
+    );
+  
     try {
       await api.put(`/api/task/update/${active.id}`, { status: newStatus });
-      setTasks((prev) =>
-        prev.map((t) =>
-          t._id === active.id ? { ...t, status: newStatus } : t
-        )
-      );
     } catch (err) {
       console.error("Failed to update task status:", err);
     }
   };
-
+  
   return (
     <div style={MyTasksStyle.container}>
       <TopNavBar />
