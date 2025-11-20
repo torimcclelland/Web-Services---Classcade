@@ -6,7 +6,10 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
   const [teacherEmail, setTeacherEmail] = useState("");
   const [groupmateEmails, setGroupmateEmails] = useState([""]);
   const [dueDate, setDueDate] = useState("");
-  const [error, setError] = useState("");
+  const [projectNameError, setProjectNameError] = useState("");
+  const [dueDateError, setDueDateError] = useState("");
+  const [teacherEmailError, setTeacherEmailError] = useState("");
+  const [groupmateEmailErrors, setGroupmateEmailErrors] = useState([""]);
   const [successMessage, setSuccessMessage] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
@@ -16,7 +19,10 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
       setTeacherEmail("");
       setGroupmateEmails([""]);
       setDueDate("");
-      setError("");
+      setProjectNameError("");
+      setDueDateError("");
+      setTeacherEmailError("");
+      setGroupmateEmailErrors([""]);
       setSuccessMessage("");
     }
   }, [isOpen]);
@@ -31,36 +37,113 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
     const updated = [...groupmateEmails];
     updated[index] = value;
     setGroupmateEmails(updated);
+    const updatedErrors = [...groupmateEmailErrors];
+    updatedErrors[index] = "";
+    setGroupmateEmailErrors(updatedErrors);
   };
 
   const removeEmailField = (index) => {
     const updated = groupmateEmails.filter((_, i) => i !== index);
     setGroupmateEmails(updated.length > 0 ? updated : [""]);
+    const updatedErrors = groupmateEmailErrors.filter((_, i) => i !== index);
+    setGroupmateEmailErrors(updatedErrors.length > 0 ? updatedErrors : [""]);
+  };
+
+  // Validate email format
+  const isValidEmailFormat = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Check if user exists with this email
+  const checkEmailExists = async (email) => {
+    try {
+      await api.get(`/api/user/email/${email}`);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  };
+
+  // Validate a single email (format and existence)
+  const validateEmail = async (email) => {
+    if (!email || email.trim() === "") {
+      return ""; // Empty is valid (optional field)
+    }
+    
+    if (!isValidEmailFormat(email)) {
+      return "Please enter a valid email address";
+    }
+
+    const exists = await checkEmailExists(email);
+    if (!exists) {
+      return "Email not found";
+    }
+
+    return ""; // No error
   };
 
   const handleSubmit = async () => {
-    setError("");
+    // Clear all previous errors
+    setProjectNameError("");
+    setDueDateError("");
+    setTeacherEmailError("");
+    setGroupmateEmailErrors(groupmateEmails.map(() => ""));
     setSuccessMessage("");
 
+    let hasError = false;
+
+    // Validate project name
     if (!projectName.trim()) {
-      setError("Project name is required");
-      return;
+      setProjectNameError("Project name is required");
+      hasError = true;
     }
 
+    // Validate due date
     if (dueDate) {
       const tdy = new Date();
       tdy.setHours(0, 0, 0, 0);
       const selected = new Date(dueDate);
 
       if (selected < tdy) {
-        setError("Due date cannot be in the past.");
-        return;
+        setDueDateError("Due date cannot be in the past");
+        hasError = true;
       }
+    }
+
+    // Validate teacher email
+    if (teacherEmail && teacherEmail.trim()) {
+      const teacherError = await validateEmail(teacherEmail);
+      if (teacherError) {
+        setTeacherEmailError(teacherError);
+        hasError = true;
+      }
+    }
+
+    // Validate groupmate emails
+    const emailErrors = [];
+    for (let i = 0; i < groupmateEmails.length; i++) {
+      const email = groupmateEmails[i];
+      if (email && email.trim()) {
+        const error = await validateEmail(email);
+        emailErrors.push(error);
+        if (error) {
+          hasError = true;
+        }
+      } else {
+        emailErrors.push("");
+      }
+    }
+    setGroupmateEmailErrors(emailErrors);
+
+    // Stop if there are any errors
+    if (hasError) {
+      return;
     }
 
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user) {
-      setError("User not logged in");
+      setProjectNameError("User not logged in");
       return;
     }
 
@@ -71,7 +154,7 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
       const response = await api.post("/api/project/create", {
         userId: user._id,
         name: projectName,
-        teacherEmail,
+        teacherEmail: teacherEmail.trim(),
         groupmateEmails: emails,
         dueDate,
       });
@@ -86,7 +169,7 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
       }, 1000);
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.error || "Error creating project");
+      setProjectNameError(err.response?.data?.error || "Error creating project");
     } finally {
       setIsCreating(false);
     }
@@ -95,9 +178,12 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
   const handleCancel = () => {
     setProjectName("");
     setTeacherEmail("");
-    setGroupmateEmails("");
+    setGroupmateEmails([""]);
     setDueDate("");
-    setError("");
+    setProjectNameError("");
+    setDueDateError("");
+    setTeacherEmailError("");
+    setGroupmateEmailErrors([""]);
     setSuccessMessage("");
     onClose();
   };
@@ -195,6 +281,13 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
     fontWeight: 500,
   });
 
+  const errorTextStyle = {
+    color: "#dc2626",
+    fontSize: "0.875rem",
+    marginTop: "0.25rem",
+    display: "block",
+  };
+
   const footerStyle = {
     display: "flex",
     justifyContent: "flex-end",
@@ -232,7 +325,6 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
         </div>
 
         <div style={bodyStyle}>
-          {error && <div style={messageStyle(true)}>{error}</div>}
           {successMessage && (
             <div style={messageStyle(false)}>{successMessage}</div>
           )}
@@ -244,9 +336,15 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
               maxLength={20}
               style={inputStyle}
               value={projectName}
-              onChange={(e) => setProjectName(e.target.value)}
+              onChange={(e) => {
+                setProjectName(e.target.value);
+                setProjectNameError("");
+              }}
               placeholder="Enter project name"
             />
+            {projectNameError && (
+              <span style={errorTextStyle}>{projectNameError}</span>
+            )}
           </div>
 
           <div style={formGroupStyle}>
@@ -256,8 +354,14 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
               style={inputStyle}
               min={today}
               value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
+              onChange={(e) => {
+                setDueDate(e.target.value);
+                setDueDateError("");
+              }}
             />
+            {dueDateError && (
+              <span style={errorTextStyle}>{dueDateError}</span>
+            )}
           </div>
 
           <div style={formGroupStyle}>
@@ -267,44 +371,56 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
               maxLength={45}
               style={inputStyle}
               value={teacherEmail}
-              onChange={(e) => setTeacherEmail(e.target.value)}
+              onChange={(e) => {
+                setTeacherEmail(e.target.value);
+                setTeacherEmailError("");
+              }}
               placeholder="Enter teacher email"
             />
+            {teacherEmailError && (
+              <span style={errorTextStyle}>{teacherEmailError}</span>
+            )}
           </div>
 
           <div style={formGroupStyle}>
             <label style={labelStyle}>Groupmate Emails</label>
 
             {groupmateEmails.map((email, index) => (
-              <div
-                key={index}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  marginBottom: "0.5rem",
-                }}
-              >
-                <input
-                  type="email"
-                  style={{ ...inputStyle, flex: 1 }}
-                  value={email}
-                  placeholder={`Groupmate email #${index + 1}`}
-                  onChange={(e) => updateEmailField(index, e.target.value)}
-                />
-                {index > 0 && (
-                  <button
-                    onClick={() => removeEmailField(index)}
-                    style={{
-                      border: "none",
-                      background: "none",
-                      cursor: "pointer",
-                      color: "#dc2626",
-                      fontSize: "1.2rem",
-                    }}
-                  >
-                    ✕
-                  </button>
+              <div key={index}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    marginBottom: "0.25rem",
+                  }}
+                >
+                  <input
+                    type="email"
+                    style={{ ...inputStyle, flex: 1 }}
+                    value={email}
+                    placeholder={`Groupmate email #${index + 1}`}
+                    onChange={(e) => updateEmailField(index, e.target.value)}
+                  />
+                  {index > 0 && (
+                    <button
+                      onClick={() => removeEmailField(index)}
+                      style={{
+                        border: "none",
+                        background: "none",
+                        cursor: "pointer",
+                        color: "#dc2626",
+                        fontSize: "1.2rem",
+                      }}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+                {groupmateEmailErrors[index] && (
+                  <span style={{ ...errorTextStyle, marginBottom: "0.5rem" }}>
+                    {groupmateEmailErrors[index]}
+                  </span>
                 )}
               </div>
             ))}
