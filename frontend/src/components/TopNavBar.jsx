@@ -6,6 +6,7 @@ import api from "../api";
 import { useProject } from "../context/ProjectContext";
 import { getUserBanner } from "../constants/storeItems";
 import AddNewProject from "../screens/AddNewProject";
+import ProfileCircle from "../components/ProfileCircle"
 
 // Helper function to darken a hex color for
 const darkenColor = (hex, percent = 20) => {
@@ -279,6 +280,9 @@ const TopNavBar = () => {
             <FaPlus size={20} />
           </button>
         </div>
+                <div style={TopNavBarStyle.profileContainer}>
+                  <ProfileCircle size={40} />
+                </div>
       </div>
 
       <AddNewProject

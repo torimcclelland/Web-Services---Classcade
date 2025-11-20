@@ -312,7 +312,6 @@ const MessageThread = () => {
               </div>
             )}
             <div style={{ flexShrink: 0 }}>
-              <ProfileCircle size={64} />
             </div>
           </div>
 

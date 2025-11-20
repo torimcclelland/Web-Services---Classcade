@@ -59,7 +59,13 @@ const TopNavBarStyle = {
   },
   homeHover: {
     backgroundColor: '#dcd4d4ff',
-  }
+  },
+  profileContainer: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    minWidth: "40px",
+  } 
 };
 
 export default TopNavBarStyle;

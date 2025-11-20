@@ -94,7 +94,7 @@ const MyTasks = () => {
 
     if (!newStatus || draggedTask.status === newStatus) return;
 
-    // optimistic update
+    //optimistic update
     setTasks((prev) =>
       prev.map((t) =>
         t._id === active.id ? { ...t, status: newStatus } : t
@@ -108,7 +108,7 @@ const MyTasks = () => {
     }
   };
 
-  // Explicit edit handler
+  //explicit edit handler
   const handleEdit = (task) => {
     setEditingTask(task);
     setShowModal(true);
@@ -132,7 +132,6 @@ const MyTasks = () => {
                   setShowModal(true);
                 }}
               />
-              <ProfileCircle size={48} />
             </div>
           </div>
 
@@ -160,7 +159,7 @@ const MyTasks = () => {
                       <DraggableCard
                         key={task._id}
                         task={task}
-                        onEdit={handleEdit} // pencil triggers modal
+                        onEdit={handleEdit} //pencil triggers modal
                       />
                     ))}
                   </Swimlane>
@@ -177,7 +176,7 @@ const MyTasks = () => {
               }}
             >
               <AddNewTaskModal
-                task={editingTask} // null for add, object for edit
+                task={editingTask} //passing the existing task to edit
                 onClose={() => {
                   setShowModal(false);
                   setEditingTask(null);

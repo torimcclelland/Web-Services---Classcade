@@ -42,9 +42,6 @@ const MainLayout = ({ children, showSidebar = true }) => {
       <div style={contentRowStyle}>
         {showSidebar && <Sidebar />}
         <main style={mainContentStyle}>
-          <div style={profileIconStyle}>
-            <ProfileCircle size={64} />
-          </div>
           {children}
         </main>
       </div>
