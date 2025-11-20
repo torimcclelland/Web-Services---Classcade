@@ -14,7 +14,6 @@ const HomePage = () => {
   const [firstName, setFirstName] = useState("");
   const [hoveredCard, setHoveredCard] = useState(null);
   const [hoveredNewBtn, setHoveredNewBtn] = useState(false);
-  const [hoveredLogout, setHoveredLogout] = useState(false);
   const [showAddProjectModal, setShowAddProjectModal] = useState(false);
 
   const { setSelectedProject } = useProject();

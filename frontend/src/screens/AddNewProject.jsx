@@ -179,12 +179,6 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
     boxSizing: "border-box",
   };
 
-  const textareaStyle = {
-    ...inputStyle,
-    minHeight: "80px",
-    resize: "vertical",
-  };
-
   const messageStyle = (isError) => ({
     padding: "0.75rem",
     borderRadius: 8,

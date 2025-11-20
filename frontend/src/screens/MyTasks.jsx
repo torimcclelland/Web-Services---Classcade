@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import MainLayout from "../components/MainLayout";
 import PrimaryButton from "../components/PrimaryButton";
 import MyTasksStyle from "../styles/MyTasksStyle";
 import api from "../api";
@@ -39,7 +38,9 @@ const Swimlane = ({ lane, children }) => {
       ref={setNodeRef}
       style={{
         ...MyTasksStyle.swimlane,
-        backgroundColor: isOver ? "#f0f8ff" : MyTasksStyle.swimlane.backgroundColor,
+        backgroundColor: isOver
+          ? "#f0f8ff"
+          : MyTasksStyle.swimlane.backgroundColor,
         transition: "background-color 0.2s ease",
       }}
     >
@@ -100,9 +101,7 @@ const MyTasks = () => {
     try {
       await api.put(`/api/task/update/${active.id}`, { status: newStatus });
       setTasks((prev) =>
-        prev.map((t) =>
-          t._id === active.id ? { ...t, status: newStatus } : t
-        )
+        prev.map((t) => (t._id === active.id ? { ...t, status: newStatus } : t))
       );
     } catch (err) {
       console.error("Failed to update task status:", err);
