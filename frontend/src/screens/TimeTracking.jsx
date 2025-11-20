@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import MainLayout from "../components/MainLayout";
 import PrimaryButton from "../components/PrimaryButton";
 import TimeTrackingStyle from "../styles/TimeTrackingStyle";
 import api from "../api";
 import { useProject } from "../context/ProjectContext";
 
-const TimeTracking = () => {
-  const navigate = useNavigate();
+const TimeTracking = ({ isOpen, onClose }) => {
   const { selectedProject } = useProject();
 
   const [tasks, setTasks] = useState([]);
@@ -19,6 +16,15 @@ const TimeTracking = () => {
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
+    if (!isOpen) {
+      // Reset form when closed
+      setSelectedTask("");
+      setMinutes("");
+      setCompleted(false);
+      setPopup("");
+      return;
+    }
+
     if (!selectedProject?._id) return;
 
     const fetchTasks = async () => {
@@ -31,10 +37,8 @@ const TimeTracking = () => {
       }
     };
 
-    fetchTasks();
-  }, [selectedProject]);
-
-  const showPopup = (msg) => {
+      fetchTasks();
+  }, [isOpen, selectedProject]);  const showPopup = (msg) => {
     setPopup(msg);
     setTimeout(() => setPopup(""), 2000);
   };
@@ -69,21 +73,91 @@ const TimeTracking = () => {
       });
 
       showPopup("Time logged");
-      setMinutes("");
-      setCompleted(false);
-      setSelectedTask("");
+      setTimeout(() => {
+        setMinutes("");
+        setCompleted(false);
+        setSelectedTask("");
+        onClose();
+      }, 1500);
     } catch (err) {
       console.error("Failed to log time:", err);
       showPopup("Error logging time");
     }
   };
 
+  if (!isOpen) return null;
+
+  const modalStyle = {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1000,
+  };
+
+  const contentStyle = {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    width: "90%",
+    maxWidth: 500,
+    maxHeight: "90vh",
+    overflow: "auto",
+    boxShadow: "0 10px 40px rgba(0, 0, 0, 0.2)",
+  };
+
+  const headerStyle = {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "1.5rem",
+    borderBottom: "1px solid #e5e7eb",
+  };
+
+  const titleStyle = {
+    fontSize: "1.5rem",
+    fontWeight: 700,
+    color: "#1f2937",
+    margin: 0,
+  };
+
+  const closeButtonStyle = {
+    background: "none",
+    border: "none",
+    fontSize: "2rem",
+    color: "#6b7280",
+    cursor: "pointer",
+    padding: 0,
+    lineHeight: 1,
+    transition: "color 0.2s",
+  };
+
+  const bodyStyle = {
+    padding: "1.5rem",
+  };
+
   return (
-    <MainLayout>
-      <div style={TimeTrackingStyle.formPanel}>
-            <h2 style={TimeTrackingStyle.title}>
-              Time Tracking ({selectedProject?.name})
-            </h2>
+    <div style={modalStyle} onClick={onClose}>
+      <div style={contentStyle} onClick={(e) => e.stopPropagation()}>
+        <div style={headerStyle}>
+          <h2 style={titleStyle}>
+            Time Tracking ({selectedProject?.name})
+          </h2>
+          <button
+            style={closeButtonStyle}
+            onClick={onClose}
+            onMouseEnter={(e) => (e.target.style.color = "#1f2937")}
+            onMouseLeave={(e) => (e.target.style.color = "#6b7280")}
+          >
+            ×
+          </button>
+        </div>
+
+        <div style={bodyStyle}>
 
             <label style={TimeTrackingStyle.label}>Select Task</label>
             <select
@@ -130,18 +204,19 @@ const TimeTracking = () => {
             <div style={TimeTrackingStyle.actionButtons}>
               <PrimaryButton
                 text="Cancel"
-                onClick={() => navigate("/dashboard")}
+                onClick={onClose}
               />
               <PrimaryButton text="Submit" onClick={handleSubmit} />
             </div>
-          </div>
 
-      {popup && (
-        <div style={TimeTrackingStyle.popupContainer}>
-          <div style={TimeTrackingStyle.popupMessage}>{popup}</div>
+          {popup && (
+            <div style={TimeTrackingStyle.popupContainer}>
+              <div style={TimeTrackingStyle.popupMessage}>{popup}</div>
+            </div>
+          )}
         </div>
-      )}
-    </MainLayout>
+      </div>
+    </div>
   );
 };
 

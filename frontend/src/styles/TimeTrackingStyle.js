@@ -27,7 +27,7 @@ export const TimeTrackingStyle = {
     maxWidth: 500,
     display: "flex",
     flexDirection: "column",
-    gap: "1rem",
+    gap: "1.25rem",
   },
   title: {
     fontSize: 24,
@@ -47,6 +47,7 @@ export const TimeTrackingStyle = {
     borderRadius: "6px",
     border: "2px solid #d1d5db",
     fontSize: 16,
+    marginBottom: "1.25rem",
   },
   input: {
     width: "100%",
@@ -54,6 +55,8 @@ export const TimeTrackingStyle = {
     borderRadius: "6px",
     border: "2px solid #d1d5db",
     fontSize: 16,
+    marginLeft: "1rem",
+    marginBottom: "0.75rem",
   },
   row: {
     display: "flex",

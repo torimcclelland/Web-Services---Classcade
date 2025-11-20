@@ -86,12 +86,6 @@ export default function Sidebar() {
       path: "/dashboard",
     },
     { key: "tasks", label: "My Tasks", icon: <FaTasks />, path: "/tasks" },
-    {
-      key: "timetracking",
-      label: "Time Tracking",
-      icon: <FaCalendarAlt />,
-      path: "/timetracking",
-    },
     { key: "stats", label: "Stats", icon: <FaChartBar />, path: "/stats" },
     {
       key: "messages",
