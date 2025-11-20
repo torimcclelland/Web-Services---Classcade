@@ -36,6 +36,7 @@ const MyTasksStyle = {
     boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
     display: "flex",
     flexDirection: "column",
+    minHeight: "40rem"
   },  
   swimlaneTitle: {
     fontSize: "1.1rem",

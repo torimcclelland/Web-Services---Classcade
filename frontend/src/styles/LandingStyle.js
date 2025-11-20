@@ -23,20 +23,43 @@ export const Hero = styled.div`
   }
 `;
 
-export const LogoImage = styled.img`
-  width: 240px;
-  height: auto;
+export const HeroTop = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
   margin-bottom: 20px;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-`;
 
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 20px;
+  }
+`;
 export const Tagline = styled.h2`
   font-size: 1.8rem;
   font-weight: 600;
   margin-bottom: 20px;
   color: #444;
+`;
+
+export const HeroText = styled.div`
+  text-align: left;
+
+  h1 {
+    font-size: 3.5rem;
+    margin-bottom: 10px;
+    color: #274de4;
+  }
+
+  ${Tagline} {
+    font-size: 1.6rem;
+    margin-bottom: 0;
+  }
+`;
+
+export const LogoImage = styled.img`
+  width: 240px;
+  height: auto;
 `;
 
 export const Description = styled.p`
@@ -55,18 +78,25 @@ export const ButtonGroup = styled.div`
 
 export const Features = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 60px;
-  gap: 30px;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 40px;
   max-width: 1000px;
+  width: 100%;
+
+  @media (max-width: 900px) {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
 `;
 
 export const FeatureCard = styled.div`
+  flex: 1;
+  min-width: 280px;
+  max-width: 320px;
   background: #fff;
   border-radius: 15px;
   padding: 25px;
-  width: 280px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 
@@ -87,5 +117,4 @@ export const FeatureCard = styled.div`
     box-shadow: 0 12px 25px rgba(0,0,0,0.15);
   }
 `;
-
 

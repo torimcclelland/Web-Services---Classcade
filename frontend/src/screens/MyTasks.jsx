@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import MainLayout from "../components/MainLayout";
 import PrimaryButton from "../components/PrimaryButton";
 import MyTasksStyle from "../styles/MyTasksStyle";
 import api from "../api";
 import { useProject } from "../context/ProjectContext";
 import ModalWrapper from "../components/ModalWrapper";
-import AddNewTaskModal from "../screens/AddNewTask";
+import AddNewTaskModal from "../screens/AddNewTask"; // unified add/edit modal
 import DraggableCard from "../components/DraggableCard";
 import TopNavBar from "../components/TopNavBar";
 import Sidebar from "../components/Sidebar";
@@ -52,9 +51,9 @@ const Swimlane = ({ lane, children }) => {
 const MyTasks = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [activeTaskId, setActiveTaskId] = useState(null);
-  const user = JSON.parse(localStorage.getItem("user"));
   const { selectedProject } = useProject();
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -86,27 +85,35 @@ const MyTasks = () => {
   const handleDragEnd = async (event) => {
     const { active, over } = event;
     setActiveTaskId(null);
-  
+
     if (!over) return;
-  
+
     const draggedTask = tasks.find((t) => t._id === active.id);
-    const newStatus = over.data?.current?.lane || swimlanes.find((lane) => lane === over.id);
-  
+    const newStatus =
+      over.data?.current?.lane || swimlanes.find((lane) => lane === over.id);
+
     if (!newStatus || draggedTask.status === newStatus) return;
-  
+
+    // optimistic update
     setTasks((prev) =>
       prev.map((t) =>
         t._id === active.id ? { ...t, status: newStatus } : t
       )
     );
-  
+
     try {
       await api.put(`/api/task/update/${active.id}`, { status: newStatus });
     } catch (err) {
       console.error("Failed to update task status:", err);
     }
   };
-  
+
+  // Explicit edit handler
+  const handleEdit = (task) => {
+    setEditingTask(task);
+    setShowModal(true);
+  };
+
   return (
     <div style={MyTasksStyle.container}>
       <TopNavBar />
@@ -120,7 +127,10 @@ const MyTasks = () => {
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <PrimaryButton
                 text="Add Task"
-                onClick={() => setShowModal(true)}
+                onClick={() => {
+                  setEditingTask(null);
+                  setShowModal(true);
+                }}
               />
               <ProfileCircle size={48} />
             </div>
@@ -147,7 +157,11 @@ const MyTasks = () => {
                       </p>
                     )}
                     {getTasksByStatus(lane).map((task) => (
-                      <DraggableCard key={task._id} task={task} />
+                      <DraggableCard
+                        key={task._id}
+                        task={task}
+                        onEdit={handleEdit} // pencil triggers modal
+                      />
                     ))}
                   </Swimlane>
                 </SortableContext>
@@ -156,9 +170,18 @@ const MyTasks = () => {
           </DndContext>
 
           {showModal && (
-            <ModalWrapper onClose={() => setShowModal(false)}>
+            <ModalWrapper
+              onClose={() => {
+                setShowModal(false);
+                setEditingTask(null);
+              }}
+            >
               <AddNewTaskModal
-                onClose={() => setShowModal(false)}
+                task={editingTask} // null for add, object for edit
+                onClose={() => {
+                  setShowModal(false);
+                  setEditingTask(null);
+                }}
                 onSuccess={async () => {
                   try {
                     const res = await api.get(
