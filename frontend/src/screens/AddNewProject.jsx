@@ -44,7 +44,7 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
 
   const removeEmailField = (index) => {
     const updated = groupmateEmails.filter((_, i) => i !== index);
-    setGroupmateEmails(updated.length > 0 ? updated : [""]);
+    setGroupmateEmails(updated);
     const updatedErrors = groupmateEmailErrors.filter((_, i) => i !== index);
     setGroupmateEmailErrors(updatedErrors.length > 0 ? updatedErrors : [""]);
   };
@@ -70,7 +70,7 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
     if (!email || email.trim() === "") {
       return ""; // Empty is valid (optional field)
     }
-    
+
     if (!isValidEmailFormat(email)) {
       return "Please enter a valid email address";
     }
@@ -169,7 +169,9 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
       }, 1000);
     } catch (err) {
       console.error(err);
-      setProjectNameError(err.response?.data?.error || "Error creating project");
+      setProjectNameError(
+        err.response?.data?.error || "Error creating project"
+      );
     } finally {
       setIsCreating(false);
     }
@@ -353,9 +355,7 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
                 setDueDateError("");
               }}
             />
-            {dueDateError && (
-              <span style={errorTextStyle}>{dueDateError}</span>
-            )}
+            {dueDateError && <span style={errorTextStyle}>{dueDateError}</span>}
           </div>
 
           <div style={formGroupStyle}>
@@ -396,20 +396,18 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
                     placeholder={`Groupmate email #${index + 1}`}
                     onChange={(e) => updateEmailField(index, e.target.value)}
                   />
-                  {index > 0 && (
-                    <button
-                      onClick={() => removeEmailField(index)}
-                      style={{
-                        border: "none",
-                        background: "none",
-                        cursor: "pointer",
-                        color: "#dc2626",
-                        fontSize: "1.2rem",
-                      }}
-                    >
-                      ✕
-                    </button>
-                  )}
+                  <button
+                    onClick={() => removeEmailField(index)}
+                    style={{
+                      border: "none",
+                      background: "none",
+                      cursor: "pointer",
+                      color: "#dc2626",
+                      fontSize: "1.2rem",
+                    }}
+                  >
+                    ✕
+                  </button>
                 </div>
                 {groupmateEmailErrors[index] && (
                   <span style={{ ...errorTextStyle, marginBottom: "0.5rem" }}>
