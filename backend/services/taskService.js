@@ -165,4 +165,45 @@ router.put("/update/:taskid", async (req, res) => {
   }
 });
 
+// Get a task by ID only (for modal editing)
+router.get("/getById/:taskid", async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.taskid);
+    if (!task) return res.status(404).json({ error: "Task not found" });
+    res.json(task);
+  } catch (err) {
+    console.error("Failed to fetch task by ID:", err);
+    res.status(500).json({ error: "Failed to fetch task" });
+  }
+});
+
+// Check if a task exists
+router.get("/exists/:taskid", async (req, res) => {
+  try {
+    const exists = await Task.exists({ _id: req.params.taskid });
+    res.json({ exists: !!exists });
+  } catch (err) {
+    console.error("Failed to check task existence:", err);
+    res.status(500).json({ error: "Failed to check task" });
+  }
+});
+
+// Partially update a task
+router.patch("/:projectid/:taskid", async (req, res) => {
+  try {
+    const updated = await Task.findOneAndUpdate(
+      { _id: req.params.taskid, projectId: req.params.projectid },
+      { $set: req.body },
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) return res.status(404).json({ error: "Task not found" });
+    res.json(updated);
+  } catch (err) {
+    console.error("Failed to patch task:", err);
+    res.status(500).json({ error: "Failed to patch task" });
+  }
+});
+
+
 module.exports = router;

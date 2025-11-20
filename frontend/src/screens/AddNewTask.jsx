@@ -6,14 +6,16 @@ import { useProject } from "../context/ProjectContext";
 
 const swimlanes = ["Not Started", "In Progress", "Under Review", "Done"];
 
-const AddNewTaskModal = ({ onClose, onSuccess }) => {
+const AddNewTaskModal = ({ task, onClose, onSuccess }) => {
   const { selectedProject } = useProject();
   const user = JSON.parse(localStorage.getItem("user"));
 
-  const [taskName, setTaskName] = useState("");
-  const [description, setDescription] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [status, setStatus] = useState("Not Started");
+  const [taskName, setTaskName] = useState(task?.name || "");
+  const [description, setDescription] = useState(task?.description || "");
+  const [dueDate, setDueDate] = useState(
+    task?.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : ""
+  );
+  const [status, setStatus] = useState(task?.status || "Not Started");
   const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
@@ -26,27 +28,41 @@ const AddNewTaskModal = ({ onClose, onSuccess }) => {
     }
 
     try {
-      await api.post(`/api/task/${selectedProject._id}`, {
-        name: taskName.trim(),
-        description: description.trim(),
-        assignedTo: user._id,
-        dueDate: dueDate || null,
-        status,
-      });
+      if (task) {
+        //editing existing task
+        await api.put(`/api/task/${selectedProject._id}/${task._id}`, {
+          name: taskName.trim(),
+          description: description.trim(),
+          dueDate: dueDate || null,
+          status,
+        });
+      } else {
+        //creating new task
+        await api.post(`/api/task/${selectedProject._id}`, {
+          name: taskName.trim(),
+          description: description.trim(),
+          assignedTo: user._id,
+          dueDate: dueDate || null,
+          status,
+        });
+      }
 
-      alert("Task added successfully!");
-      onSuccess?.(); // refresh task list in parent
-      onClose();     // close modal
+      onSuccess?.(); //refresh task list
+      onClose();     //close modal
     } catch (err) {
-      console.error("Failed to create task:", err);
-      setError(err.response?.data?.error || "Failed to create task.");
+      console.error("Failed to save task:", err);
+      setError(
+        err.response?.data?.error ||
+        err.message ||
+        "Failed to save task."
+      );
     }
   };
 
   return (
     <div style={AddNewTaskStyle.formPanel}>
       <h2 style={AddNewTaskStyle.title}>
-        Add Task to: {selectedProject?.name}
+        {task ? "Edit Task" : `Add Task to: ${selectedProject?.name}`}
       </h2>
 
       {error && <p style={{ color: "red", marginBottom: "1rem" }}>{error}</p>}
@@ -91,7 +107,10 @@ const AddNewTaskModal = ({ onClose, onSuccess }) => {
 
       <div style={AddNewTaskStyle.actionButtons}>
         <PrimaryButton text="Cancel" onClick={onClose} />
-        <PrimaryButton text="Create Task" onClick={handleSubmit} />
+        <PrimaryButton
+          text={task ? "Update Task" : "Create Task"}
+          onClick={handleSubmit}
+        />
       </div>
     </div>
   );
