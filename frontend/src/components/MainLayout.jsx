@@ -1,7 +1,6 @@
 import React from 'react';
 import TopNavBar from './TopNavBar';
 import Sidebar from './Sidebar';
-import ProfileCircle from './ProfileCircle';
 
 /**
  * MainLayout - Consistent layout wrapper for all main application pages
@@ -24,16 +23,9 @@ const MainLayout = ({ children, showSidebar = true }) => {
   const mainContentStyle = {
     flex: 1,
     padding: '24px',
-    paddingTop: '100px', // Increased space for profile icon
+    paddingTop: '50px', // Increased space for profile icon
     backgroundColor: '#ddf9ea',
     position: 'relative',
-  };
-
-  const profileIconStyle = {
-    position: 'absolute',
-    top: '20px',
-    right: '40px',
-    zIndex: 10,
   };
 
   return (
