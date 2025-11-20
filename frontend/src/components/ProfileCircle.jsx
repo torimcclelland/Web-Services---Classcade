@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
@@ -10,6 +10,7 @@ const Wrapper = styled.div`
   display: flex;
   align-items: center;
   cursor: pointer;
+  position: relative;
 `;
 
 const Circle = styled.div`
@@ -41,10 +42,41 @@ const Name = styled.span`
   color: #333;
 `;
 
+const DropdownMenu = styled.div`
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 180px;
+  z-index: 1000;
+  overflow: hidden;
+`;
+
+const MenuItem = styled.div`
+  padding: 12px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: #f5f5f5;
+  }
+  
+  &:not(:last-child) {
+    border-bottom: 1px solid #eee;
+  }
+`;
+
 const ProfileCircle = ({ avatarUrl, name, size = 48, alt = 'User avatar' }) => {
   const navigate = useNavigate();
   const [iconUrl, setIconUrl] = useState(getUserIcon(null));
   const [backdrop, setBackdrop] = useState(null);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
   
   const getUserSelectedIcon = () => {
     try {
@@ -88,8 +120,49 @@ const ProfileCircle = ({ avatarUrl, name, size = 48, alt = 'User avatar' }) => {
     };
   }, []);
 
-  const goToProfile = () => {
-    navigate("/profile");
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdown]);
+
+  const toggleDropdown = () => {
+    setShowDropdown(!showDropdown);
+  };
+
+  const handleEditAccount = () => {
+    setShowDropdown(false);
+    navigate('/profile');
+  };
+
+  const handleCustomization = () => {
+    setShowDropdown(false);
+    navigate('/profile');
+  };
+
+  const handleLogout = () => {
+    setShowDropdown(false);
+    localStorage.removeItem('user');
+    navigate('/');
+  };
+
+  const handleDeleteAccount = () => {
+    setShowDropdown(false);
+    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      // TODO: Call delete account API
+      localStorage.removeItem('user');
+      navigate('/');
+    }
   };
 
   // Render backdrop based on type and size
@@ -189,12 +262,20 @@ const ProfileCircle = ({ avatarUrl, name, size = 48, alt = 'User avatar' }) => {
   };
 
   return (
-    <Wrapper onClick={goToProfile}>
-      <Circle size={size}>
+    <Wrapper ref={dropdownRef}>
+      <Circle size={size} onClick={toggleDropdown}>
         {backdrop && renderBackdrop(backdrop.type, backdrop.color, size)}
         <Avatar src={iconUrl} alt={alt} />
       </Circle>
       {name && <Name>{name}</Name>}
+      {showDropdown && (
+        <DropdownMenu>
+          <MenuItem onClick={handleEditAccount}>Edit Account</MenuItem>
+          <MenuItem onClick={handleCustomization}>Customization</MenuItem>
+          <MenuItem onClick={handleLogout}>Logout</MenuItem>
+          <MenuItem onClick={handleDeleteAccount}>Delete Account</MenuItem>
+        </DropdownMenu>
+      )}
     </Wrapper>
   );
 };
