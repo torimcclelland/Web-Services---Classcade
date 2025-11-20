@@ -4,7 +4,7 @@ import api from "../api";
 const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
   const [projectName, setProjectName] = useState("");
   const [teacherEmail, setTeacherEmail] = useState("");
-  const [groupmateEmails, setGroupmateEmails] = useState("");
+  const [groupmateEmails, setGroupmateEmails] = useState([""]);
   const [dueDate, setDueDate] = useState("");
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -14,7 +14,7 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
     if (isOpen) {
       setProjectName("");
       setTeacherEmail("");
-      setGroupmateEmails("");
+      setGroupmateEmails([""]);
       setDueDate("");
       setError("");
       setSuccessMessage("");
@@ -22,6 +22,21 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
   }, [isOpen]);
 
   if (!isOpen) return null;
+
+  const addEmailField = () => {
+    setGroupmateEmails([...groupmateEmails, ""]);
+  };
+
+  const updateEmailField = (index, value) => {
+    const updated = [...groupmateEmails];
+    updated[index] = value;
+    setGroupmateEmails(updated);
+  };
+
+  const removeEmailField = (index) => {
+    const updated = groupmateEmails.filter((_, i) => i !== index);
+    setGroupmateEmails(updated.length > 0 ? updated : [""]);
+  };
 
   const handleSubmit = async () => {
     setError("");
@@ -49,10 +64,7 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
       return;
     }
 
-    const emails = groupmateEmails
-      .split(",")
-      .map((e) => e.trim())
-      .filter(Boolean);
+    const emails = groupmateEmails.map((e) => e.trim()).filter(Boolean);
 
     setIsCreating(true);
     try {
@@ -262,13 +274,55 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
 
           <div style={formGroupStyle}>
             <label style={labelStyle}>Groupmate Emails</label>
-            <textarea
-              maxLength={45}
-              style={textareaStyle}
-              value={groupmateEmails}
-              onChange={(e) => setGroupmateEmails(e.target.value)}
-              placeholder="Enter emails separated by commas"
-            />
+
+            {groupmateEmails.map((email, index) => (
+              <div
+                key={index}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                <input
+                  type="email"
+                  style={{ ...inputStyle, flex: 1 }}
+                  value={email}
+                  placeholder={`Groupmate email #${index + 1}`}
+                  onChange={(e) => updateEmailField(index, e.target.value)}
+                />
+                {index > 0 && (
+                  <button
+                    onClick={() => removeEmailField(index)}
+                    style={{
+                      border: "none",
+                      background: "none",
+                      cursor: "pointer",
+                      color: "#dc2626",
+                      fontSize: "1.2rem",
+                    }}
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
+
+            <button
+              onClick={addEmailField}
+              style={{
+                padding: "0.5rem 1rem",
+                borderRadius: 8,
+                border: "1px solid #d1d5db",
+                backgroundColor: "#f9fafb",
+                cursor: "pointer",
+                fontWeight: 600,
+                marginTop: "0.5rem",
+              }}
+            >
+              + Add Groupmate
+            </button>
           </div>
         </div>
 

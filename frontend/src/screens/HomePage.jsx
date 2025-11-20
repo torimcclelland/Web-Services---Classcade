@@ -62,11 +62,13 @@ const HomePage = () => {
 
   const handleProjectCreated = (createdProject) => {
     // If a created project is provided, select it and go to dashboard
-    if (createdProject && createdProject._id) {
-      setSelectedProject(createdProject);
+    const project = createdProject?.project;
+
+    if (project && project._id) {
+      setSelectedProject(project);
       // Save selection to localStorage for persistence
-      try { localStorage.setItem('selectedProject', JSON.stringify(createdProject)); } catch (e) {}
-      navigate('/dashboard');
+      localStorage.setItem("selectedProject", JSON.stringify(project));
+      navigate("/dashboard");
       return;
     }
 
@@ -87,7 +89,9 @@ const HomePage = () => {
           alignItems: "center",
           justifyContent: "center",
         }}
-      > <ProfileCircle size={64} />
+      >
+        {" "}
+        <ProfileCircle size={64} />
       </div>
       <div style={HomePageStyle.inner}>
         <button style={HomePageStyle.logoutBtn} onClick={handleLogout}>
@@ -132,7 +136,6 @@ const HomePage = () => {
                     <div style={HomePageStyle.metaText}>
                       Members: {g.members?.length || 0}
                     </div>
-
                   </div>
                 </div>
               </div>
@@ -154,7 +157,7 @@ const HomePage = () => {
         </button>
       </div>
 
-      <AddNewProject 
+      <AddNewProject
         isOpen={showAddProjectModal}
         onClose={() => setShowAddProjectModal(false)}
         onProjectCreated={handleProjectCreated}
