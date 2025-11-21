@@ -124,12 +124,52 @@ const TopNavBar = () => {
       if (!storedUser) return { success: false, error: 'User not found' };
 
       const user = JSON.parse(storedUser);
-      const response = await api.put(`/api/user/${user._id}`, updates);
+      const currentUserData = userData || JSON.parse(storedUser);
 
-      // Update localStorage with new user data
-      const updatedUser = { ...user, ...updates };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      setUserData(response.data);
+      // Only update if values have changed
+      if (updates.firstName !== currentUserData.firstName || updates.lastName !== currentUserData.lastName) {
+        await api.put(`/api/user/${user._id}/updatename`, {
+          firstName: updates.firstName,
+          lastName: updates.lastName,
+        });
+      }
+
+      if (updates.email !== currentUserData.email) {
+        await api.put(`/api/user/${user._id}/updateemail`, {
+          email: updates.email,
+        });
+      }
+
+      if (updates.username !== currentUserData.username) {
+        await api.put(`/api/user/${user._id}/updateusername`, {
+          username: updates.username,
+        });
+      }
+
+      if (updates.password) {
+        await api.put(`/api/user/${user._id}/updatepassword`, {
+          password: updates.password,
+        });
+      }
+
+      // Update selected customizations (only if changed)
+      const customizationsChanged = 
+        updates.selectedIcon !== currentUserData.selectedIcon ||
+        updates.selectedBanner !== currentUserData.selectedBanner ||
+        updates.selectedBackdrop !== currentUserData.selectedBackdrop;
+
+      if (customizationsChanged) {
+        await api.put(`/api/user/${user._id}/updateselections`, {
+          selectedIcon: updates.selectedIcon,
+          selectedBanner: updates.selectedBanner,
+          selectedBackdrop: updates.selectedBackdrop,
+        });
+      }
+
+      // Fetch updated user data from backend
+      const updatedUserResponse = await api.get(`/api/user/${user._id}`);
+      localStorage.setItem('user', JSON.stringify(updatedUserResponse.data));
+      setUserData(updatedUserResponse.data);
 
       // Dispatch event to notify other components
       window.dispatchEvent(new Event('userUpdated'));
@@ -137,7 +177,8 @@ const TopNavBar = () => {
       return { success: true };
     } catch (error) {
       console.error('Error saving profile:', error);
-      return { success: false, error: error.response?.data?.message || 'Failed to update profile' };
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to update profile';
+      return { success: false, error: errorMessage };
     }
   };
 

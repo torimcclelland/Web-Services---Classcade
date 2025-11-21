@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { getUserIcon, getUserBackdrop } from '../constants/storeItems';
+import api from '../api';
 import star from '../assets/star.png';
 import flame from '../assets/fire.png';
 
@@ -164,12 +165,23 @@ const ProfileCircle = ({ avatarUrl, name, size = 48, alt = 'User avatar', onEdit
     navigate('/');
   };
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = async () => {
     setShowDropdown(false);
     if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-      // TODO: Call delete account API
-      localStorage.removeItem('user');
-      navigate('/');
+      try {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const user = JSON.parse(storedUser);
+          await api.delete(`/api/user/${user._id}`);
+        }
+        localStorage.removeItem('user');
+        localStorage.removeItem('userProjects');
+        localStorage.removeItem('userProjectsTimestamp');
+        navigate('/');
+      } catch (error) {
+        console.error('Error deleting account:', error);
+        alert('Failed to delete account. Please try again.');
+      }
     }
   };
 
