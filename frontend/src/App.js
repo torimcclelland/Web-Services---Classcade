@@ -1,8 +1,12 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { UserProvider } from "./context/UserContext";
 import { ProjectProvider } from "./context/ProjectContext";
-
 import DashboardPage from "./screens/Dashboard";
 import LogInPage from "./screens/LogIn";
 import HomePage from "./screens/HomePage";
@@ -19,6 +23,7 @@ import AddNewTask from "./screens/AddNewTask";
 import ProjectSettings from "./screens/ProjectSettings";
 import MessageThread from "./screens/MessageThread";
 import MessagesRedirect from "./screens/MessagesRedirect";
+import Landing from "./screens/Landing";
 
 export default function App() {
   return (
@@ -26,7 +31,8 @@ export default function App() {
       <ProjectProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<LogInPage />} />
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<LogInPage />} />
             <Route path="/signup" element={<SignUp />} />
             <Route
               path="/home"
