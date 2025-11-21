@@ -120,7 +120,18 @@ const SignUp = () => {
       // Auto-login after successful signup
       try {
         const loginRes = await api.post("/api/user/login", { username, password });
-        localStorage.setItem("user", JSON.stringify(loginRes.data.user));
+        const userData = loginRes.data.user;
+        localStorage.setItem("user", JSON.stringify(userData));
+        
+        // Fetch and cache user projects on signup (will be empty initially)
+        try {
+          const projectsRes = await api.get(`/api/project/user/${userData._id}`);
+          localStorage.setItem('userProjects', JSON.stringify(projectsRes.data));
+          localStorage.setItem('userProjectsTimestamp', Date.now().toString());
+        } catch (projErr) {
+          console.error("Error caching projects on signup:", projErr);
+        }
+        
         navigate("/home");
       } catch (loginErr) {
         // If auto-login fails, still show success and redirect to login

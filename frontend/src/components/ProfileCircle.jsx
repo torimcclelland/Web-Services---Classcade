@@ -71,7 +71,7 @@ const MenuItem = styled.div`
   }
 `;
 
-const ProfileCircle = ({ avatarUrl, name, size = 48, alt = 'User avatar' }) => {
+const ProfileCircle = ({ avatarUrl, name, size = 48, alt = 'User avatar', onEditAccount, onCustomization }) => {
   const navigate = useNavigate();
   const [iconUrl, setIconUrl] = useState(getUserIcon(null));
   const [backdrop, setBackdrop] = useState(null);
@@ -142,12 +142,20 @@ const ProfileCircle = ({ avatarUrl, name, size = 48, alt = 'User avatar' }) => {
 
   const handleEditAccount = () => {
     setShowDropdown(false);
-    navigate('/profile');
+    if (onEditAccount) {
+      onEditAccount();
+    } else {
+      navigate('/profile');
+    }
   };
 
   const handleCustomization = () => {
     setShowDropdown(false);
-    navigate('/profile');
+    if (onCustomization) {
+      onCustomization();
+    } else {
+      navigate('/store');
+    }
   };
 
   const handleLogout = () => {

@@ -69,7 +69,18 @@ const LogIn = () => {
 
     try {
       const res = await api.post("/api/user/login", { username, password });
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      const userData = res.data.user;
+      localStorage.setItem("user", JSON.stringify(userData));
+      
+      // Fetch and cache user projects on login
+      try {
+        const projectsRes = await api.get(`/api/project/user/${userData._id}`);
+        localStorage.setItem('userProjects', JSON.stringify(projectsRes.data));
+        localStorage.setItem('userProjectsTimestamp', Date.now().toString());
+      } catch (projErr) {
+        console.error("Error caching projects on login:", projErr);
+      }
+      
       navigate("/home");
     } catch (err) {
       // Parse error message for cleaner display
@@ -115,7 +126,7 @@ const LogIn = () => {
           placeholder="Enter your username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          maxLength={45}
+          maxLength={30}
         />
         
         {/* Password field with eye toggle */}
@@ -126,7 +137,7 @@ const LogIn = () => {
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            maxLength={45}
+            maxLength={30}
           />
           <button
             type="button"

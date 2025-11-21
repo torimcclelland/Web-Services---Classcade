@@ -23,7 +23,7 @@ const MainLayout = ({ children, showSidebar = true }) => {
   const mainContentStyle = {
     flex: 1,
     padding: '24px',
-    paddingTop: '50px', // Increased space for profile icon
+    paddingTop: '50px',
     backgroundColor: '#ddf9ea',
     position: 'relative',
   };
