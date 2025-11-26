@@ -264,13 +264,18 @@ const MessageThread = () => {
                         <div style={MessageThreadStyle.header}>
                             {project && (
                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                    <h3 style={MessageThreadStyle.chatTitle}>
-                                        {project.name} {activeChannel && `/ #${activeChannel.name}`}
-                                    </h3>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <h3 style={MessageThreadStyle.chatTitle}>
+                                            {project.name}
+                                        </h3>
+                                        {activeChannel && (
+                                            <span style={MessageThreadStyle.channelBadge}>
+                                                #{activeChannel.name}
+                                            </span>
+                                        )}
+                                    </div>
                                     <div style={{
-                                        fontSize: '0.85em',
-                                        color: '#666',
-                                        marginTop: '4px',
+                                        ...MessageThreadStyle.memberCount,
                                         position: 'relative'
                                     }}>
                                         <span>
@@ -280,12 +285,7 @@ const MessageThread = () => {
                                             {members.length > 3 && (
                                                 <span
                                                     onClick={() => setShowAllMembers(!showAllMembers)}
-                                                    style={{
-                                                        color: '#007bff',
-                                                        cursor: 'pointer',
-                                                        textDecoration: 'underline',
-                                                        marginLeft: '2px'
-                                                    }}
+                                                    style={MessageThreadStyle.memberLink}
                                                 >
                                                     +{members.length - 3} more
                                                 </span>
@@ -307,37 +307,14 @@ const MessageThread = () => {
                                                     }}
                                                 />
 
-                                                <div style={{
-                                                    position: 'absolute',
-                                                    top: '100%',
-                                                    left: 0,
-                                                    marginTop: '8px',
-                                                    backgroundColor: 'white',
-                                                    border: '1px solid #d1d5db',
-                                                    borderRadius: '8px',
-                                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                                                    padding: '12px',
-                                                    minWidth: '200px',
-                                                    maxWidth: '300px',
-                                                    zIndex: 1000,
-                                                }}>
-                                                    <div style={{
-                                                        fontWeight: '600',
-                                                        marginBottom: '8px',
-                                                        color: '#333',
-                                                        fontSize: '0.9em'
-                                                    }}>
+                                                <div style={MessageThreadStyle.memberDropdown}>
+                                                    <div style={MessageThreadStyle.memberDropdownHeader}>
                                                         All Members ({members.length})
                                                     </div>
-                                                    {members.map((member, index) => (
+                                                    {members.map((member) => (
                                                         <div
                                                             key={member._id}
-                                                            style={{
-                                                                padding: '6px 0',
-                                                                color: '#555',
-                                                                fontSize: '0.95em',
-                                                                borderTop: index > 0 ? '1px solid #f0f0f0' : 'none'
-                                                            }}
+                                                            style={MessageThreadStyle.memberItem}
                                                         >
                                                             {member.firstName} {member.lastName}
                                                         </div>
@@ -348,28 +325,16 @@ const MessageThread = () => {
                                     </div>
                                 </div>
                             )}
-                            <div style={{ flexShrink: 0 }}>
-                            </div>
                         </div>
 
                         {/* Messages window */}
                         <div style={MessageThreadStyle.chatWindow}>
                             {!activeChannelId ? (
-                                <div style={{
-                                    textAlign: 'center',
-                                    color: '#999',
-                                    padding: '40px',
-                                    fontStyle: 'italic'
-                                }}>
+                                <div style={MessageThreadStyle.emptyState}>
                                     Select a channel to start messaging
                                 </div>
                             ) : messages.length === 0 ? (
-                                <div style={{
-                                    textAlign: 'center',
-                                    color: '#999',
-                                    padding: '40px',
-                                    fontStyle: 'italic'
-                                }}>
+                                <div style={MessageThreadStyle.emptyState}>
                                     No messages yet. Start the conversation!
                                 </div>
                             ) : (
@@ -398,34 +363,26 @@ const MessageThread = () => {
                                             <div
                                                 style={{
                                                     ...MessageThreadStyle.messageBubble,
-                                                    backgroundColor: isCurrentUser ? '#007bff' : '#e9ecef',
-                                                    color: isCurrentUser ? 'white' : 'black',
+                                                    backgroundColor: isCurrentUser ? '#1e3a8a' : '#ffffff',
+                                                    color: isCurrentUser ? 'white' : '#1f2937',
                                                     maxWidth: '70%',
-                                                    padding: '10px 14px',
-                                                    borderRadius: '16px',
+                                                    borderRadius: '12px',
                                                     display: 'flex',
                                                     flexDirection: 'column',
-                                                    gap: '4px'
+                                                    gap: '4px',
+                                                    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
                                                 }}
                                             >
-                                                <strong style={{
-                                                    fontSize: '0.85em',
-                                                    fontWeight: '600'
-                                                }}>
+                                                <strong style={MessageThreadStyle.messageAuthor}>
                                                     {senderName}
                                                 </strong>
 
-                                                <span style={{
-                                                    wordBreak: 'break-word',
-                                                    fontSize: '0.95em',
-                                                    lineHeight: '1.4'
-                                                }}>
+                                                <span style={MessageThreadStyle.messageContent}>
                                                     {msg.content}
                                                 </span>
 
                                                 <small style={{
-                                                    fontSize: '0.7em',
-                                                    opacity: 0.7,
+                                                    ...MessageThreadStyle.messageTime,
                                                     alignSelf: 'flex-end'
                                                 }}>
                                                     {new Date(msg.createdAt).toLocaleTimeString([], {
@@ -452,9 +409,6 @@ const MessageThread = () => {
                                             minHeight: '40px',
                                             maxHeight: '120px',
                                             overflowY: 'auto',
-                                            fontFamily: 'inherit',
-                                            fontSize: '14px',
-                                            lineHeight: '1.5',
                                             padding: '10px',
                                             paddingRight: '60px',
                                             width: '100%',
@@ -472,12 +426,8 @@ const MessageThread = () => {
                                         rows={1}
                                     />
                                     <div style={{
-                                        position: 'absolute',
-                                        bottom: '12px',
-                                        right: '12px',
-                                        fontSize: '11px',
+                                        ...MessageThreadStyle.characterCount,
                                         color: input.length > 900 ? '#dc3545' : '#999',
-                                        pointerEvents: 'none',
                                     }}>
                                         {input.length}/1000
                                     </div>
@@ -485,6 +435,8 @@ const MessageThread = () => {
                                 <button
                                     style={MessageThreadStyle.sendButton}
                                     onClick={sendMessage}
+                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1e40af'}
+                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1e3a8a'}
                                 >
                                     Send
                                 </button>
