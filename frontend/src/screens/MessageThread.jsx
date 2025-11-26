@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import ChannelSidebar from "../components/ChannelSidebar";
+import EmptyProjectState from "../components/EmptyProjectState";
 import MessageThreadStyle from "../styles/MessageThreadStyle";
 import api from "../api";
 import { useUser } from "../context/UserContext";
@@ -23,7 +24,20 @@ const MessageThread = () => {
     const [activeChannelId, setActiveChannelId] = useState(null);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
+    // Responsive state
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
     const messagesEndRef = useRef(null);
+
+    // Handle responsive layout
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // Fetch project info and members
     useEffect(() => {
@@ -55,25 +69,25 @@ const MessageThread = () => {
 
             try {
                 const res = await api.get(`/api/project/${conversationId}/channels`);
-                console.log('Fetched channels:', res.data);
-
                 if (res.data.length === 0) {
-                    // Create default general channel if none exist
-                    console.log('No channels found, creating general channel');
                     const generalRes = await api.post(`/api/project/${conversationId}/channels`, {
                         name: 'general',
                         description: 'General discussion'
                     });
                     setChannels([generalRes.data]);
-                    setActiveChannelId(generalRes.data._id);
+                    const channelId = generalRes.data.id || generalRes.data._id;
+                    setActiveChannelId(channelId);
                 } else {
                     setChannels(res.data);
-                    // Set first channel (preferably general) as active
-                    const generalChannel = res.data.find(c => c.name.toLowerCase() === 'general');
-                    setActiveChannelId(generalChannel?._id || res.data[0]._id);
+                    const generalChannel = res.data.find(c => c.name && c.name.toLowerCase() === 'general');
+                    const firstChannel = generalChannel || res.data[0];
+                    const initialChannelId = firstChannel?.id || firstChannel?._id;
+                    if (initialChannelId) {
+                        setActiveChannelId(initialChannelId);
+                    }
                 }
             } catch (err) {
-                console.error("Error fetching channels:", err);
+                console.error("[MessageThread] Error fetching channels:", err);
             }
         };
 
@@ -84,22 +98,12 @@ const MessageThread = () => {
     useEffect(() => {
         if (!activeChannelId) return;
 
-        console.log('[MessageThread] Setting up socket for channel:', activeChannelId);
-
         socketManager.connect();
         socketManager.joinRoom(activeChannelId);
 
         const handleReceiveMessage = (msg) => {
-            console.log('[MessageThread] Received message:', msg);
-
-            // Only process messages for active channel
-            if (msg.channelId !== activeChannelId) {
-                console.log('[MessageThread] Message for different channel, ignoring');
-                return;
-            }
-
+            if (msg.channelId !== activeChannelId) return;
             setMessages((prev) => {
-                // Remove temporary optimistic message
                 const filtered = prev.filter(m => {
                     const mId = m._id || m.id;
                     if (!mId) return true;
@@ -107,14 +111,8 @@ const MessageThread = () => {
                     return !mIdStr.startsWith('temp-') || m.content !== msg.content;
                 });
 
-                // Prevent duplicate real messages
                 const msgId = msg._id || msg.id;
-                if (filtered.some(m => (m._id || m.id) === msgId)) {
-                    console.log('[MessageThread] Duplicate message, skipping:', msgId);
-                    return filtered;
-                }
-
-                console.log('[MessageThread] Adding new message:', msgId);
+                if (filtered.some(m => (m._id || m.id) === msgId)) return filtered;
                 return [...filtered, msg];
             });
         };
@@ -122,9 +120,10 @@ const MessageThread = () => {
         socketManager.on("receiveMessage", handleReceiveMessage);
 
         return () => {
-            console.log('[MessageThread] Cleaning up socket listeners');
             socketManager.off("receiveMessage", handleReceiveMessage);
-            socketManager.leaveRoom(activeChannelId);
+            if (socketManager.isConnected()) {
+                socketManager.emit('leaveRoom', activeChannelId);
+            }
         };
     }, [activeChannelId]);
 
@@ -132,52 +131,16 @@ const MessageThread = () => {
     useEffect(() => {
         const fetchHistory = async () => {
             if (!currentUserId || !activeChannelId) return;
-
             try {
                 const res = await api.get(`/api/channels/${activeChannelId}/messages`);
-
                 const sortedMessages = res.data.sort(
                     (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
                 );
-
                 setMessages(sortedMessages);
-
-                // Mark unread messages as read
-                const unreadMessages = sortedMessages.filter(msg => {
-                    const isUnread = !msg.readBy?.some(r => r.user?.toString() === currentUserId);
-                    const senderId = msg.sender?._id || msg.sender;
-                    const notMine = senderId !== currentUserId && senderId?.toString() !== currentUserId?.toString();
-                    return isUnread && notMine;
-                });
-
-                console.log('Found', unreadMessages.length, 'unread messages');
-
-                if (unreadMessages.length > 0) {
-                    for (const msg of unreadMessages) {
-                        const msgId = msg._id || msg.id;
-                        if (!msgId) continue;
-
-                        try {
-                            await api.post(`/api/chat/${msgId}/read`, { userId: currentUserId });
-                        } catch (err) {
-                            console.error('Error marking message as read:', msgId, err);
-                        }
-                    }
-
-                    if (socketManager.isConnected()) {
-                        socketManager.emit("messagesRead", {
-                            channelId: activeChannelId,
-                            userId: currentUserId,
-                            count: unreadMessages.length
-                        });
-                    }
-                }
-
             } catch (err) {
-                console.error("Error loading messages:", err);
+                console.error("[MessageThread] Error loading messages:", err);
             }
         };
-
         fetchHistory();
     }, [activeChannelId, currentUserId]);
 
@@ -188,34 +151,35 @@ const MessageThread = () => {
 
     // Handle channel selection
     const handleChannelSelect = useCallback((channelId) => {
+        if (channelId === activeChannelId) return;
+        if (activeChannelId && socketManager.isConnected()) {
+            socketManager.emit('leaveRoom', activeChannelId);
+        }
         setActiveChannelId(channelId);
-        setMessages([]); // Clear messages when switching channels
-    }, []);
+        setMessages([]);
+        if (isMobile) {
+            setIsSidebarCollapsed(true);
+        }
+    }, [activeChannelId, isMobile]);
 
     // Send message handler
     const sendMessage = useCallback(async () => {
         if (!input.trim() || !activeChannelId) return;
-
         if (input.trim().length > 1000) {
             alert("Message is too long! Maximum 1000 characters.");
             return;
         }
-
         if (!socketManager.isConnected()) {
-            console.error("Socket not connected");
             alert("Connection lost. Please refresh the page.");
             return;
         }
-
         const msg = {
             channelId: activeChannelId,
-            conversationId: conversationId, // Keep for backwards compatibility
+            conversationId: conversationId,
             sender: currentUserId,
             content: input.trim(),
             recipients: members.map(m => m._id).filter(id => id !== currentUserId)
         };
-
-        // Optimistic UI update
         const optimisticMessage = {
             _id: `temp-${Date.now()}`,
             id: `temp-${Date.now()}`,
@@ -228,10 +192,8 @@ const MessageThread = () => {
             createdAt: new Date().toISOString(),
             readBy: []
         };
-
         setMessages(prev => [...prev, optimisticMessage]);
         setInput("");
-
         socketManager.emit("sendMessage", msg);
     }, [input, activeChannelId, conversationId, currentUserId, members, user]);
 
@@ -242,13 +204,52 @@ const MessageThread = () => {
         }
     };
 
-    const activeChannel = channels.find(c => c._id === activeChannelId);
+    const activeChannel = channels.find(c => (c.id || c._id) === activeChannelId);
+
+    // Date separator helper
+    const formatDateSeparator = (date) => {
+        const today = new Date();
+        const messageDate = new Date(date);
+        const isToday = today.toDateString() === messageDate.toDateString();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const isYesterday = yesterday.toDateString() === messageDate.toDateString();
+        if (isToday) return 'Today';
+        if (isYesterday) return 'Yesterday';
+        return messageDate.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: messageDate.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
+        });
+    };
+
+    const groupMessagesByDate = (messages) => {
+        const groups = [];
+        let currentDate = null;
+        messages.forEach(msg => {
+            const msgDate = new Date(msg.createdAt).toDateString();
+            if (msgDate !== currentDate) {
+                currentDate = msgDate;
+                groups.push({
+                    type: 'date',
+                    date: msg.createdAt
+                });
+            }
+            groups.push({
+                type: 'message',
+                data: msg
+            });
+        });
+        return groups;
+    };
+
+    // Check if user is alone in project
+    const isAloneInProject = members.length === 1 && members[0]._id === currentUserId;
 
     return (
         <MainLayout showSidebar={true}>
             <div style={MessageThreadStyle.container}>
                 <div style={MessageThreadStyle.layout}>
-                    {/* Channel Sidebar */}
                     <ChannelSidebar
                         channels={channels}
                         activeChannelId={activeChannelId}
@@ -261,11 +262,36 @@ const MessageThread = () => {
 
                     <main style={MessageThreadStyle.main}>
                         {/* Header */}
-                        <div style={MessageThreadStyle.header}>
+                        <div style={{
+                            ...MessageThreadStyle.header,
+                            ...(isMobile && { padding: "0.75rem 1rem", minHeight: '60px', height: 'auto' })
+                        }}>
+                            {/* ASCII Mobile menu toggle */}
+                            {isMobile && (
+                                <button
+                                    onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                                    style={{
+                                        background: 'none',
+                                        border: '1px solid #1e3a8a',
+                                        borderRadius: '5px',
+                                        fontWeight: 700,
+                                        fontSize: '0.9375rem',
+                                        cursor: 'pointer',
+                                        padding: '0.5rem 0.75rem',
+                                        color: '#1e3a8a',
+                                        marginRight: '0.5rem'
+                                    }}
+                                >
+                                    MENU
+                                </button>
+                            )}
                             {project && (
                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <h3 style={MessageThreadStyle.chatTitle}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                        <h3 style={{
+                                            ...MessageThreadStyle.chatTitle,
+                                            ...(isMobile && { fontSize: '1rem' })
+                                        }}>
                                             {project.name}
                                         </h3>
                                         {activeChannel && (
@@ -274,62 +300,18 @@ const MessageThread = () => {
                                             </span>
                                         )}
                                     </div>
-                                    <div style={{
-                                        ...MessageThreadStyle.memberCount,
-                                        position: 'relative'
-                                    }}>
-                                        <span>
-                                            {members.length} member{members.length !== 1 ? 's' : ''}
-                                            {members.length > 0 && ': '}
-                                            {members.slice(0, 3).map(m => m.firstName).join(', ')}
-                                            {members.length > 3 && (
-                                                <span
-                                                    onClick={() => setShowAllMembers(!showAllMembers)}
-                                                    style={MessageThreadStyle.memberLink}
-                                                >
-                                                    +{members.length - 3} more
-                                                </span>
-                                            )}
-                                        </span>
-
-                                        {/* Members dropdown */}
-                                        {showAllMembers && members.length > 3 && (
-                                            <>
-                                                <div
-                                                    onClick={() => setShowAllMembers(false)}
-                                                    style={{
-                                                        position: 'fixed',
-                                                        top: 0,
-                                                        left: 0,
-                                                        right: 0,
-                                                        bottom: 0,
-                                                        zIndex: 999
-                                                    }}
-                                                />
-
-                                                <div style={MessageThreadStyle.memberDropdown}>
-                                                    <div style={MessageThreadStyle.memberDropdownHeader}>
-                                                        All Members ({members.length})
-                                                    </div>
-                                                    {members.map((member) => (
-                                                        <div
-                                                            key={member._id}
-                                                            style={MessageThreadStyle.memberItem}
-                                                        >
-                                                            {member.firstName} {member.lastName}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
                                 </div>
                             )}
                         </div>
 
                         {/* Messages window */}
-                        <div style={MessageThreadStyle.chatWindow}>
-                            {!activeChannelId ? (
+                        <div style={{
+                            ...MessageThreadStyle.chatWindow,
+                            ...(isMobile && { padding: '1rem' })
+                        }}>
+                            {isAloneInProject ? (
+                                <EmptyProjectState projectName={project?.name || 'this project'} />
+                            ) : !activeChannelId ? (
                                 <div style={MessageThreadStyle.emptyState}>
                                     Select a channel to start messaging
                                 </div>
@@ -338,7 +320,20 @@ const MessageThread = () => {
                                     No messages yet. Start the conversation!
                                 </div>
                             ) : (
-                                messages.map((msg) => {
+                                groupMessagesByDate(messages).map((item, index) => {
+                                    if (item.type === 'date') {
+                                        return (
+                                            <div key={`date-${index}`} style={MessageThreadStyle.dateSeparator}>
+                                                <div style={MessageThreadStyle.dateSeparatorLine}></div>
+                                                <div style={MessageThreadStyle.dateSeparatorText}>
+                                                    {formatDateSeparator(item.date)}
+                                                </div>
+                                                <div style={MessageThreadStyle.dateSeparatorLine}></div>
+                                            </div>
+                                        );
+                                    }
+
+                                    const msg = item.data;
                                     const msgId = msg._id || msg.id;
                                     const senderId = msg.sender?._id || msg.sender;
                                     const isCurrentUser = senderId === currentUserId ||
@@ -365,7 +360,7 @@ const MessageThread = () => {
                                                     ...MessageThreadStyle.messageBubble,
                                                     backgroundColor: isCurrentUser ? '#1e3a8a' : '#ffffff',
                                                     color: isCurrentUser ? 'white' : '#1f2937',
-                                                    maxWidth: '70%',
+                                                    maxWidth: isMobile ? '85%' : '70%',
                                                     borderRadius: '12px',
                                                     display: 'flex',
                                                     flexDirection: 'column',
@@ -376,11 +371,9 @@ const MessageThread = () => {
                                                 <strong style={MessageThreadStyle.messageAuthor}>
                                                     {senderName}
                                                 </strong>
-
                                                 <span style={MessageThreadStyle.messageContent}>
                                                     {msg.content}
                                                 </span>
-
                                                 <small style={{
                                                     ...MessageThreadStyle.messageTime,
                                                     alignSelf: 'flex-end'
@@ -399,8 +392,11 @@ const MessageThread = () => {
                         </div>
 
                         {/* Input area */}
-                        {activeChannelId && (
-                            <div style={MessageThreadStyle.inputArea}>
+                        {activeChannelId && !isAloneInProject && (
+                            <div style={{
+                                ...MessageThreadStyle.inputArea,
+                                ...(isMobile && { padding: '0.75rem 1rem' })
+                            }}>
                                 <div style={{ flex: 1, position: 'relative' }}>
                                     <textarea
                                         style={{
@@ -433,7 +429,10 @@ const MessageThread = () => {
                                     </div>
                                 </div>
                                 <button
-                                    style={MessageThreadStyle.sendButton}
+                                    style={{
+                                        ...MessageThreadStyle.sendButton,
+                                        ...(isMobile && { padding: '0.75rem 1rem', fontSize: '0.8125rem' })
+                                    }}
                                     onClick={sendMessage}
                                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1e40af'}
                                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1e3a8a'}

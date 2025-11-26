@@ -40,7 +40,8 @@ const ChannelSidebar = ({
             onChannelsUpdate([...channels, res.data]);
             setNewChannelName("");
             setIsCreating(false);
-            onChannelSelect(res.data._id);
+            const newChannelId = res.data.id || res.data._id;
+            onChannelSelect(newChannelId);
         } catch (err) {
             console.error("Error creating channel:", err);
             alert(`Failed to create channel: ${err.response?.data?.error || err.message}`);
@@ -63,9 +64,10 @@ const ChannelSidebar = ({
                 name: newName.trim()
             });
 
-            const updated = channels.map(c =>
-                c._id === channelId ? { ...c, name: newName.trim() } : c
-            );
+            const updated = channels.map(c => {
+                const cId = c.id || c._id;
+                return cId === channelId ? { ...c, name: newName.trim() } : c;
+            });
             onChannelsUpdate(updated);
             setEditingChannelId(null);
         } catch (err) {
@@ -75,36 +77,49 @@ const ChannelSidebar = ({
     };
 
     const handleDeleteChannel = async (channelId) => {
-        const channelName = channels.find(c => c._id === channelId)?.name;
+        console.log('[ChannelSidebar] handleDeleteChannel called with ID:', channelId);
+
+        const channel = channels.find(c => (c.id || c._id) === channelId);
+        const channelName = channel?.name;
+
+        console.log('[ChannelSidebar] Found channel:', channel);
+        console.log('[ChannelSidebar] Channel name:', channelName);
 
         if (channelName?.toLowerCase() === 'general') {
+            console.log('[ChannelSidebar] Cannot delete general channel');
             alert("Cannot delete the general channel!");
             return;
         }
 
         if (!window.confirm(`Delete #${channelName}? All messages will be permanently lost.`)) {
+            console.log('[ChannelSidebar] User cancelled delete');
             return;
         }
 
         try {
-            await api.delete(`/api/channels/${channelId}`);
+            console.log('[ChannelSidebar] Sending DELETE request to:', `/api/channels/${channelId}`);
+            const response = await api.delete(`/api/channels/${channelId}`);
+            console.log('[ChannelSidebar] Delete response:', response.data);
 
-            const filtered = channels.filter(c => c._id !== channelId);
+            const filtered = channels.filter(c => (c.id || c._id) !== channelId);
+            console.log('[ChannelSidebar] Channels after filter:', filtered);
             onChannelsUpdate(filtered);
 
             if (activeChannelId === channelId) {
+                console.log('[ChannelSidebar] Deleted channel was active, switching channel');
                 const generalChannel = filtered.find(c => c.name.toLowerCase() === 'general');
                 if (generalChannel) {
-                    onChannelSelect(generalChannel._id);
+                    onChannelSelect(generalChannel.id || generalChannel._id);
                 } else if (filtered.length > 0) {
-                    onChannelSelect(filtered[0]._id);
+                    onChannelSelect(filtered[0].id || filtered[0]._id);
                 }
             }
 
             setOpenMenuId(null);
         } catch (err) {
-            console.error("Error deleting channel:", err);
-            alert("Failed to delete channel");
+            console.error('[ChannelSidebar] Error deleting channel:', err);
+            console.error('[ChannelSidebar] Error response:', err.response?.data);
+            alert("Failed to delete channel: " + (err.response?.data?.error || err.message));
         }
     };
 
@@ -163,10 +178,11 @@ const ChannelSidebar = ({
                 )}
 
                 {channels.map(channel => {
-                    const isActive = activeChannelId === channel._id;
-                    const isHovered = hoveredChannelId === channel._id;
-                    const isEditing = editingChannelId === channel._id;
-                    const isGeneral = channel.name.toLowerCase() === 'general';
+                    const channelId = channel.id || channel._id;
+                    const isActive = activeChannelId === channelId;
+                    const isHovered = hoveredChannelId === channelId;
+                    const isEditing = editingChannelId === channelId;
+                    const isGeneral = channel.name?.toLowerCase() === 'general';
 
                     const itemStyle = {
                         ...ChannelSidebarStyle.channelItem,
@@ -177,19 +193,19 @@ const ChannelSidebar = ({
 
                     return (
                         <div
-                            key={channel._id}
+                            key={channelId}
                             style={itemStyle}
-                            onMouseEnter={() => setHoveredChannelId(channel._id)}
+                            onMouseEnter={() => setHoveredChannelId(channelId)}
                             onMouseLeave={() => setHoveredChannelId(null)}
                         >
                             {isEditing && !isCollapsed ? (
                                 <input
                                     value={editingName}
                                     onChange={(e) => setEditingName(e.target.value)}
-                                    onBlur={() => handleUpdateChannel(channel._id, editingName)}
+                                    onBlur={() => handleUpdateChannel(channelId, editingName)}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
-                                            handleUpdateChannel(channel._id, editingName);
+                                            handleUpdateChannel(channelId, editingName);
                                         } else if (e.key === 'Escape') {
                                             setEditingChannelId(null);
                                         }
@@ -201,7 +217,7 @@ const ChannelSidebar = ({
                             ) : (
                                 <>
                                     <div
-                                        onClick={() => onChannelSelect(channel._id)}
+                                        onClick={() => onChannelSelect(channelId)}
                                         style={ChannelSidebarStyle.channelContent}
                                     >
                                         <span style={ChannelSidebarStyle.channelHash}>#</span>
@@ -223,19 +239,20 @@ const ChannelSidebar = ({
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    setOpenMenuId(openMenuId === channel._id ? null : channel._id);
+                                                    console.log('[ChannelSidebar] Menu button clicked for channel:', channelId);
+                                                    setOpenMenuId(openMenuId === channelId ? null : channelId);
                                                 }}
                                                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e5e7eb'}
                                                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                                                 style={{
                                                     ...ChannelSidebarStyle.menuButton,
-                                                    ...((isHovered || openMenuId === channel._id) && ChannelSidebarStyle.menuButtonVisible)
+                                                    ...((isHovered || openMenuId === channelId) && ChannelSidebarStyle.menuButtonVisible)
                                                 }}
                                             >
                                                 ...
                                             </button>
 
-                                            {openMenuId === channel._id && (
+                                            {openMenuId === channelId && (
                                                 <>
                                                     <div
                                                         onClick={(e) => {
@@ -256,7 +273,8 @@ const ChannelSidebar = ({
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                setEditingChannelId(channel._id);
+                                                                console.log('[ChannelSidebar] Rename clicked for channel:', channelId);
+                                                                setEditingChannelId(channelId);
                                                                 setEditingName(channel.name);
                                                                 setOpenMenuId(null);
                                                             }}
@@ -269,7 +287,8 @@ const ChannelSidebar = ({
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                handleDeleteChannel(channel._id);
+                                                                console.log('[ChannelSidebar] Delete button clicked for channel:', channelId);
+                                                                handleDeleteChannel(channelId);
                                                             }}
                                                             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'}
                                                             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
