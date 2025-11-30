@@ -182,7 +182,7 @@ const HomePage = () => {
           position: "fixed",
           top: 72,
           right: 56,
-          zIndex: 9999,
+          zIndex: 100,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

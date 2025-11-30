@@ -114,7 +114,7 @@ const HomePageStyle = {
     fontSize: 28,
     color: "#0F3E2D",
     fontWeight: "bold",
-    zIndex: 9999,
+    zIndex: 100,
   },
 };
 
