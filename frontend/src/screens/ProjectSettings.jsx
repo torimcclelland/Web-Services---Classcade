@@ -18,6 +18,7 @@ const ProjectSettings = () => {
   const [showToast, setShowToast] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmRemoveMember, setConfirmRemoveMember] = useState(null);
+  const [confirmInvite, setConfirmInvite] = useState(null);
 
   const today = new Date().toISOString().split("T")[0];
   const currentUser = JSON.parse(localStorage.getItem("user"));
@@ -79,9 +80,27 @@ const ProjectSettings = () => {
   };
 
   const handleAddMember = async () => {
+    const trimmedEmail = newMemberEmail.trim().toLowerCase();
+    
+    // Check if user is adding their own email
+    if (trimmedEmail === currentUser.email.toLowerCase()) {
+      triggerToast("You're already in this project");
+      setNewMemberEmail("");
+      return;
+    }
+
     try {
-      const userRes = await api.get(`/api/user/email/${newMemberEmail}`);
+      // Check if user exists
+      const userRes = await api.get(`/api/user/email/${trimmedEmail}`);
       const userId = userRes.data._id;
+
+      // Check if user is already a member
+      const isAlreadyMember = members.some(m => m._id === userId);
+      if (isAlreadyMember) {
+        triggerToast("User is already a member");
+        setNewMemberEmail("");
+        return;
+      }
 
       await api.post(`/api/project/${selectedProject._id}/members`, { userId });
 
@@ -92,7 +111,26 @@ const ProjectSettings = () => {
       setNewMemberEmail("");
       triggerToast("Member added!");
     } catch {
-      triggerToast("Email not found");
+      // User not found - prompt for invitation
+      setConfirmInvite(trimmedEmail);
+    }
+  };
+
+  const handleSendInvite = async () => {
+    try {
+      await api.post('/api/user/invite', {
+        email: confirmInvite,
+        projectId: selectedProject._id,
+        projectName: selectedProject.name,
+        inviterName: `${currentUser.firstName} ${currentUser.lastName}`
+      });
+      
+      triggerToast("Invitation sent!");
+      setConfirmInvite(null);
+      setNewMemberEmail("");
+    } catch (err) {
+      triggerToast("Failed to send invitation");
+      setConfirmInvite(null);
     }
   };
 
@@ -267,6 +305,29 @@ const ProjectSettings = () => {
                     confirmRemoveMember.email
                   )
                 }
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmInvite && (
+        <div className="overlay">
+          <div className="popup">
+            <p className="popupText">
+              {confirmInvite} is not registered with Classcade. Would you like to send them an invitation to join this project?
+            </p>
+            <div className="popup-btns">
+              <PrimaryButton
+                text="Cancel"
+                onClick={() => {
+                  setConfirmInvite(null);
+                  setNewMemberEmail("");
+                }}
+              />
+              <PrimaryButton
+                text="Send Invite"
+                onClick={handleSendInvite}
               />
             </div>
           </div>

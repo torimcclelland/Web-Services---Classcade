@@ -12,6 +12,14 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
   const [groupmateEmailErrors, setGroupmateEmailErrors] = useState([""]);
   const [successMessage, setSuccessMessage] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+  const [pendingInvites, setPendingInvites] = useState([]);
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    setCurrentUser(user);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -65,7 +73,7 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
     }
   };
 
-  // Validate a single email (format and existence)
+  // Validate a single email (format only - existence checked separately)
   const validateEmail = async (email) => {
     if (!email || email.trim() === "") {
       return ""; // Empty is valid (optional field)
@@ -73,11 +81,6 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
 
     if (!isValidEmailFormat(email)) {
       return "Please enter a valid email address";
-    }
-
-    const exists = await checkEmailExists(email);
-    if (!exists) {
-      return "Email not found";
     }
 
     return ""; // No error
@@ -111,7 +114,7 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
       }
     }
 
-    // Validate teacher email
+    // Validate teacher email format
     if (teacherEmail && teacherEmail.trim()) {
       const teacherError = await validateEmail(teacherEmail);
       if (teacherError) {
@@ -120,7 +123,7 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
       }
     }
 
-    // Validate groupmate emails
+    // Validate groupmate email formats
     const emailErrors = [];
     for (let i = 0; i < groupmateEmails.length; i++) {
       const email = groupmateEmails[i];
@@ -136,7 +139,7 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
     }
     setGroupmateEmailErrors(emailErrors);
 
-    // Stop if there are any errors
+    // Stop if there are any format errors
     if (hasError) {
       return;
     }
@@ -147,17 +150,63 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
       return;
     }
 
-    const emails = groupmateEmails.map((e) => e.trim()).filter(Boolean);
+    // Filter out own email and check existence of others
+    const allEmails = groupmateEmails
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean)
+      .filter((email) => email !== user.email.toLowerCase());
 
+    const existingUsers = [];
+    const nonExistingEmails = [];
+
+    for (const email of allEmails) {
+      const exists = await checkEmailExists(email);
+      if (exists) {
+        existingUsers.push(email);
+      } else {
+        nonExistingEmails.push(email);
+      }
+    }
+
+    // If there are non-existing emails, show invitation dialog
+    if (nonExistingEmails.length > 0) {
+      setPendingInvites(nonExistingEmails);
+      setShowInviteDialog(true);
+      return;
+    }
+
+    // Proceed with project creation
+    await createProject(existingUsers, []);
+  };
+
+  const createProject = async (existingUsers, invitedEmails) => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    
     setIsCreating(true);
     try {
       const response = await api.post("/api/project/create", {
         userId: user._id,
         name: projectName,
         teacherEmail: teacherEmail.trim(),
-        groupmateEmails: emails,
+        groupmateEmails: existingUsers,
         dueDate,
       });
+
+      // Send invites to non-existing users
+      if (invitedEmails.length > 0) {
+        for (const email of invitedEmails) {
+          try {
+            await api.post('/api/user/invite', {
+              email: email,
+              projectId: response.data._id,
+              projectName: projectName,
+              inviterName: `${user.firstName} ${user.lastName}`
+            });
+          } catch (err) {
+            console.error(`Failed to send invite to ${email}:`, err);
+          }
+        }
+      }
 
       setSuccessMessage("Project created successfully!");
 
@@ -174,7 +223,28 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
       );
     } finally {
       setIsCreating(false);
+      setShowInviteDialog(false);
+      setPendingInvites([]);
     }
+  };
+
+  const handleProceedWithInvites = () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const allEmails = groupmateEmails
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean)
+      .filter((email) => email !== user.email.toLowerCase());
+
+    const existingUsers = allEmails.filter(
+      (email) => !pendingInvites.includes(email)
+    );
+
+    createProject(existingUsers, pendingInvites);
+  };
+
+  const handleCancelInvites = () => {
+    setShowInviteDialog(false);
+    setPendingInvites([]);
   };
 
   const handleCancel = () => {
@@ -451,6 +521,69 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
           </button>
         </div>
       </div>
+
+      {showInviteDialog && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1001,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: 12,
+              padding: "2rem",
+              maxWidth: 500,
+              boxShadow: "0 10px 40px rgba(0, 0, 0, 0.3)",
+            }}
+          >
+            <h3 style={{ marginTop: 0, marginBottom: "1rem" }}>
+              Users Not Found
+            </h3>
+            <p style={{ marginBottom: "1rem", color: "#374151" }}>
+              The following email(s) are not registered:
+            </p>
+            <ul style={{ marginBottom: "1.5rem", color: "#374151" }}>
+              {pendingInvites.map((email, idx) => (
+                <li key={idx}>{email}</li>
+              ))}
+            </ul>
+            <p style={{ marginBottom: "1.5rem", color: "#374151" }}>
+              Would you like to send them an invitation to join Classcade and
+              this project?
+            </p>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "0.75rem",
+              }}
+            >
+              <button
+                style={buttonStyle(false)}
+                onClick={handleCancelInvites}
+              >
+                Cancel
+              </button>
+              <button
+                style={buttonStyle(true)}
+                onClick={handleProceedWithInvites}
+              >
+                Send Invites
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
