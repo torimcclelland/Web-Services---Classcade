@@ -43,7 +43,9 @@ const Swimlane = ({ lane, children }) => {
       }}
     >
       <h3 style={MyTasksStyle.swimlaneTitle}>{lane}</h3>
-      {children}
+      <div style={MyTasksStyle.swimlaneContent}>
+        {children}
+      </div>
     </div>
   );
 };
