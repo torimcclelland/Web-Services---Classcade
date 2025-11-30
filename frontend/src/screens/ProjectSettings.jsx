@@ -17,8 +17,10 @@ const ProjectSettings = () => {
   const [toast, setToast] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmRemoveMember, setConfirmRemoveMember] = useState(null);
 
   const today = new Date().toISOString().split("T")[0];
+  const currentUser = JSON.parse(localStorage.getItem("user"));
 
   const triggerToast = (text) => {
     setToast(text);
@@ -96,17 +98,53 @@ const ProjectSettings = () => {
 
   const handleRemoveMember = async (memberId, email) => {
     try {
-      await api.delete(
-        `/api/project/${selectedProject._id}/members/${memberId}`
-      );
-      const memRes = await api.get(
-        `/api/project/${selectedProject._id}/members`
-      );
-      setMembers(memRes.data);
-      triggerToast(`Removed ${email}`);
+      const isRemovingSelf = memberId === currentUser._id;
+      const isLastMember = members.length === 1;
+
+      if (isRemovingSelf && isLastMember) {
+        // User is removing themselves and they're the last member - delete project
+        await api.delete(`/api/project/${selectedProject._id}`);
+        
+        localStorage.removeItem("selectedProject");
+        setSelectedProject(null);
+        
+        triggerToast("Project deleted");
+        setConfirmRemoveMember(null);
+        
+        setTimeout(() => navigate("/home"), 1200);
+      } else {
+        // Remove the member
+        await api.delete(
+          `/api/project/${selectedProject._id}/members/${memberId}`
+        );
+        
+        if (isRemovingSelf) {
+          // User removed themselves - clear project and navigate home
+          localStorage.removeItem("selectedProject");
+          setSelectedProject(null);
+          
+          triggerToast("Left project");
+          setConfirmRemoveMember(null);
+          
+          setTimeout(() => navigate("/home"), 1200);
+        } else {
+          // Removed someone else - refresh member list
+          const memRes = await api.get(
+            `/api/project/${selectedProject._id}/members`
+          );
+          setMembers(memRes.data);
+          triggerToast(`Removed ${email}`);
+          setConfirmRemoveMember(null);
+        }
+      }
     } catch {
       triggerToast("Failed to remove");
+      setConfirmRemoveMember(null);
     }
+  };
+
+  const initiateRemoveMember = (memberId, email) => {
+    setConfirmRemoveMember({ memberId, email });
   };
 
   const deleteProject = async () => {
@@ -169,7 +207,7 @@ const ProjectSettings = () => {
                 <span>{m.email}</span>
                 <button
                   className="remove-member-btn"
-                  onClick={() => handleRemoveMember(m._id, m.email)}
+                  onClick={() => initiateRemoveMember(m._id, m.email)}
                 >
                   ✕
                 </button>
@@ -201,6 +239,35 @@ const ProjectSettings = () => {
                 onClick={() => setConfirmDelete(false)}
               />
               <SecondaryButton text="Delete" onClick={deleteProject} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmRemoveMember && (
+        <div className="overlay">
+          <div className="popup">
+            <p className="popupText">
+              {confirmRemoveMember.memberId === currentUser._id
+                ? members.length === 1
+                  ? "You are the only member. Leaving will delete this project. Continue?"
+                  : "Are you sure you want to leave this project?"
+                : `Remove ${confirmRemoveMember.email} from this project?`}
+            </p>
+            <div className="popup-btns">
+              <PrimaryButton
+                text="Cancel"
+                onClick={() => setConfirmRemoveMember(null)}
+              />
+              <SecondaryButton
+                text={confirmRemoveMember.memberId === currentUser._id ? "Leave" : "Remove"}
+                onClick={() =>
+                  handleRemoveMember(
+                    confirmRemoveMember.memberId,
+                    confirmRemoveMember.email
+                  )
+                }
+              />
             </div>
           </div>
         </div>
