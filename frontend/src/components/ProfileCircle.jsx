@@ -162,7 +162,7 @@ const ProfileCircle = ({ avatarUrl, name, size = 48, alt = 'User avatar', onEdit
   const handleLogout = () => {
     setShowDropdown(false);
     localStorage.removeItem('user');
-    navigate('/');
+    navigate('/login');
   };
 
   const handleDeleteAccount = async () => {
