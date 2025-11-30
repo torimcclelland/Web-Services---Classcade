@@ -39,8 +39,27 @@ const DraggableCard = ({ task, onEdit }) => {
       {/* Drag handle only */}
       <div {...listeners} {...attributes} style={handleStyle} aria-label="Drag handle" />
 
-      <h4 style={{ fontWeight: 600, marginBottom: "0.5rem" }}>{task.name}</h4>
-      <p style={{ fontSize: "0.9rem", marginBottom: "0.5rem" }}>
+      <h4 style={{ 
+        fontWeight: 600, 
+        marginBottom: "0.5rem",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+        wordBreak: "break-word",
+        paddingRight: "24px"
+      }}>
+        {task.name}
+      </h4>
+      <p style={{ 
+        fontSize: "0.9rem", 
+        marginBottom: "0.5rem",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        display: "-webkit-box",
+        WebkitLineClamp: 2,
+        WebkitBoxOrient: "vertical",
+        wordBreak: "break-word"
+      }}>
         {task.description}
       </p>
       {task.dueDate && (

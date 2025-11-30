@@ -53,23 +53,25 @@ const MyTasksStyle = {
   },
   taskCard: {
     backgroundColor: "#ffffff",
-    padding: "0.75rem",
+    padding: "0.5rem",
     borderRadius: "8px",
-    marginBottom: "1rem",
+    marginBottom: "0.75rem",
     boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
     border: "1px solid #e0e0e0",
   },  
   taskTitle: {
     fontWeight: "600",
-    marginBottom: "0.5rem",
+    marginBottom: "0.25rem",
+    fontSize: "0.95rem",
   },
   taskDescription: {
-    fontSize: "0.9rem",
-    marginBottom: "0.5rem",
+    fontSize: "0.85rem",
+    marginBottom: "0.25rem",
+    color: "#666",
   },
   taskDueDate: {
-    fontSize: "0.8rem",
-    color: "#555",
+    fontSize: "0.75rem",
+    color: "#888",
   },
 };
 

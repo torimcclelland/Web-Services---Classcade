@@ -72,17 +72,25 @@ const AddNewTaskModal = ({ task, onClose, onSuccess }) => {
         type="text"
         style={AddNewTaskStyle.input}
         value={taskName}
-        onChange={(e) => setTaskName(e.target.value)}
+        onChange={(e) => setTaskName(e.target.value.slice(0, 50))}
         placeholder="Enter task name"
+        maxLength={50}
       />
+      <small style={{ color: "#666", fontSize: "0.8rem", marginTop: "-0.5rem", marginBottom: "0.5rem" }}>
+        {taskName.length}/50 characters
+      </small>
 
       <label style={AddNewTaskStyle.label}>Description</label>
       <textarea
         style={{ ...AddNewTaskStyle.input, height: "80px" }}
         value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        onChange={(e) => setDescription(e.target.value.slice(0, 200))}
         placeholder="Describe the task"
+        maxLength={200}
       />
+      <small style={{ color: "#666", fontSize: "0.8rem", marginTop: "-0.5rem", marginBottom: "0.5rem" }}>
+        {description.length}/200 characters
+      </small>
 
       <label style={AddNewTaskStyle.label}>Due Date</label>
       <input
@@ -90,6 +98,7 @@ const AddNewTaskModal = ({ task, onClose, onSuccess }) => {
         style={AddNewTaskStyle.input}
         value={dueDate}
         onChange={(e) => setDueDate(e.target.value)}
+        min={new Date().toISOString().split('T')[0]}
       />
 
       <label style={AddNewTaskStyle.label}>Status</label>
