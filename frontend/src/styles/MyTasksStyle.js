@@ -14,7 +14,7 @@ const MyTasksStyle = {
   },
   main: {
     flex: 1,
-    padding: "1rem",
+    padding: "1rem 1.5rem 1rem 1rem",
     backgroundColor: "#DDF9EA",
     overflowX: "auto",
     overflowY: "hidden",
@@ -40,7 +40,7 @@ const MyTasksStyle = {
   },
   swimlane: {
     backgroundColor: "white",
-    padding: "1rem",
+    padding: "0.25rem 1rem 1rem 1rem",
     borderRadius: "12px",
     minWidth: "0",
     maxWidth: "100%",
