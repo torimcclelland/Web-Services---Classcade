@@ -4,7 +4,7 @@ export const Container = styled.div`
   font-family: "Poppins", sans-serif;
   background: linear-gradient(135deg, #ddf9ea, #ddf9ea);
   color: #333;
-  height: 100vh;
+  height: 95vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -73,7 +73,8 @@ export const Features = styled.div`
   gap: 20px;
   max-width: 1000px;
   width: 100%;
-  margin-bottom: 20px; 
+  margin-bottom: 10vh;
+  background: linear-gradient(135deg, #ddf9ea, #ddf9ea);
 
   @media (max-width: 900px) {
     flex-wrap: wrap;
