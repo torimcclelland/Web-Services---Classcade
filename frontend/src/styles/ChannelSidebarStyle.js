@@ -18,6 +18,22 @@ const ChannelSidebarStyle = {
         width: '60px',
     },
 
+    // RESPONSIVE: Hide sidebar on mobile by default
+    '@media (max-width: 768px)': {
+        sidebar: {
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            zIndex: 100,
+            boxShadow: '2px 0 8px rgba(0, 0, 0, 0.1)',
+        },
+        sidebarCollapsed: {
+            transform: 'translateX(-100%)',
+            width: '0',
+        },
+    },
+
     toggleButton: {
         background: '#ffffff',
         border: '1px solid #e5e7eb',
@@ -88,7 +104,7 @@ const ChannelSidebarStyle = {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        margin: '2px 0',
+        margin: '4px 0',
         borderRadius: '6px',
         transition: 'all 0.15s',
         color: '#6b7280',
@@ -97,7 +113,7 @@ const ChannelSidebarStyle = {
     },
 
     channelItemExpanded: {
-        padding: '8px 12px',
+        padding: '10px 12px',
     },
 
     channelItemCollapsed: {
@@ -121,13 +137,13 @@ const ChannelSidebarStyle = {
         flex: 1,
         display: 'flex',
         alignItems: 'center',
-        gap: '8px',
+        gap: '10px',
         minWidth: 0,
         overflow: 'hidden',
     },
 
     channelHash: {
-        fontSize: '1rem',
+        fontSize: '1.125rem',
         fontWeight: '700',
         color: 'inherit',
         flexShrink: 0,
@@ -240,7 +256,6 @@ const ChannelSidebarStyle = {
     characterCountWarning: {
         color: '#dc2626',
     },
-
 
     createButtons: {
         display: 'flex',

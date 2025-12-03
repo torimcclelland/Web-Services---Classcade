@@ -34,12 +34,24 @@ const MessageThreadStyle = {
         height: '73px',
         boxSizing: 'border-box',
     },
+    // RESPONSIVE: Mobile header (smaller screens)
+    '@media (max-width: 768px)': {
+        header: {
+            padding: "0.75rem 1rem",
+            height: 'auto',
+            minHeight: '60px',
+        },
+    },
     chatTitle: {
         margin: 0,
         fontSize: "1.125rem",
         fontWeight: "600",
         color: "#1f2937",
         lineHeight: "1.5",
+    },
+    // RESPONSIVE: Smaller title on mobile
+    chatTitleMobile: {
+        fontSize: "1rem",
     },
     channelBadge: {
         display: "inline-flex",
@@ -62,11 +74,25 @@ const MessageThreadStyle = {
         backgroundColor: "#f9fafb",
         minHeight: 0,
     },
+    // RESPONSIVE: Less padding on mobile
+    chatWindowMobile: {
+        padding: "1rem",
+    },
     messageBubble: {
         backgroundColor: "#e5e7eb",
         padding: "0.75rem 1rem",
         borderRadius: "12px",
         maxWidth: "60%",
+    },
+    // RESPONSIVE: Wider bubbles on mobile
+    messageBubbleMobile: {
+        maxWidth: "85%",
+    },
+    messageGroup: {
+        display: 'flex',
+        flexDirection: 'column',
+        marginBottom: '1.5rem',
+        width: '100%',
     },
     messageAuthor: {
         fontSize: "0.8125rem",
@@ -85,6 +111,26 @@ const MessageThreadStyle = {
         marginTop: "4px",
         lineHeight: "1.2",
     },
+    dateSeparator: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: '1.5rem 0',
+        width: '100%',
+    },
+    dateSeparatorLine: {
+        flex: 1,
+        height: '1px',
+        backgroundColor: '#e5e7eb',
+    },
+    dateSeparatorText: {
+        padding: '0 1rem',
+        fontSize: '0.75rem',
+        fontWeight: '600',
+        color: '#6b7280',
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+    },
     inputArea: {
         display: "flex",
         gap: "0.75rem",
@@ -93,6 +139,10 @@ const MessageThreadStyle = {
         padding: "1rem 1.5rem",
         backgroundColor: "#ffffff",
         borderTop: "1px solid #e5e7eb",
+    },
+    // RESPONSIVE: Stack input on small screens if needed
+    inputAreaMobile: {
+        padding: "0.75rem 1rem",
     },
     input: {
         flex: 1,
@@ -117,6 +167,11 @@ const MessageThreadStyle = {
         fontSize: "0.875rem",
         transition: "background-color 0.2s",
         lineHeight: "1.2",
+    },
+    // RESPONSIVE: Smaller button on mobile
+    sendButtonMobile: {
+        padding: "0.75rem 1rem",
+        fontSize: "0.8125rem",
     },
     memberCount: {
         fontSize: "0.8125rem",
