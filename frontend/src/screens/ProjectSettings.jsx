@@ -17,8 +17,11 @@ const ProjectSettings = () => {
   const [toast, setToast] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmRemoveMember, setConfirmRemoveMember] = useState(null);
+  const [confirmInvite, setConfirmInvite] = useState(null);
 
   const today = new Date().toISOString().split("T")[0];
+  const currentUser = JSON.parse(localStorage.getItem("user"));
 
   const triggerToast = (text) => {
     setToast(text);
@@ -77,9 +80,27 @@ const ProjectSettings = () => {
   };
 
   const handleAddMember = async () => {
+    const trimmedEmail = newMemberEmail.trim().toLowerCase();
+    
+    // Check if user is adding their own email
+    if (trimmedEmail === currentUser.email.toLowerCase()) {
+      triggerToast("You're already in this project");
+      setNewMemberEmail("");
+      return;
+    }
+
     try {
-      const userRes = await api.get(`/api/user/email/${newMemberEmail}`);
+      // Check if user exists
+      const userRes = await api.get(`/api/user/email/${trimmedEmail}`);
       const userId = userRes.data._id;
+
+      // Check if user is already a member
+      const isAlreadyMember = members.some(m => m._id === userId);
+      if (isAlreadyMember) {
+        triggerToast("User is already a member");
+        setNewMemberEmail("");
+        return;
+      }
 
       await api.post(`/api/project/${selectedProject._id}/members`, { userId });
 
@@ -90,23 +111,78 @@ const ProjectSettings = () => {
       setNewMemberEmail("");
       triggerToast("Member added!");
     } catch {
-      triggerToast("Email not found");
+      // User not found - prompt for invitation
+      setConfirmInvite(trimmedEmail);
+    }
+  };
+
+  const handleSendInvite = async () => {
+    try {
+      await api.post('/api/user/invite', {
+        email: confirmInvite,
+        projectId: selectedProject._id,
+        projectName: selectedProject.name,
+        inviterName: `${currentUser.firstName} ${currentUser.lastName}`
+      });
+      
+      triggerToast("Invitation sent!");
+      setConfirmInvite(null);
+      setNewMemberEmail("");
+    } catch (err) {
+      triggerToast("Failed to send invitation");
+      setConfirmInvite(null);
     }
   };
 
   const handleRemoveMember = async (memberId, email) => {
     try {
-      await api.delete(
-        `/api/project/${selectedProject._id}/members/${memberId}`
-      );
-      const memRes = await api.get(
-        `/api/project/${selectedProject._id}/members`
-      );
-      setMembers(memRes.data);
-      triggerToast(`Removed ${email}`);
+      const isRemovingSelf = memberId === currentUser._id;
+      const isLastMember = members.length === 1;
+
+      if (isRemovingSelf && isLastMember) {
+        // User is removing themselves and they're the last member - delete project
+        await api.delete(`/api/project/${selectedProject._id}`);
+        
+        localStorage.removeItem("selectedProject");
+        setSelectedProject(null);
+        
+        triggerToast("Project deleted");
+        setConfirmRemoveMember(null);
+        
+        setTimeout(() => navigate("/home"), 1200);
+      } else {
+        // Remove the member
+        await api.delete(
+          `/api/project/${selectedProject._id}/members/${memberId}`
+        );
+        
+        if (isRemovingSelf) {
+          // User removed themselves - clear project and navigate home
+          localStorage.removeItem("selectedProject");
+          setSelectedProject(null);
+          
+          triggerToast("Left project");
+          setConfirmRemoveMember(null);
+          
+          setTimeout(() => navigate("/home"), 1200);
+        } else {
+          // Removed someone else - refresh member list
+          const memRes = await api.get(
+            `/api/project/${selectedProject._id}/members`
+          );
+          setMembers(memRes.data);
+          triggerToast(`Removed ${email}`);
+          setConfirmRemoveMember(null);
+        }
+      }
     } catch {
       triggerToast("Failed to remove");
+      setConfirmRemoveMember(null);
     }
+  };
+
+  const initiateRemoveMember = (memberId, email) => {
+    setConfirmRemoveMember({ memberId, email });
   };
 
   const deleteProject = async () => {
@@ -169,7 +245,7 @@ const ProjectSettings = () => {
                 <span>{m.email}</span>
                 <button
                   className="remove-member-btn"
-                  onClick={() => handleRemoveMember(m._id, m.email)}
+                  onClick={() => initiateRemoveMember(m._id, m.email)}
                 >
                   ✕
                 </button>
@@ -201,6 +277,58 @@ const ProjectSettings = () => {
                 onClick={() => setConfirmDelete(false)}
               />
               <SecondaryButton text="Delete" onClick={deleteProject} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmRemoveMember && (
+        <div className="overlay">
+          <div className="popup">
+            <p className="popupText">
+              {confirmRemoveMember.memberId === currentUser._id
+                ? members.length === 1
+                  ? "You are the only member. Leaving will delete this project. Continue?"
+                  : "Are you sure you want to leave this project?"
+                : `Remove ${confirmRemoveMember.email} from this project?`}
+            </p>
+            <div className="popup-btns">
+              <PrimaryButton
+                text="Cancel"
+                onClick={() => setConfirmRemoveMember(null)}
+              />
+              <SecondaryButton
+                text={confirmRemoveMember.memberId === currentUser._id ? "Leave" : "Remove"}
+                onClick={() =>
+                  handleRemoveMember(
+                    confirmRemoveMember.memberId,
+                    confirmRemoveMember.email
+                  )
+                }
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmInvite && (
+        <div className="overlay">
+          <div className="popup">
+            <p className="popupText">
+              {confirmInvite} is not registered with Classcade. Would you like to send them an invitation to join this project?
+            </p>
+            <div className="popup-btns">
+              <PrimaryButton
+                text="Cancel"
+                onClick={() => {
+                  setConfirmInvite(null);
+                  setNewMemberEmail("");
+                }}
+              />
+              <PrimaryButton
+                text="Send Invite"
+                onClick={handleSendInvite}
+              />
             </div>
           </div>
         </div>

@@ -60,11 +60,11 @@ const MenuItem = styled.div`
   padding: 12px 16px;
   cursor: pointer;
   font-size: 14px;
-  color: #333;
+  color: ${props => props.danger ? '#dc2626' : '#333'};
   transition: background-color 0.2s;
   
   &:hover {
-    background-color: #f5f5f5;
+    background-color: ${props => props.danger ? '#fee2e2' : '#f5f5f5'};
   }
   
   &:not(:last-child) {
@@ -162,7 +162,7 @@ const ProfileCircle = ({ avatarUrl, name, size = 48, alt = 'User avatar', onEdit
   const handleLogout = () => {
     setShowDropdown(false);
     localStorage.removeItem('user');
-    navigate('/');
+    navigate('/login');
   };
 
   const handleDeleteAccount = async () => {
@@ -293,7 +293,7 @@ const ProfileCircle = ({ avatarUrl, name, size = 48, alt = 'User avatar', onEdit
           <MenuItem onClick={handleEditAccount}>Edit Account</MenuItem>
           <MenuItem onClick={handleCustomization}>Customization</MenuItem>
           <MenuItem onClick={handleLogout}>Logout</MenuItem>
-          <MenuItem onClick={handleDeleteAccount}>Delete Account</MenuItem>
+          <MenuItem danger onClick={handleDeleteAccount}>Delete Account</MenuItem>
         </DropdownMenu>
       )}
     </Wrapper>

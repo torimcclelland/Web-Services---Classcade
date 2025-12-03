@@ -7,6 +7,7 @@ import { useProject } from "../context/ProjectContext";
 import HomePageStyle from "../styles/HomePageStyle";
 import AddNewProject from "./AddNewProject";
 import ProfileCircle from "../components/ProfileCircle";
+import EditProfile from "../components/EditProfile";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -16,6 +17,9 @@ const HomePage = () => {
   const [hoveredNewBtn, setHoveredNewBtn] = useState(false);
   const [hoveredLogout, setHoveredLogout] = useState(false);
   const [showAddProjectModal, setShowAddProjectModal] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [editProfileTab, setEditProfileTab] = useState('personal');
+  const [userData, setUserData] = useState(null);
 
   const { setSelectedProject } = useProject();
 
@@ -60,6 +64,100 @@ const HomePage = () => {
     navigate("/login");
   };
 
+  const fetchUserData = async (retryCount = 0) => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        const response = await api.get(`/api/user/${user._id}`);
+        setUserData(response.data);
+        return true;
+      }
+    } catch (error) {
+      console.error(`Error fetching user data (attempt ${retryCount + 1}/3):`, error);
+      
+      if (retryCount < 2) {
+        await new Promise(resolve => setTimeout(resolve, 500 * (retryCount + 1)));
+        return fetchUserData(retryCount + 1);
+      }
+      
+      console.error('Failed to fetch user data after 3 attempts');
+      return false;
+    }
+  };
+
+  const handleEditAccount = async () => {
+    setEditProfileTab('personal');
+    await fetchUserData();
+    setShowEditProfile(true);
+  };
+
+  const handleCustomization = async () => {
+    setEditProfileTab('customization');
+    await fetchUserData();
+    setShowEditProfile(true);
+  };
+
+  const handleSaveProfile = async (updates) => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (!storedUser) return { success: false, error: 'User not found' };
+
+      const user = JSON.parse(storedUser);
+      const currentUserData = userData || JSON.parse(storedUser);
+
+      if (updates.firstName !== currentUserData.firstName || updates.lastName !== currentUserData.lastName) {
+        await api.put(`/api/user/${user._id}/updatename`, {
+          firstName: updates.firstName,
+          lastName: updates.lastName,
+        });
+      }
+
+      if (updates.email !== currentUserData.email) {
+        await api.put(`/api/user/${user._id}/updateemail`, {
+          email: updates.email,
+        });
+      }
+
+      if (updates.username !== currentUserData.username) {
+        await api.put(`/api/user/${user._id}/updateusername`, {
+          username: updates.username,
+        });
+      }
+
+      if (updates.password) {
+        await api.put(`/api/user/${user._id}/updatepassword`, {
+          password: updates.password,
+        });
+      }
+
+      const customizationsChanged = 
+        updates.selectedIcon !== currentUserData.selectedIcon ||
+        updates.selectedBanner !== currentUserData.selectedBanner ||
+        updates.selectedBackdrop !== currentUserData.selectedBackdrop;
+
+      if (customizationsChanged) {
+        await api.put(`/api/user/${user._id}/updateselections`, {
+          selectedIcon: updates.selectedIcon,
+          selectedBanner: updates.selectedBanner,
+          selectedBackdrop: updates.selectedBackdrop,
+        });
+      }
+
+      const updatedUserResponse = await api.get(`/api/user/${user._id}`);
+      localStorage.setItem('user', JSON.stringify(updatedUserResponse.data));
+      setUserData(updatedUserResponse.data);
+
+      window.dispatchEvent(new Event('userUpdated'));
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to update profile';
+      return { success: false, error: errorMessage };
+    }
+  };
+
   const handleProjectCreated = (createdProject) => {
     // If a created project is provided, select it and go to dashboard
     const project = createdProject?.project;
@@ -84,14 +182,18 @@ const HomePage = () => {
           position: "fixed",
           top: 72,
           right: 56,
-          zIndex: 9999,
+          zIndex: 100,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
         {" "}
-        <ProfileCircle size={64} />
+        <ProfileCircle 
+          size={64} 
+          onEditAccount={handleEditAccount}
+          onCustomization={handleCustomization}
+        />
       </div>
       <div style={HomePageStyle.inner}>
         <button style={HomePageStyle.logoutBtn} onClick={handleLogout}>
@@ -161,6 +263,14 @@ const HomePage = () => {
         isOpen={showAddProjectModal}
         onClose={() => setShowAddProjectModal(false)}
         onProjectCreated={handleProjectCreated}
+      />
+
+      <EditProfile
+        isOpen={showEditProfile}
+        onClose={() => setShowEditProfile(false)}
+        userData={userData}
+        onSave={handleSaveProfile}
+        initialTab={editProfileTab}
       />
     </div>
   );

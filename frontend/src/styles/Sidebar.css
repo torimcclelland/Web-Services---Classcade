@@ -11,7 +11,7 @@
 
 .cc-sidebar {
   position: relative;
-  height: auto;
+  height: 85%;
   width: var(--cc-expanded-width);
   margin: 16px 16px 40px 10px;
   z-index: 10;

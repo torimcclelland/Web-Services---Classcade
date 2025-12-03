@@ -19,10 +19,6 @@ import {
   useSensors,
   useDroppable,
 } from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 
 const swimlanes = ["Not Started", "In Progress", "Under Review", "Done"];
@@ -38,12 +34,14 @@ const Swimlane = ({ lane, children }) => {
       ref={setNodeRef}
       style={{
         ...MyTasksStyle.swimlane,
-        backgroundColor: isOver ? "#f0f8ff" : MyTasksStyle.swimlane.backgroundColor,
+        backgroundColor: isOver ? "#f5f5f5" : MyTasksStyle.swimlane.backgroundColor,
         transition: "background-color 0.2s ease",
       }}
     >
       <h3 style={MyTasksStyle.swimlaneTitle}>{lane}</h3>
-      {children}
+      <div style={MyTasksStyle.swimlaneContent}>
+        {children}
+      </div>
     </div>
   );
 };
@@ -89,17 +87,33 @@ const MyTasks = () => {
     if (!over) return;
 
     const draggedTask = tasks.find((t) => t._id === active.id);
-    const newStatus =
-      over.data?.current?.lane || swimlanes.find((lane) => lane === over.id);
+    
+    // Check if dropping directly on a swimlane or on the swimlane's ID
+    let newStatus = null;
+    if (swimlanes.includes(over.id)) {
+      newStatus = over.id;
+    } else if (over.data?.current?.lane) {
+      newStatus = over.data.current.lane;
+    }
 
-    if (!newStatus || draggedTask.status === newStatus) return;
+    if (!newStatus || !draggedTask || draggedTask.status === newStatus) return;
 
-    //optimistic update
-    setTasks((prev) =>
-      prev.map((t) =>
-        t._id === active.id ? { ...t, status: newStatus } : t
-      )
-    );
+    const timestamp = Date.now();
+    
+    //optimistic update - move to bottom of new lane
+    setTasks((prev) => {
+      const updated = prev.map((t) =>
+        t._id === active.id ? { ...t, status: newStatus, movedAt: timestamp } : t
+      );
+      
+      // Sort so moved task appears at bottom of its new lane
+      return updated.sort((a, b) => {
+        if (a.status !== b.status) return 0;
+        if (a._id === active.id) return 1;
+        if (b._id === active.id) return -1;
+        return (a.movedAt || 0) - (b.movedAt || 0);
+      });
+    });
 
     try {
       await api.put(`/api/task/update/${active.id}`, { status: newStatus });
@@ -144,26 +158,20 @@ const MyTasks = () => {
           >
             <div style={MyTasksStyle.swimlaneContainer}>
               {swimlanes.map((lane) => (
-                <SortableContext
-                  key={lane}
-                  items={getTasksByStatus(lane).map((t) => t._id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <Swimlane lane={lane}>
-                    {getTasksByStatus(lane).length === 0 && (
-                      <p style={{ fontStyle: "italic", opacity: 0.6 }}>
-                        No tasks yet
-                      </p>
-                    )}
-                    {getTasksByStatus(lane).map((task) => (
-                      <DraggableCard
-                        key={task._id}
-                        task={task}
-                        onEdit={handleEdit} //pencil triggers modal
-                      />
-                    ))}
-                  </Swimlane>
-                </SortableContext>
+                <Swimlane key={lane} lane={lane}>
+                  {getTasksByStatus(lane).length === 0 && (
+                    <p style={{ fontStyle: "italic", opacity: 0.6 }}>
+                      No tasks yet
+                    </p>
+                  )}
+                  {getTasksByStatus(lane).map((task) => (
+                    <DraggableCard
+                      key={task._id}
+                      task={task}
+                      onEdit={handleEdit}
+                    />
+                  ))}
+                </Swimlane>
               ))}
             </div>
           </DndContext>
