@@ -6,7 +6,8 @@ import api from "../api";
 import { useProject } from "../context/ProjectContext";
 import { getUserBanner } from "../constants/storeItems";
 import AddNewProject from "../screens/AddNewProject";
-import ProfileCircle from "../components/ProfileCircle"
+import ProfileCircle from "../components/ProfileCircle";
+import EditProfile from "../components/EditProfile";
 
 // Helper function to darken a hex color for
 const darkenColor = (hex, percent = 20) => {
@@ -29,8 +30,24 @@ const darkenColor = (hex, percent = 20) => {
 
 const TopNavBar = () => {
   const navigate = useNavigate();
-  const [projects, setProjects] = useState([]);
-  const [bannerColor, setBannerColor] = useState("#DDF9EA");
+  const [projects, setProjects] = useState(() => {
+    // Initialize from localStorage cache
+    const cached = localStorage.getItem('userProjects');
+    return cached ? JSON.parse(cached) : [];
+  });
+  const [bannerColor, setBannerColor] = useState(() => {
+    // Initialize banner color immediately from localStorage
+    try {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        return getUserBanner(user.selectedBanner);
+      }
+    } catch (error) {
+      console.error("Error getting banner color:", error);
+    }
+    return "#DDF9EA";
+  });
   const [homeHover, setHomeHover] = useState(false);
   const [hoveredTab, setHoveredTab] = useState(null);
   const [addBtnHover, setAddBtnHover] = useState(false);
@@ -40,6 +57,9 @@ const TopNavBar = () => {
   const [isLastMember, setIsLastMember] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [successMessageText, setSuccessMessageText] = useState("");
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [editProfileTab, setEditProfileTab] = useState('personal');
+  const [userData, setUserData] = useState(null);
 
   const { selectedProject, setSelectedProject } = useProject();
 
@@ -59,12 +79,129 @@ const TopNavBar = () => {
     }
   };
 
+  const fetchUserData = async (retryCount = 0) => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        const response = await api.get(`/api/user/${user._id}`);
+        setUserData(response.data);
+        return true;
+      }
+    } catch (error) {
+      console.error(`Error fetching user data (attempt ${retryCount + 1}/3):`, error);
+      
+      // Retry up to 3 times
+      if (retryCount < 2) {
+        // Wait a bit before retrying (exponential backoff: 500ms, 1000ms)
+        await new Promise(resolve => setTimeout(resolve, 500 * (retryCount + 1)));
+        return fetchUserData(retryCount + 1);
+      }
+      
+      // After 3 attempts, give up and leave fields blank
+      console.error('Failed to fetch user data after 3 attempts');
+      return false;
+    }
+  };
+
+  const handleEditAccount = async () => {
+    setEditProfileTab('personal');
+    // Always fetch fresh user data when opening the modal
+    await fetchUserData();
+    setShowEditProfile(true);
+  };
+
+  const handleCustomization = async () => {
+    setEditProfileTab('customization');
+    // Always fetch fresh user data when opening the modal
+    await fetchUserData();
+    setShowEditProfile(true);
+  };
+
+  const handleSaveProfile = async (updates) => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (!storedUser) return { success: false, error: 'User not found' };
+
+      const user = JSON.parse(storedUser);
+      const currentUserData = userData || JSON.parse(storedUser);
+
+      // Only update if values have changed
+      if (updates.firstName !== currentUserData.firstName || updates.lastName !== currentUserData.lastName) {
+        await api.put(`/api/user/${user._id}/updatename`, {
+          firstName: updates.firstName,
+          lastName: updates.lastName,
+        });
+      }
+
+      if (updates.email !== currentUserData.email) {
+        await api.put(`/api/user/${user._id}/updateemail`, {
+          email: updates.email,
+        });
+      }
+
+      if (updates.username !== currentUserData.username) {
+        await api.put(`/api/user/${user._id}/updateusername`, {
+          username: updates.username,
+        });
+      }
+
+      if (updates.password) {
+        await api.put(`/api/user/${user._id}/updatepassword`, {
+          password: updates.password,
+        });
+      }
+
+      // Update selected customizations (only if changed)
+      const customizationsChanged = 
+        updates.selectedIcon !== currentUserData.selectedIcon ||
+        updates.selectedBanner !== currentUserData.selectedBanner ||
+        updates.selectedBackdrop !== currentUserData.selectedBackdrop;
+
+      if (customizationsChanged) {
+        await api.put(`/api/user/${user._id}/updateselections`, {
+          selectedIcon: updates.selectedIcon,
+          selectedBanner: updates.selectedBanner,
+          selectedBackdrop: updates.selectedBackdrop,
+        });
+      }
+
+      // Fetch updated user data from backend
+      const updatedUserResponse = await api.get(`/api/user/${user._id}`);
+      localStorage.setItem('user', JSON.stringify(updatedUserResponse.data));
+      setUserData(updatedUserResponse.data);
+
+      // Dispatch event to notify other components
+      window.dispatchEvent(new Event('userUpdated'));
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to update profile';
+      return { success: false, error: errorMessage };
+    }
+  };
+
   useEffect(() => {
     const fetchProjects = async () => {
       if (!user?._id) return;
+      
+      // Check if we already have cached projects
+      const cached = localStorage.getItem('userProjects');
+      const cacheTimestamp = localStorage.getItem('userProjectsTimestamp');
+      const now = Date.now();
+      
+      // Use cache if it's less than 5 minutes old
+      if (cached && cacheTimestamp && (now - parseInt(cacheTimestamp)) < 300000) {
+        return; // Use existing cached data
+      }
+      
       try {
         const res = await api.get(`/api/project/user/${user._id}`);
         setProjects(res.data);
+        // Cache the projects
+        localStorage.setItem('userProjects', JSON.stringify(res.data));
+        localStorage.setItem('userProjectsTimestamp', now.toString());
       } catch (err) {
         console.error("Error fetching user projects:", err);
       }
@@ -73,13 +210,27 @@ const TopNavBar = () => {
     fetchProjects();
     updateBannerColor();
 
-    // Listen for user updates
+    // Listen for user updates and project changes
+    const handleProjectUpdate = () => {
+      // Invalidate cache and refetch
+      localStorage.removeItem('userProjectsTimestamp');
+      if (user?._id) {
+        api.get(`/api/project/user/${user._id}`).then(res => {
+          setProjects(res.data);
+          localStorage.setItem('userProjects', JSON.stringify(res.data));
+          localStorage.setItem('userProjectsTimestamp', Date.now().toString());
+        }).catch(err => console.error("Error fetching projects:", err));
+      }
+    };
+
     window.addEventListener("userUpdated", updateBannerColor);
     window.addEventListener("storage", updateBannerColor);
+    window.addEventListener("projectsUpdated", handleProjectUpdate);
 
     return () => {
       window.removeEventListener("userUpdated", updateBannerColor);
       window.removeEventListener("storage", updateBannerColor);
+      window.removeEventListener("projectsUpdated", handleProjectUpdate);
     };
   }, [user]);
 
@@ -104,6 +255,11 @@ const TopNavBar = () => {
     try {
       const res = await api.get(`/api/project/user/${user._id}`);
       setProjects(res.data);
+      // Update cache
+      localStorage.setItem('userProjects', JSON.stringify(res.data));
+      localStorage.setItem('userProjectsTimestamp', Date.now().toString());
+      // Notify other components
+      window.dispatchEvent(new Event('projectsUpdated'));
     } catch (err) {
       console.error("Error fetching user projects:", err);
     }
@@ -150,6 +306,11 @@ const TopNavBar = () => {
       // Refresh projects list
       const res = await api.get(`/api/project/user/${user._id}`);
       setProjects(res.data);
+      // Update cache
+      localStorage.setItem('userProjects', JSON.stringify(res.data));
+      localStorage.setItem('userProjectsTimestamp', Date.now().toString());
+      // Notify other components
+      window.dispatchEvent(new Event('projectsUpdated'));
 
       // If the project being left is currently selected, clear selection
       if (selectedProject?._id === projectToLeave._id) {
@@ -281,7 +442,11 @@ const TopNavBar = () => {
           </button>
         </div>
                 <div style={TopNavBarStyle.profileContainer}>
-                  <ProfileCircle size={40} />
+                  <ProfileCircle 
+                    size={40} 
+                    onEditAccount={handleEditAccount}
+                    onCustomization={handleCustomization}
+                  />
                 </div>
       </div>
 
@@ -289,6 +454,14 @@ const TopNavBar = () => {
         isOpen={showAddProjectModal}
         onClose={() => setShowAddProjectModal(false)}
         onProjectCreated={handleProjectCreated}
+      />
+
+      <EditProfile
+        isOpen={showEditProfile}
+        onClose={() => setShowEditProfile(false)}
+        userData={userData}
+        onSave={handleSaveProfile}
+        initialTab={editProfileTab}
       />
 
       {/* Leave/Delete Project Confirmation Popup */}

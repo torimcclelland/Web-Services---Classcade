@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../components/MainLayout";
 import PrimaryButton from "../components/PrimaryButton";
+import TimeTracking from "./TimeTracking";
 import DashboardStyle from "../styles/DashboardStyle";
 import api from "../api";
 import { useProject } from "../context/ProjectContext";
@@ -12,6 +13,7 @@ const Dashboard = () => {
 
   const [report, setReport] = useState({ total: 0, completed: 0 });
   const [tasks, setTasks] = useState([]);
+  const [showTimeTracking, setShowTimeTracking] = useState(false);
 
   useEffect(() => {
     if (!loadingProject && !selectedProject) {
@@ -128,7 +130,7 @@ const Dashboard = () => {
           />
           <PrimaryButton
             text="Track Time"
-            onClick={() => navigate("/timetracking")}
+            onClick={() => setShowTimeTracking(true)}
           />
           <PrimaryButton
             text="Schedule Meeting"
@@ -136,6 +138,11 @@ const Dashboard = () => {
           />
         </div>
       </div>
+
+      <TimeTracking 
+        isOpen={showTimeTracking} 
+        onClose={() => setShowTimeTracking(false)} 
+      />
     </MainLayout>
   );
 };

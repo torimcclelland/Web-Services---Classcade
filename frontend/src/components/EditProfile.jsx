@@ -7,7 +7,7 @@ import EditProfileStyle from "../styles/EditProfileStyle";
 import star from '../assets/star.png';
 import flame from '../assets/fire.png';
 
-const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
+const EditProfile = ({ isOpen, onClose, userData, onSave, initialTab = 'personal' }) => {
   const [activeTab, setActiveTab] = useState('personal'); // 'personal' or 'customization'
   const [formData, setFormData] = useState({
     firstName: '',
@@ -39,9 +39,9 @@ const EditProfile = ({ isOpen, onClose, userData, onSave }) => {
       setSelectedBackdrop(userData.selectedBackdrop || null);
       setErrors({});
       setSaveMessage({ type: '', text: '' });
-      setActiveTab('personal');
+      setActiveTab(initialTab);
     }
-  }, [isOpen]);
+  }, [isOpen, initialTab]);
 
   if (!isOpen) return null;
 

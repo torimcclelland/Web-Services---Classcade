@@ -1,8 +1,12 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { UserProvider } from "./context/UserContext";
 import { ProjectProvider } from "./context/ProjectContext";
-
 import DashboardPage from "./screens/Dashboard";
 import LogInPage from "./screens/LogIn";
 import HomePage from "./screens/HomePage";
@@ -28,8 +32,8 @@ export default function App() {
         <Router>
           <Routes>
             <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<LogInPage />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/login" element={<LogInPage/>} />
             <Route
               path="/home"
               element={
@@ -46,14 +50,7 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
-            <Route
-              path="/timetracking"
-              element={
-                <ProtectedRoute>
-                  <TimeTracking />
-                </ProtectedRoute>
-              }
-            />
+
             <Route
               path="/profile"
               element={
@@ -133,12 +130,6 @@ export default function App() {
                 <ProtectedRoute>
                   <MessageThread />
                 </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/landing"
-              element={
-                  <Landing />
               }
             />
           </Routes>

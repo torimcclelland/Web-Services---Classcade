@@ -13,14 +13,6 @@ const AddNewTaskStyle = {
     flex: 1,
     padding: 24,
   },
-  formPanel: {
-    backgroundColor: '#fff',
-    padding: 24,
-    borderRadius: 12,
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-    maxWidth: 600,
-    margin: '0 auto',
-  },
   title: {
     fontSize: 28,
     fontWeight: 600,
@@ -37,6 +29,8 @@ const AddNewTaskStyle = {
     marginTop: 4,
     borderRadius: 6,
     border: '1px solid #ccc',
+    fontFamily: 'inherit',
+    fontSize: 15,
     boxSizing: 'border-box',
   },
   select: {
@@ -45,6 +39,7 @@ const AddNewTaskStyle = {
     marginTop: 4,
     borderRadius: 6,
     border: '1px solid #ccc',
+    fontFamily: 'inherit',
     boxSizing: 'border-box',
   },
   actionButtons: {

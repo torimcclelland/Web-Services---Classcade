@@ -9,8 +9,6 @@ const storeStyles = {
   },
   main: {
     flex: 1,
-    padding: 24,
-    paddingTop: 40,
     backgroundColor: "#ddf9ea",
     position: "relative",
   },
@@ -26,7 +24,7 @@ const storeStyles = {
     display: "flex",
     flexDirection: "column",
     gap: 16,
-    padding: "80px 16px 24px",
+    padding: "0px 16px 0px",
   },
   section: {
     width: "100%",

@@ -270,4 +270,28 @@ router.get("/email/:email", async (req, res) => {
   res.json(user);
 });
 
+// Send invitation email to non-registered user
+router.post("/invite", async (req, res) => {
+  try {
+    const { email, projectId, projectName, inviterName } = req.body;
+
+    if (!email || !projectName || !inviterName) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // TODO? Implement actual email sending functionality
+    console.log(`Invitation sent to ${email} for project "${projectName}" by ${inviterName}`);
+    console.log(`Project ID: ${projectId}`);
+
+    res.json({ 
+      message: "Invitation sent successfully",
+      email,
+      projectName
+    });
+  } catch (err) {
+    console.error("Error sending invitation:", err);
+    res.status(500).json({ error: "Failed to send invitation" });
+  }
+});
+
 module.exports = router;
