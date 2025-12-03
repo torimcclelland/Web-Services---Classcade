@@ -29,6 +29,8 @@ const AddNewTaskStyle = {
     marginTop: 4,
     borderRadius: 6,
     border: '1px solid #ccc',
+    fontFamily: 'inherit',
+    fontSize: 15,
     boxSizing: 'border-box',
   },
   select: {
@@ -37,6 +39,7 @@ const AddNewTaskStyle = {
     marginTop: 4,
     borderRadius: 6,
     border: '1px solid #ccc',
+    fontFamily: 'inherit',
     boxSizing: 'border-box',
   },
   actionButtons: {
