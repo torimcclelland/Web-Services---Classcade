@@ -104,11 +104,8 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
 
     // Validate due date
     if (dueDate) {
-      const tdy = new Date();
-      tdy.setHours(0, 0, 0, 0);
-      const selected = new Date(dueDate);
-
-      if (selected < tdy) {
+      const tdy = new Date().toISOString().split("T")[0];
+      if (dueDate < tdy) {
         setDueDateError("Due date cannot be in the past");
         hasError = true;
       }
@@ -218,9 +215,12 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
       }, 1000);
     } catch (err) {
       console.error(err);
-      setProjectNameError(
-        err.response?.data?.error || "Error creating project"
-      );
+      const serverMsg = err.response?.data?.error || err.message || "Error creating project";
+      if (typeof serverMsg === 'string' && serverMsg.toLowerCase().includes('due date')) {
+        setDueDateError(serverMsg);
+      } else {
+        setProjectNameError(serverMsg);
+      }
     } finally {
       setIsCreating(false);
       setShowInviteDialog(false);
@@ -396,7 +396,7 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
           )}
 
           <div style={formGroupStyle}>
-            <label style={labelStyle}>Project Name</label>
+            <label style={labelStyle}>Project Name *</label>
             <input
               type="text"
               maxLength={20}
@@ -429,7 +429,7 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
           </div>
 
           <div style={formGroupStyle}>
-            <label style={labelStyle}>Teacher Email (optional)</label>
+            <label style={labelStyle}>Teacher Email</label>
             <input
               type="email"
               maxLength={45}

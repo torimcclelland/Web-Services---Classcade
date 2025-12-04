@@ -19,11 +19,8 @@ router.post("/create", async (req, res) => {
     }
 
     if (dueDate) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      const selected = new Date(dueDate);
-      if (selected < today) {
+      const todayStr = new Date().toISOString().split("T")[0];
+      if (dueDate < todayStr) {
         return res
           .status(400)
           .json({ error: "Due date cannot be in the past" });

@@ -237,13 +237,25 @@ const TopNavBar = () => {
   const goToHome = () => navigate("/home");
 
   const handleProjectCreated = async (createdProject) => {
-    // If a created project is provided, select it and go to dashboard
+    localStorage.removeItem('userProjectsTimestamp');
     const project = createdProject?.project;
 
     if (project && project._id) {
+      if (user?._id) {
+        try {
+          const res = await api.get(`/api/project/user/${user._id}`);
+          setProjects(res.data);
+          localStorage.setItem('userProjects', JSON.stringify(res.data));
+          localStorage.setItem('userProjectsTimestamp', Date.now().toString());
+          window.dispatchEvent(new Event('projectsUpdated'));
+        } catch (err) {
+          console.error("Error fetching user projects:", err);
+        }
+      }
+      
       setSelectedProject(project);
       try {
-        localStorage.setItem("selectedProject", JSON.stringify(createdProject));
+        localStorage.setItem("selectedProject", JSON.stringify(project));
       } catch (e) {}
       setShowAddProjectModal(false);
       navigate("/dashboard");
