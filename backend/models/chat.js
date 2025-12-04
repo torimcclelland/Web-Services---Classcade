@@ -11,17 +11,27 @@ const reactionSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 }, { _id: false });
 
+const attachmentSchema = new mongoose.Schema({
+    filename: { type: String, required: true },
+    originalName: { type: String, required: true },
+    fileSize: { type: Number, required: true }, // in bytes
+    mimeType: { type: String, required: true },
+    url: { type: String, required: true }, // Storage URL
+    uploadedAt: { type: Date, default: Date.now }
+}, { _id: false });
+
 const chatSchema = new mongoose.Schema({
     conversationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Conversation' }, // groups/rooms/DM thread
-    channelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Channel', index: true }, // NEW: for channel support
+    channelId: { type: mongoose.Schema.Types.ObjectId, ref: 'Channel', index: true }, // for channel support
     sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    content: { type: String, required: true },
+    content: { type: String, required: false }, 
 
-    // recipients can be useful for group messages. Otherwise just use conversationId
     recipients: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 
     // reply-to
     repliedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'Chat' },
+
+    attachments: [attachmentSchema],
 
     // reactions and read receipts
     reactions: [reactionSchema],
@@ -37,6 +47,14 @@ const chatSchema = new mongoose.Schema({
 chatSchema.index({ conversationId: 1, createdAt: 1 });
 chatSchema.index({ channelId: 1, createdAt: 1 });
 chatSchema.index({ sender: 1, createdAt: -1 });
+
+chatSchema.pre('validate', function (next) {
+    if (!this.content && (!this.attachments || this.attachments.length === 0)) {
+        next(new Error('Message must have either content or attachments'));
+    } else {
+        next();
+    }
+});
 
 chatSchema.set('toJSON', {
     transform(doc, ret) {

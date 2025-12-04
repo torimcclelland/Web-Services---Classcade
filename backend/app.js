@@ -28,6 +28,7 @@ const taskApiDocsRoutes = require("./my-api-docs/routes/taskRoute");
 const userApiDocsRoutes = require("./my-api-docs/routes/userRoute");
 const zoomApiDocsRoutes = require("./my-api-docs/routes/zoomRoute");
 const channelRoutes = require("./services/channelService");
+const uploadService = require('./services/uploadService');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -49,14 +50,11 @@ const options = {
             },
         ],
     },
-    // Paths to files containing API definitions
     apis: ["./my-api-docs/routes/*.js"],
 };
 
-// Generate the OpenAPI specification
 const specs = swaggerJsdoc(options);
 
-// Serve the Swagger UI on a specific route
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 app.use(cors());
@@ -86,6 +84,8 @@ app.use("/", taskApiDocsRoutes);
 app.use("/", userApiDocsRoutes);
 app.use("/", zoomApiDocsRoutes);
 app.use("/api", channelRoutes);
+app.use('/api', uploadService);
+app.use('/uploads', express.static('uploads'));
 
 const startServer = async () => {
     try {
@@ -101,7 +101,7 @@ const startServer = async () => {
         io.on('connection', socket => {
             console.log('Socket connected:', socket.id);
 
-            // Join a room (now supports both channels and projects)
+            // Join a room
             socket.on('joinRoom', roomId => {
                 socket.join(roomId);
                 console.log(`Socket ${socket.id} joined room ${roomId}`);
@@ -113,14 +113,13 @@ const startServer = async () => {
                 console.log(`Socket ${socket.id} left room ${roomId}`);
             });
 
-            // Send message (updated to support channels)
+            // Send message
             socket.on('sendMessage', async msg => {
                 try {
-                    // Create message with both channelId and conversationId for backwards compatibility
                     const messageData = {
                         ...msg,
-                        channelId: msg.channelId, // New: channel support
-                        conversationId: msg.conversationId // Keep for backwards compatibility
+                        channelId: msg.channelId,
+                        conversationId: msg.conversationId
                     };
 
                     console.log('Saving message:', {
@@ -129,17 +128,15 @@ const startServer = async () => {
                         sender: messageData.sender
                     });
 
-                    // Save the message to database
                     const saved = await Chat.create(messageData);
 
-                    // Populate the sender and recipients with user details before emitting
                     const populated = await Chat.findById(saved._id)
                         .populate('sender', 'firstName lastName avatar email')
-                        .populate('recipients', 'firstName lastName avatar email');
+                        .populate('recipients', 'firstName lastName avatar email')
+                        .populate('reactions.user', 'firstName lastName');
 
                     console.log('Populated sender:', populated.sender);
 
-                    // Emit to the appropriate room (prioritize channelId, fallback to conversationId)
                     const roomId = msg.channelId || msg.conversationId;
                     io.to(roomId).emit('receiveMessage', populated);
 
@@ -150,10 +147,63 @@ const startServer = async () => {
                 }
             });
 
+            // Add reaction
+            socket.on('addReaction', async ({ messageId, userId, emoji }) => {
+                try {
+                    console.log('Adding reaction:', { messageId, userId, emoji });
+
+                    // Remove existing reaction from this user
+                    await Chat.findByIdAndUpdate(messageId, { $pull: { reactions: { user: userId } } });
+
+                    // Add new reaction
+                    const updated = await Chat.findByIdAndUpdate(
+                        messageId,
+                        { $push: { reactions: { user: userId, type: emoji, createdAt: new Date() } } },
+                        { new: true }
+                    )
+                        .populate('sender', 'firstName lastName avatar email')
+                        .populate('recipients', 'firstName lastName avatar email')
+                        .populate('reactions.user', 'firstName lastName');
+
+                    if (updated) {
+                        const channelId = updated.channelId;
+                        io.to(channelId).emit('reactionUpdated', updated);
+                        console.log('Reaction added and broadcasted to channel:', channelId);
+                    }
+                } catch (err) {
+                    console.error('Error adding reaction:', err);
+                    socket.emit('reactionError', { error: 'Failed to add reaction' });
+                }
+            });
+
+            // NEW: Remove reaction
+            socket.on('removeReaction', async ({ messageId, userId }) => {
+                try {
+                    console.log('Removing reaction:', { messageId, userId });
+
+                    const updated = await Chat.findOneAndUpdate(
+                        { _id: messageId },
+                        { $pull: { reactions: { user: userId } } },
+                        { new: true }
+                    )
+                        .populate('sender', 'firstName lastName avatar email')
+                        .populate('recipients', 'firstName lastName avatar email')
+                        .populate('reactions.user', 'firstName lastName');
+
+                    if (updated) {
+                        const channelId = updated.channelId;
+                        io.to(channelId).emit('reactionUpdated', updated);
+                        console.log('Reaction removed and broadcasted to channel:', channelId);
+                    }
+                } catch (err) {
+                    console.error('Error removing reaction:', err);
+                    socket.emit('reactionError', { error: 'Failed to remove reaction' });
+                }
+            });
+
             // Handle messages read event
             socket.on('messagesRead', ({ channelId, userId, count }) => {
                 console.log(`${count} messages marked as read in channel ${channelId} by user ${userId}`);
-                // Optionally broadcast to other users in the channel
                 socket.to(channelId).emit('messagesReadUpdate', { channelId, userId, count });
             });
 
