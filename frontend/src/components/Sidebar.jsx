@@ -85,7 +85,7 @@ export default function Sidebar() {
       icon: <FaHome />,
       path: "/dashboard",
     },
-    { key: "tasks", label: "My Tasks", icon: <FaTasks />, path: "/tasks" },
+    { key: "tasks", label: "Tasks", icon: <FaTasks />, path: "/tasks" },
     { key: "stats", label: "Stats", icon: <FaChartBar />, path: "/stats" },
     {
       key: "messages",

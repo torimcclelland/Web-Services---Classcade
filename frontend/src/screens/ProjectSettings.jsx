@@ -13,6 +13,7 @@ const ProjectSettings = () => {
   const [name, setName] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [members, setMembers] = useState([]);
+  const [pendingInvites, setPendingInvites] = useState([]);
   const [newMemberEmail, setNewMemberEmail] = useState("");
   const [toast, setToast] = useState("");
   const [showToast, setShowToast] = useState(false);
@@ -55,7 +56,15 @@ const ProjectSettings = () => {
       } catch {}
     };
 
+    const fetchProjectDetails = async () => {
+      try {
+        const res = await api.get(`/api/project/${selectedProject._id}`);
+        setPendingInvites(res.data.pendingInvites || []);
+      } catch {}
+    };
+
     fetchMembers();
+    fetchProjectDetails();
   }, [selectedProject]);
 
   const handleUpdate = async () => {
@@ -108,6 +117,11 @@ const ProjectSettings = () => {
         `/api/project/${selectedProject._id}/members`
       );
       setMembers(memRes.data);
+      
+      // Refresh pending invites in case the added user was in the pending list
+      const projectRes = await api.get(`/api/project/${selectedProject._id}`);
+      setPendingInvites(projectRes.data.pendingInvites || []);
+      
       setNewMemberEmail("");
       triggerToast("Member added!");
     } catch {
@@ -125,12 +139,30 @@ const ProjectSettings = () => {
         inviterName: `${currentUser.firstName} ${currentUser.lastName}`
       });
       
+      // Refresh pending invites list
+      const res = await api.get(`/api/project/${selectedProject._id}`);
+      setPendingInvites(res.data.pendingInvites || []);
+      
       triggerToast("Invitation sent!");
       setConfirmInvite(null);
       setNewMemberEmail("");
     } catch (err) {
       triggerToast("Failed to send invitation");
       setConfirmInvite(null);
+    }
+  };
+
+  const handleRemovePendingInvite = async (email) => {
+    try {
+      await api.delete(`/api/project/${selectedProject._id}/pendingInvites/${encodeURIComponent(email)}`);
+      
+      const res = await api.get(`/api/project/${selectedProject._id}`);
+      setPendingInvites(res.data.pendingInvites || []);
+      
+      triggerToast("Invite removed");
+    } catch {
+      console.error('Failed to remove pending invite', email);
+      triggerToast("Failed to remove invite");
     }
   };
 
@@ -246,6 +278,20 @@ const ProjectSettings = () => {
                 <button
                   className="remove-member-btn"
                   onClick={() => initiateRemoveMember(m._id, m.email)}
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+            {pendingInvites.map((email) => (
+              <li key={email} className="member-item pending-invite">
+                <span>
+                  {email}
+                  <span className="pending-badge">Invited</span>
+                </span>
+                <button
+                  className="remove-member-btn"
+                  onClick={() => handleRemovePendingInvite(email)}
                 >
                   ✕
                 </button>

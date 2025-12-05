@@ -279,6 +279,16 @@ router.post("/invite", async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
+    // Add email to project's pendingInvites if projectId is provided
+    if (projectId) {
+      const Project = require("../models/project");
+      await Project.findByIdAndUpdate(
+        projectId,
+        { $addToSet: { pendingInvites: email.toLowerCase() } },
+        { new: true }
+      );
+    }
+
     // TODO? Implement actual email sending functionality
     console.log(`Invitation sent to ${email} for project "${projectName}" by ${inviterName}`);
     console.log(`Project ID: ${projectId}`);

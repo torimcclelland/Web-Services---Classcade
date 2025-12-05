@@ -143,8 +143,19 @@ router.post("/:id/members", async (req, res) => {
     const { userId } = req.body;
     const project = await Project.findById(req.params.id);
 
+    if (!project) return res.status(404).json({ error: 'Project not found' });
+
     if (!project.members.includes(userId)) {
       project.members.push(userId);
+
+      project.pendingInvites = project.pendingInvites || [];
+      const user = await User.findById(userId);
+      if (user && user.email) {
+        project.pendingInvites = project.pendingInvites.filter(
+          (email) => email.toLowerCase() !== user.email.toLowerCase()
+        );
+      }
+
       await project.save();
 
       await User.findByIdAndUpdate(userId, {
@@ -175,6 +186,36 @@ router.delete("/:id/members/:userId", async (req, res) => {
     res.json(project);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// Remove pending invite
+router.delete("/:id/pendingInvites/:email", async (req, res) => {
+  try {
+    const projectId = req.params.id;
+    const decodedEmail = decodeURIComponent(req.params.email);
+    const emailToRemove = decodedEmail.toLowerCase();
+
+    console.log(`Removing pending invite: project=${projectId}, email=${decodedEmail}`);
+
+    const project = await Project.findById(projectId);
+    if (!project) return res.status(404).json({ error: 'Project not found' });
+
+    project.pendingInvites = project.pendingInvites || [];
+    const beforeCount = project.pendingInvites.length;
+    project.pendingInvites = project.pendingInvites.filter(
+      (email) => email.toLowerCase() !== emailToRemove
+    );
+    const afterCount = project.pendingInvites.length;
+
+    await project.save();
+
+    console.log(`Pending invites removed: ${beforeCount - afterCount}`);
+
+    res.json(project);
+  } catch (err) {
+    console.error('Error removing pending invite:', err);
+    res.status(500).json({ error: 'Failed to remove pending invite' });
   }
 });
 

@@ -180,7 +180,7 @@ const MyTasks = () => {
 
         <main style={MyTasksStyle.main}>
           <div style={MyTasksStyle.header}>
-            <h2>My Tasks ({selectedProject?.name})</h2>
+            <h2>Tasks ({selectedProject?.name})</h2>
 
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <PrimaryButton

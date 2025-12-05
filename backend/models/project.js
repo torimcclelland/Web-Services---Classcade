@@ -10,6 +10,7 @@ const projectSchema = new mongoose.Schema({
   },
   dueDate: { type: Date },
   members: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  pendingInvites: [{ type: String }], // Emails of invited non-registered users
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
