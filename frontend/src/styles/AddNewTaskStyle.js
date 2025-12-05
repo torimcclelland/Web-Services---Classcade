@@ -17,6 +17,7 @@ const AddNewTaskStyle = {
     fontSize: 28,
     fontWeight: 600,
     marginBottom: 16,
+    marginTop: 0
   },
   label: {
     marginTop: 12,

@@ -1,6 +1,6 @@
 import React from "react";
 import { useDraggable } from "@dnd-kit/core";
-import { FaPencilAlt } from "react-icons/fa";
+import { HiDotsVertical } from "react-icons/hi";
 
 const DraggableCard = ({ task, onEdit }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
@@ -25,9 +25,9 @@ const DraggableCard = ({ task, onEdit }) => {
       : undefined,
     opacity: isDragging ? 0.8 : 1,
     backgroundColor: "#fff",
-    padding: "0.75rem",
+    padding: "0.5rem 0.75rem",
     borderRadius: "8px",
-    marginBottom: "1rem",
+    marginBottom: "0.75rem",
     boxShadow: isDragging ? "0 8px 16px rgba(0,0,0,0.2)" : "0 2px 4px rgba(0,0,0,0.1)",
     border: "1px solid #e0e0e0",
     cursor: isDragging ? "grabbing" : "grab",
@@ -44,57 +44,76 @@ const DraggableCard = ({ task, onEdit }) => {
       nodeRef.current = node;
     }} style={style} {...listeners} {...attributes}>
 
-      <h4 style={{ 
-        fontWeight: 600, 
-        marginBottom: "0.5rem",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
-        wordBreak: "break-word",
-        paddingRight: "24px"
+      <div style={{ 
+        display: "flex", 
+        justifyContent: "space-between", 
+        alignItems: "flex-start",
+        gap: "0.5rem",
+        marginBottom: "0.25rem"
       }}>
-        {task.name}
-      </h4>
+        <h4 style={{ 
+          fontWeight: 600,
+          fontSize: "0.95rem",
+          margin: 0,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          wordBreak: "break-word",
+          flex: 1
+        }}>
+          {task.name}
+        </h4>
+        
+        {/* Three dots menu */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            onEdit(task);
+          }}
+          onPointerDown={(e) => {
+            e.stopPropagation();
+          }}
+          style={{
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            padding: "0",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            height: "20px",
+            width: "20px",
+          }}
+        >
+          <HiDotsVertical size={16} color="#666" />
+        </button>
+      </div>
+
       <p style={{ 
-        fontSize: "0.9rem", 
-        marginBottom: "0.5rem",
+        fontSize: "0.85rem", 
+        marginBottom: "0.25rem",
+        margin: 0,
         overflow: "hidden",
         textOverflow: "ellipsis",
         display: "-webkit-box",
         WebkitLineClamp: 2,
         WebkitBoxOrient: "vertical",
-        wordBreak: "break-word"
+        wordBreak: "break-word",
+        color: "#666"
       }}>
         {task.description}
       </p>
       {task.dueDate && (
-        <p style={{ fontSize: "0.8rem", color: "#555" }}>
+        <p style={{ 
+          fontSize: "0.75rem", 
+          color: "#888",
+          margin: "0.25rem 0 0 0"
+        }}>
           Due: {new Date(task.dueDate).toLocaleDateString()}
         </p>
       )}
-
-      {/* Pencil icon opens modal */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          onEdit(task);
-        }}
-        onPointerDown={(e) => {
-          e.stopPropagation();
-        }}
-        style={{
-          position: "absolute",
-          top: "8px",
-          right: "8px",
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          zIndex: 10,
-        }}
-      >
-        <FaPencilAlt size={16} color="#555" />
-      </button>
     </div>
   );
 };

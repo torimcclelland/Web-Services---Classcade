@@ -49,6 +49,7 @@ const MyTasksStyle = {
     flexDirection: "column",
     height: "94%",
     overflow: "hidden",
+    border: "1px solid #e5e5e5",
   },  
   swimlaneTitle: {
     fontSize: "1.1rem",

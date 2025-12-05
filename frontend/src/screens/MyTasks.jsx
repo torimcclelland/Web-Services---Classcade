@@ -20,10 +20,11 @@ import {
   useDroppable,
 } from "@dnd-kit/core";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
+import SecondaryButton from "../components/SecondaryButton";
 
 const swimlanes = ["Not Started", "In Progress", "Under Review", "Done"];
 
-const Swimlane = ({ lane, children }) => {
+const Swimlane = ({ lane, children, onClearCompleted, showClearButton }) => {
   const { setNodeRef, isOver } = useDroppable({
     id: lane,
     data: { lane },
@@ -38,7 +39,26 @@ const Swimlane = ({ lane, children }) => {
         transition: "background-color 0.2s ease",
       }}
     >
-      <h3 style={MyTasksStyle.swimlaneTitle}>{lane}</h3>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+        <h3 style={{ ...MyTasksStyle.swimlaneTitle, marginBottom: 0 }}>{lane}</h3>
+        {showClearButton && (
+          <button
+            onClick={onClearCompleted}
+            style={{
+              padding: "0.35rem 0.75rem",
+              fontSize: "0.8rem",
+              backgroundColor: "#1e3a8a",
+              color: "#fff",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontWeight: 600,
+            }}
+          >
+            Clear All
+          </button>
+        )}
+      </div>
       <div style={MyTasksStyle.swimlaneContent}>
         {children}
       </div>
@@ -52,6 +72,7 @@ const MyTasks = () => {
   const [editingTask, setEditingTask] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [activeTaskId, setActiveTaskId] = useState(null);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const { selectedProject } = useProject();
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -116,9 +137,12 @@ const MyTasks = () => {
     });
 
     try {
-      await api.put(`/api/task/update/${active.id}`, { status: newStatus });
+      await api.put(`/api/task/${selectedProject._id}/${active.id}`, { status: newStatus });
     } catch (err) {
       console.error("Failed to update task status:", err);
+      // Revert optimistic update on error
+      const res = await api.get(`/api/task/${selectedProject._id}`);
+      setTasks(res.data || []);
     }
   };
 
@@ -126,6 +150,26 @@ const MyTasks = () => {
   const handleEdit = (task) => {
     setEditingTask(task);
     setShowModal(true);
+  };
+
+  const handleClearCompleted = async () => {
+    const completedTasks = tasks.filter(t => t.status === "Done");
+    
+    try {
+      // Delete all completed tasks
+      await Promise.all(
+        completedTasks.map(task => 
+          api.delete(`/api/task/${selectedProject._id}/${task._id}`)
+        )
+      );
+      
+      // Refresh task list
+      const res = await api.get(`/api/task/${selectedProject._id}`);
+      setTasks(res.data || []);
+    } catch (err) {
+      console.error("Failed to clear completed tasks:", err);
+    }
+    setShowClearConfirm(false);
   };
 
   return (
@@ -158,7 +202,12 @@ const MyTasks = () => {
           >
             <div style={MyTasksStyle.swimlaneContainer}>
               {swimlanes.map((lane) => (
-                <Swimlane key={lane} lane={lane}>
+                <Swimlane 
+                  key={lane} 
+                  lane={lane}
+                  onClearCompleted={() => setShowClearConfirm(true)}
+                  showClearButton={lane === "Done" && getTasksByStatus("Done").length > 0}
+                >
                   {getTasksByStatus(lane).length === 0 && (
                     <p style={{ fontStyle: "italic", opacity: 0.6 }}>
                       No tasks yet
@@ -201,6 +250,51 @@ const MyTasks = () => {
                 }}
               />
             </ModalWrapper>
+          )}
+
+          {showClearConfirm && (
+            <div style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0, 0, 0, 0.7)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 2000,
+            }}>
+              <div style={{
+                backgroundColor: "#fff",
+                borderRadius: "12px",
+                padding: "2rem",
+                maxWidth: "400px",
+                boxShadow: "0 10px 40px rgba(0, 0, 0, 0.3)",
+              }}>
+                <h3 style={{ marginTop: 0, marginBottom: "1rem" }}>
+                  Clear All Completed Tasks?
+                </h3>
+                <p style={{ marginBottom: "1.5rem", color: "#374151" }}>
+                  Are you sure you want to delete all {tasks.filter(t => t.status === "Done").length} completed task(s)? This action cannot be undone.
+                </p>
+                <div style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: "0.75rem",
+                }}>
+                  <PrimaryButton
+                    text="Cancel"
+                    onClick={() => setShowClearConfirm(false)}
+                  />
+                  <SecondaryButton
+                    text="Delete All"
+                    onClick={handleClearCompleted}
+                    style={{ backgroundColor: "#dc2626", color: "#fff" }}
+                  />
+                </div>
+              </div>
+            </div>
           )}
         </main>
       </div>
