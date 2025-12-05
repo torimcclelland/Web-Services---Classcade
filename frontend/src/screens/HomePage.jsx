@@ -6,6 +6,8 @@ import api from "../api";
 import { useProject } from "../context/ProjectContext";
 import HomePageStyle from "../styles/HomePageStyle";
 import AddNewProject from "./AddNewProject";
+import AddNewTaskModal from "./AddNewTask";
+import ModalWrapper from "../components/ModalWrapper";
 import ProfileCircle from "../components/ProfileCircle";
 import EditProfile from "../components/EditProfile";
 
@@ -17,11 +19,21 @@ const HomePage = () => {
   const [hoveredNewBtn, setHoveredNewBtn] = useState(false);
   const [hoveredLogout, setHoveredLogout] = useState(false);
   const [showAddProjectModal, setShowAddProjectModal] = useState(false);
+  const [showAddTaskModal, setShowAddTaskModal] = useState(false);
+  const [taskProject, setTaskProject] = useState(null);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [editProfileTab, setEditProfileTab] = useState('personal');
   const [userData, setUserData] = useState(null);
+  const [toast, setToast] = useState("");
+  const [showToast, setShowToast] = useState(false);
 
   const { setSelectedProject } = useProject();
+
+  const triggerToast = (text) => {
+    setToast(text);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2000);
+  };
 
   const fetchProjects = async () => {
     try {
@@ -55,6 +67,19 @@ const HomePage = () => {
   const handleCardClick = (project) => {
     setSelectedProject(project);
     navigate("/dashboard");
+  };
+
+  const handleAddTask = (e, project) => {
+    e.stopPropagation();
+    setTaskProject(project);
+    setSelectedProject(project);
+    setShowAddTaskModal(true);
+  };
+
+  const handleTaskSuccess = () => {
+    setShowAddTaskModal(false);
+    setTaskProject(null);
+    triggerToast("Task created successfully!");
   };
 
   const handleLogout = () => {
@@ -176,6 +201,25 @@ const HomePage = () => {
 
   return (
     <div style={HomePageStyle.page}>
+      {showToast && (
+        <div
+          style={{
+            position: "fixed",
+            top: "20px",
+            right: "20px",
+            background: "#1e3a8a",
+            color: "white",
+            padding: "12px 18px",
+            borderRadius: "8px",
+            fontSize: "0.95rem",
+            fontWeight: "500",
+            zIndex: 2000,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+          }}
+        >
+          {toast}
+        </div>
+      )}
       <div
         // profile icon
         style={{
@@ -209,54 +253,96 @@ const HomePage = () => {
           Click a project or create a new one to get started
         </div>
 
-        <div style={HomePageStyle.list}>
-          {projects.map((g, index) => (
-            <div
-              key={g._id || index}
+        {projects.length === 0 ? (
+          <div style={HomePageStyle.emptyState}>
+            <div style={HomePageStyle.emptyStateIcon}>📋</div>
+            <h2 style={HomePageStyle.emptyStateTitle}>No Projects Yet</h2>
+            <p style={HomePageStyle.emptyStateDescription}>
+              Get started by creating a project! Projects help you organize tasks, 
+              collaborate with team members, and track progress all in one place.
+            </p>
+            <button
               style={{
-                ...HomePageStyle.card,
-                backgroundColor: hoveredCard === index ? "#f5f5f5" : "#fff",
+                ...HomePageStyle.emptyStateCTA,
+                backgroundColor: hoveredNewBtn ? "#1e40af" : "#1e3a8a",
+              }}
+              onClick={() => setShowAddProjectModal(true)}
+              onMouseEnter={() => setHoveredNewBtn(true)}
+              onMouseLeave={() => setHoveredNewBtn(false)}
+            >
+              🚀 Create Your First Project
+            </button>
+          </div>
+        ) : (
+          <>
+            <button
+              style={{
+                ...HomePageStyle.newProjectBtn,
+                backgroundColor: hoveredNewBtn ? "#f4f4f4ff" : "#fff",
                 transition: "background-color 0.2s ease",
               }}
-              onClick={() => handleCardClick(g)}
-              onMouseEnter={() => setHoveredCard(index)}
-              onMouseLeave={() => setHoveredCard(null)}
+              onClick={() => setShowAddProjectModal(true)}
+              onMouseEnter={() => setHoveredNewBtn(true)}
+              onMouseLeave={() => setHoveredNewBtn(false)}
             >
-              <div style={HomePageStyle.cardLeft}>
+              + New Project
+            </button>
+
+            <div style={HomePageStyle.list}>
+              {projects.map((g, index) => (
                 <div
+                  key={g._id || index}
                   style={{
-                    ...HomePageStyle.badge,
+                    ...HomePageStyle.card,
                     backgroundColor: hoveredCard === index ? "#f5f5f5" : "#fff",
                     transition: "background-color 0.2s ease",
                   }}
+                  onClick={() => handleCardClick(g)}
+                  onMouseEnter={() => setHoveredCard(index)}
+                  onMouseLeave={() => setHoveredCard(null)}
                 >
-                  {index + 1}.
-                </div>
-                <div style={HomePageStyle.cardContent}>
-                  <div style={HomePageStyle.cardTitle}>{g.name}</div>
-                  <div style={HomePageStyle.cardMeta}>
-                    <div style={HomePageStyle.metaText}>
-                      Members: {g.members?.length || 0}
+                  <div style={HomePageStyle.cardLeft}>
+                    <div
+                      style={{
+                        ...HomePageStyle.badge,
+                        backgroundColor: hoveredCard === index ? "#f5f5f5" : "#fff",
+                        transition: "background-color 0.2s ease",
+                      }}
+                    >
+                      {index + 1}.
+                    </div>
+                    <div style={HomePageStyle.cardContent}>
+                      <div style={HomePageStyle.cardTitle}>{g.name}</div>
+                      <div style={HomePageStyle.cardMeta}>
+                        <div style={HomePageStyle.metaText}>
+                          Members: {g.members?.length || 0}
+                        </div>
+                      </div>
                     </div>
                   </div>
+                  <button
+                    style={{
+                      padding: "8px 16px",
+                      backgroundColor: "#1e3a8a",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "6px",
+                      cursor: "pointer",
+                      fontSize: "0.9rem",
+                      fontWeight: "600",
+                      transition: "background-color 0.2s ease",
+                    }}
+                    onClick={(e) => handleAddTask(e, g)}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = "#1e40af"}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = "#1e3a8a"}
+                  >
+                    + Add Task
+                  </button>
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
-
-        <button
-          style={{
-            ...HomePageStyle.newProjectBtn,
-            backgroundColor: hoveredNewBtn ? "#f4f4f4ff" : "#fff",
-            transition: "background-color 0.2s ease",
-          }}
-          onClick={() => setShowAddProjectModal(true)}
-          onMouseEnter={() => setHoveredNewBtn(true)}
-          onMouseLeave={() => setHoveredNewBtn(false)}
-        >
-          + New Project
-        </button>
+          </>
+        )}
       </div>
 
       <AddNewProject
@@ -272,6 +358,16 @@ const HomePage = () => {
         onSave={handleSaveProfile}
         initialTab={editProfileTab}
       />
+
+      {showAddTaskModal && taskProject && (
+        <ModalWrapper onClose={() => setShowAddTaskModal(false)}>
+          <AddNewTaskModal
+            task={null}
+            onClose={() => setShowAddTaskModal(false)}
+            onSuccess={handleTaskSuccess}
+          />
+        </ModalWrapper>
+      )}
     </div>
   );
 };
