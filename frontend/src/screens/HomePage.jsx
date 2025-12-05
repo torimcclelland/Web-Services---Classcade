@@ -184,6 +184,9 @@ const HomePage = () => {
   };
 
   const handleProjectCreated = (createdProject) => {
+    localStorage.removeItem('userProjectsTimestamp');
+    window.dispatchEvent(new Event('projectsUpdated'));
+    
     // If a created project is provided, select it and go to dashboard
     const project = createdProject?.project;
 
