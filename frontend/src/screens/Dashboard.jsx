@@ -7,6 +7,7 @@ import api from "../api";
 import { useProject } from "../context/ProjectContext";
 import AddNewTask from "./AddNewTask";
 import ModalWrapper from "../components/ModalWrapper";
+import PrimaryButton from "../components/PrimaryButton";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -88,16 +89,7 @@ const Dashboard = () => {
         {/* Header Section */}
         <div style={DashboardStyle.header}>
           <h1 style={DashboardStyle.projectTitle}>{selectedProject?.name}</h1>
-          <button
-            style={{
-              ...DashboardStyle.editProjectBtn,
-              backgroundColor: hoveredBtn === 'editProject' ? "#f5f5f5" : "#fff",
-            }}
-            onMouseEnter={() => setHoveredBtn('editProject')}
-            onMouseLeave={() => setHoveredBtn(null)}
-          >
-            Edit Project
-          </button>
+          <PrimaryButton text="Edit Project" />
         </div>
 
         {/* Stats Grid */}
