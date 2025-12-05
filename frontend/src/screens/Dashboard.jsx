@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../components/MainLayout";
-import PrimaryButton from "../components/PrimaryButton";
 import TimeTracking from "./TimeTracking";
 import DashboardStyle from "../styles/DashboardStyle";
 import api from "../api";
 import { useProject } from "../context/ProjectContext";
+import AddNewTask from "./AddNewTask";
+import ModalWrapper from "../components/ModalWrapper";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -14,6 +15,8 @@ const Dashboard = () => {
   const [report, setReport] = useState({ total: 0, completed: 0 });
   const [tasks, setTasks] = useState([]);
   const [showTimeTracking, setShowTimeTracking] = useState(false);
+  const [showAddTaskModal, setShowAddTaskModal] = useState(false);
+  const [hoveredBtn, setHoveredBtn] = useState(null);
 
   useEffect(() => {
     if (!loadingProject && !selectedProject) {
@@ -44,7 +47,13 @@ const Dashboard = () => {
   const total = report?.total || 0;
   const completed = report?.completed || 0;
   const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
-  const upcomingTask = tasks.find((t) => t.status !== "Done");
+  
+  // Get task with soonest due date that is not Done
+  const upcomingTask = tasks
+    .filter((t) => t.status !== "Done" && t.dueDate)
+    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0] || 
+    tasks.find((t) => t.status !== "Done");
+  
   const projectDueDate = selectedProject?.dueDate
     ? selectedProject.dueDate.slice(0, 10)
     : "Not set";
@@ -64,78 +73,135 @@ const Dashboard = () => {
     }
   }
 
+  const handleTaskAdded = () => {
+    setShowAddTaskModal(false);
+    // Refresh data
+    if (selectedProject?._id) {
+      api.get(`/api/task/${selectedProject._id}/getreport`).then(res => setReport(res.data));
+      api.get(`/api/task/${selectedProject._id}`).then(res => setTasks(res.data));
+    }
+  };
+
   return (
     <MainLayout>
-      <div style={DashboardStyle.statsPanel}>
-        <h2>{selectedProject?.name} Dashboard</h2>
+      <div style={DashboardStyle.container}>
+        {/* Header Section */}
+        <div style={DashboardStyle.header}>
+          <h1 style={DashboardStyle.projectTitle}>{selectedProject?.name}</h1>
+          <button
+            style={{
+              ...DashboardStyle.editProjectBtn,
+              backgroundColor: hoveredBtn === 'editProject' ? "#f5f5f5" : "#fff",
+            }}
+            onMouseEnter={() => setHoveredBtn('editProject')}
+            onMouseLeave={() => setHoveredBtn(null)}
+          >
+            Edit Project
+          </button>
+        </div>
 
-        <div style={DashboardStyle.statsGrid}>
-          <div style={DashboardStyle.statItem}>
-            <label style={DashboardStyle.statLabel}>Overall Progress</label>
-            <div style={DashboardStyle.progressBar}>
+        {/* Stats Grid */}
+        <div style={DashboardStyle.statsContainer}>
+          <div style={DashboardStyle.statCard}>
+            <div style={DashboardStyle.statLabel}>Project Due Date</div>
+            <div style={DashboardStyle.statValue}>{projectDueDate}</div>
+            {dueWarning && (
+              <div style={DashboardStyle.dueWarning}>{dueWarning}</div>
+            )}
+          </div>
+
+          <div style={DashboardStyle.statCard}>
+            <div style={DashboardStyle.statLabel}>Overall Progress</div>
+            <div style={DashboardStyle.statValue}>{progress}%</div>
+            <div style={DashboardStyle.progressBarContainer}>
               <div
                 style={{
-                  ...DashboardStyle.progressFill,
+                  ...DashboardStyle.progressBar,
                   width: `${progress}%`,
-                  opacity: progress > 0 ? 1 : 0.3,
                 }}
               />
             </div>
-            <span>{progress}%</span>
           </div>
 
-          <div style={DashboardStyle.statItem}>
-            <label style={DashboardStyle.statLabel}>Total Tasks</label>
-            <span>{total}</span>
+          <div style={DashboardStyle.statCard}>
+            <div style={DashboardStyle.statLabel}>Total Tasks</div>
+            <div style={DashboardStyle.statValue}>{total}</div>
           </div>
 
-          <div style={DashboardStyle.statItem}>
-            <label style={DashboardStyle.statLabel}>Completed Tasks</label>
-            <span>{completed}</span>
+          <div style={DashboardStyle.statCard}>
+            <div style={DashboardStyle.statLabel}>Completed</div>
+            <div style={DashboardStyle.statValue}>{completed}</div>
           </div>
 
-          <div style={DashboardStyle.statItem}>
-            <label style={DashboardStyle.statLabel}>Project Due Date</label>
-            <span>
-              {projectDueDate}
-              {dueWarning && (
-                <span
-                  style={{ color: "red", marginLeft: 8, fontWeight: "bold" }}
-                >
-                  • {dueWarning}
-                </span>
-              )}
-            </span>{" "}
-          </div>
-
-          <div style={DashboardStyle.statItem}>
-            <label style={DashboardStyle.statLabel}>Next Task</label>
-            <span>{upcomingTask ? upcomingTask.name : "All caught up!"}</span>
-          </div>
-
-          <div style={DashboardStyle.statItem}>
-            <label style={DashboardStyle.statLabel}>Next Task Due Date</label>
-            <span>
+          <div style={DashboardStyle.statCard}>
+            <div style={DashboardStyle.statLabel}>Next Task</div>
+            <div style={DashboardStyle.statValueSmall}>
+              {upcomingTask ? upcomingTask.name : "All caught up!"}
+            </div>
+            <div style={DashboardStyle.statSubtext}>
               {upcomingTask?.dueDate
                 ? new Date(upcomingTask.dueDate).toLocaleDateString()
-                : "No upcoming deadline"}
-            </span>
+                : "No deadline"}
+            </div>
           </div>
         </div>
 
-        <div style={DashboardStyle.actionButtons}>
-          <PrimaryButton
-            text="Detailed Stats"
-            onClick={() => navigate("/stats")}
-          />
-          <PrimaryButton
-            text="Track Time"
-            onClick={() => setShowTimeTracking(true)}
-          />
-          <PrimaryButton
-            text="Schedule Meeting"
-            onClick={() => navigate("/zoom")}
-          />
+        {/* Quick Actions */}
+        <div style={DashboardStyle.quickActions}>
+          <div style={DashboardStyle.sectionTitle}>Quick Actions</div>
+          <div style={DashboardStyle.actionCardsGrid}>
+            <div
+              style={{
+                ...DashboardStyle.actionCard,
+                backgroundColor: hoveredBtn === 'addTask' ? "#f0f9ff" : "#fff",
+              }}
+              onClick={() => setShowAddTaskModal(true)}
+              onMouseEnter={() => setHoveredBtn('addTask')}
+              onMouseLeave={() => setHoveredBtn(null)}
+            >
+              <div style={DashboardStyle.actionCardTitle}>Add Task</div>
+              <div style={DashboardStyle.actionCardDesc}>Create a new task for this project</div>
+            </div>
+
+            <div
+              style={{
+                ...DashboardStyle.actionCard,
+                backgroundColor: hoveredBtn === 'stats' ? "#f0f9ff" : "#fff",
+              }}
+              onClick={() => navigate("/stats")}
+              onMouseEnter={() => setHoveredBtn('stats')}
+              onMouseLeave={() => setHoveredBtn(null)}
+            >
+              <div style={DashboardStyle.actionCardTitle}>Detailed Stats</div>
+              <div style={DashboardStyle.actionCardDesc}>View analytics and reports</div>
+            </div>
+
+            <div
+              style={{
+                ...DashboardStyle.actionCard,
+                backgroundColor: hoveredBtn === 'time' ? "#f0f9ff" : "#fff",
+              }}
+              onClick={() => setShowTimeTracking(true)}
+              onMouseEnter={() => setHoveredBtn('time')}
+              onMouseLeave={() => setHoveredBtn(null)}
+            >
+              <div style={DashboardStyle.actionCardTitle}>Track Time</div>
+              <div style={DashboardStyle.actionCardDesc}>Log hours you spend on tasks</div>
+            </div>
+
+            <div
+              style={{
+                ...DashboardStyle.actionCard,
+                backgroundColor: hoveredBtn === 'zoom' ? "#f0f9ff" : "#fff",
+              }}
+              onClick={() => navigate("/zoom")}
+              onMouseEnter={() => setHoveredBtn('zoom')}
+              onMouseLeave={() => setHoveredBtn(null)}
+            >
+              <div style={DashboardStyle.actionCardTitle}>Schedule Meeting</div>
+              <div style={DashboardStyle.actionCardDesc}>Set up a Zoom call</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -143,6 +209,15 @@ const Dashboard = () => {
         isOpen={showTimeTracking} 
         onClose={() => setShowTimeTracking(false)} 
       />
+
+      {showAddTaskModal && (
+        <ModalWrapper onClose={() => setShowAddTaskModal(false)}>
+          <AddNewTask
+            onClose={handleTaskAdded}
+            projectId={selectedProject?._id}
+          />
+        </ModalWrapper>
+      )}
     </MainLayout>
   );
 };
