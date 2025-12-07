@@ -6,7 +6,10 @@ import SecondaryButton from '../components/SecondaryButton';
 import ZoomLogo from '../assets/ZoomLogo.png';
 
 const Zoom = () => {
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(() => {
+    // Check localStorage for saved connection state
+    return localStorage.getItem('zoomConnected') === 'true';
+  });
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hoveredMeeting, setHoveredMeeting] = useState(null);
@@ -17,6 +20,7 @@ const Zoom = () => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('connected') === 'true') {
       setIsConnected(true);
+      localStorage.setItem('zoomConnected', 'true');
       fetchMeetings();
       window.history.replaceState({}, '', '/zoom');
     }
@@ -27,11 +31,15 @@ const Zoom = () => {
       const response = await fetch(`http://localhost:4000/api/zoom/meetings?userId=${userId}`);
       if (response.ok) {
         setIsConnected(true);
+        localStorage.setItem('zoomConnected', 'true');
         const data = await response.json();
         setMeetings(data.meetings || []);
+      } else if (response.status === 401 || response.status === 403) {
+        setIsConnected(false);
+        localStorage.removeItem('zoomConnected');
       }
-    } catch {
-      setIsConnected(false);
+    } catch (error) {
+      console.log('Network error checking Zoom connection:', error);
     }
   };
 
@@ -95,6 +103,7 @@ const Zoom = () => {
       });
       
       setIsConnected(false);
+      localStorage.removeItem('zoomConnected');
       setMeetings([]);
       alert('Zoom disconnected successfully');
     } catch (error) {
