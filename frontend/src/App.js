@@ -18,6 +18,7 @@ import SignUp from "./screens/SignUp";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Stats from "./screens/Stats";
 import Zoom from "./screens/Zoom";
+import ZoomCallback from "./screens/ZoomCallback";
 import StorePage from "./screens/Store";
 import AddNewTask from "./screens/AddNewTask";
 import ProjectSettings from "./screens/ProjectSettings";
@@ -34,6 +35,7 @@ export default function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<LogInPage />} />
             <Route path="/signup" element={<SignUp />} />
+            <Route path="/zoom/callback" element={<ZoomCallback />} />
             <Route
               path="/home"
               element={
