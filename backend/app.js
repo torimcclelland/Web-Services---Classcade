@@ -207,6 +207,17 @@ const startServer = async () => {
                 socket.to(channelId).emit('messagesReadUpdate', { channelId, userId, count });
             });
 
+            // Team meeting events
+            socket.on('teamMeetingCreated', ({ projectId, teamMeeting }) => {
+                console.log(`Team meeting created for project ${projectId}`);
+                io.to(`project_${projectId}`).emit('teamMeetingUpdate', { projectId, teamMeeting });
+            });
+
+            socket.on('teamMeetingEnded', ({ projectId }) => {
+                console.log(`Team meeting ended for project ${projectId}`);
+                io.to(`project_${projectId}`).emit('teamMeetingUpdate', { projectId, teamMeeting: null });
+            });
+
             socket.on('disconnect', () => {
                 console.log('Socket disconnected:', socket.id);
             });

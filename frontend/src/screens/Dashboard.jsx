@@ -8,6 +8,7 @@ import { useProject } from "../context/ProjectContext";
 import AddNewTask from "./AddNewTask";
 import ModalWrapper from "../components/ModalWrapper";
 import PrimaryButton from "../components/PrimaryButton";
+import TeamMeetingWidget from "../components/TeamMeetingWidget";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -94,6 +95,8 @@ const Dashboard = () => {
 
         {/* Stats Grid */}
         <div style={DashboardStyle.statsContainer}>
+          <TeamMeetingWidget />
+
           <div style={DashboardStyle.statCard}>
             <div style={DashboardStyle.statLabel}>Project Due Date</div>
             <div style={DashboardStyle.statValue}>{projectDueDate}</div>

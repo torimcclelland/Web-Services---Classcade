@@ -5,9 +5,12 @@ import PrimaryButton from '../components/PrimaryButton';
 import SecondaryButton from '../components/SecondaryButton';
 import ZoomLogo from '../assets/ZoomLogo.png';
 import { useUser } from '../context/UserContext';
+import { useProject } from '../context/ProjectContext';
+import io from 'socket.io-client';
 
 const Zoom = () => {
   const { user } = useUser();
+  const { selectedProject } = useProject();
   const [isConnected, setIsConnected] = useState(() => {
     // Check localStorage for saved connection state
     return localStorage.getItem('zoomConnected') === 'true';
@@ -15,8 +18,11 @@ const Zoom = () => {
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hoveredMeeting, setHoveredMeeting] = useState(null);
+  const [teamMeeting, setTeamMeeting] = useState(null);
+  const [socket, setSocket] = useState(null);
 
   const userId = user?._id;
+  const projectId = selectedProject?._id;
 
   const checkZoomConnection = useCallback(async () => {
     if (!userId) return;
@@ -53,6 +59,38 @@ const Zoom = () => {
     }
   }, [userId]);
 
+  const fetchTeamMeeting = useCallback(async () => {
+    if (!projectId) return;
+    try {
+      const response = await fetch(`http://localhost:4000/api/zoom/team-meeting/${projectId}`);
+      const data = await response.json();
+      setTeamMeeting(data.teamMeeting);
+    } catch (error) {
+      console.error('Error fetching team meeting:', error);
+    }
+  }, [projectId]);
+
+  // Socket.IO setup for real-time team meeting updates
+  useEffect(() => {
+    const newSocket = io('http://localhost:4000');
+    setSocket(newSocket);
+
+    if (projectId) {
+      newSocket.emit('joinRoom', `project_${projectId}`);
+      
+      newSocket.on('teamMeetingUpdate', ({ teamMeeting: updatedTeamMeeting }) => {
+        setTeamMeeting(updatedTeamMeeting);
+      });
+    }
+
+    return () => {
+      if (projectId) {
+        newSocket.emit('leaveRoom', `project_${projectId}`);
+      }
+      newSocket.disconnect();
+    };
+  }, [projectId]);
+
   useEffect(() => {
     if (!userId) return;
 
@@ -61,7 +99,10 @@ const Zoom = () => {
       setIsConnected(true);
       localStorage.setItem('zoomConnected', 'true');
       window.history.replaceState({}, '', '/zoom');
-      setTimeout(() => fetchMeetings(), 500);
+      setTimeout(() => {
+        fetchMeetings();
+        fetchTeamMeeting();
+      }, 500);
     } else if (urlParams.get('error')) {
       setIsConnected(false);
       localStorage.removeItem('zoomConnected');
@@ -69,8 +110,9 @@ const Zoom = () => {
       window.history.replaceState({}, '', '/zoom');
     } else {
       checkZoomConnection();
+      fetchTeamMeeting();
     }
-  }, [userId, fetchMeetings, checkZoomConnection]);
+  }, [userId, fetchMeetings, checkZoomConnection, fetchTeamMeeting]);
 
   // Show loading or error if user is not available
   if (!user) {
@@ -119,6 +161,60 @@ const Zoom = () => {
       alert('Something went wrong while creating the meeting. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleStartTeamMeeting = async () => {
+    if (!projectId) {
+      alert('Please select a project first');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:4000/api/zoom/team-meeting', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, projectId })
+      });
+      
+      const data = await response.json();
+
+      if (response.ok && data.teamMeeting) {
+        setTeamMeeting(data.teamMeeting);
+        socket?.emit('teamMeetingCreated', { projectId, teamMeeting: data.teamMeeting });
+        // Automatically open the meeting for the creator
+        window.open(data.teamMeeting.startUrl, '_blank');
+      } else {
+        alert(`Failed to start team meeting: ${data.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error starting team meeting:', error);
+      alert('Something went wrong while starting the team meeting. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEndTeamMeeting = async () => {
+    if (!projectId) return;
+    if (!window.confirm('Are you sure you want to end the team meeting for everyone?')) return;
+
+    try {
+      const response = await fetch(`http://localhost:4000/api/zoom/team-meeting/${projectId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      });
+
+      if (response.ok) {
+        setTeamMeeting(null);
+        socket?.emit('teamMeetingEnded', { projectId });
+        alert('Team meeting ended');
+      }
+    } catch (error) {
+      console.error('Error ending team meeting:', error);
+      alert('Failed to end team meeting');
     }
   };
 
@@ -180,6 +276,89 @@ const Zoom = () => {
             </div>
           </div>
 
+          {/* Team Meeting Banner */}
+          {teamMeeting && teamMeeting.isActive ? (
+            <div style={{
+              background:'#d81d1dff',
+              color:'white',
+              padding: '12px 20px',
+              borderRadius: '8px',
+              marginBottom: '20px',
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '18px', fontWeight: 600, lineHeight: '1' }}>
+                      Active Meeting
+                    </span>
+                    <span style={{ fontSize: '14px', fontWeight: 400, opacity: 0.95, lineHeight: '1' }}>
+                      Started by {teamMeeting.createdBy?.firstName || 'Unknown'} {teamMeeting.createdBy?.lastName || ''}
+                    </span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    onClick={() => window.open(teamMeeting.joinUrl, '_blank')}
+                    style={{
+                      backgroundColor: 'white',
+                      color: 'black',
+                      border: '1.5px solid white',
+                      padding: '8px 16px',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.backgroundColor = '#eff6ff';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.backgroundColor = 'white';
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.backgroundColor = '#eff6ff';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.backgroundColor = 'white';
+                    }}
+                  >
+                    Join Meeting
+                  </button>
+                  <button
+                    onClick={handleEndTeamMeeting}
+                    style={{
+                      backgroundColor: 'white',
+                      color: 'black',
+                      border: '1.5px solid white',
+                      padding: '7px 16px',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.backgroundColor = '#eff6ff';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.backgroundColor = 'white';
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.backgroundColor = '#eff6ff';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.backgroundColor = 'white';
+                    }}
+                  >
+                    End Meeting
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
           <div style={ZoomStyle.statsCard}>
             <div style={ZoomStyle.statItem}>
               <div style={ZoomStyle.statContent}>
@@ -195,9 +374,9 @@ const Zoom = () => {
             </div>
             <div>
               <PrimaryButton 
-                text={loading ? 'Creating...' : 'Create Meeting'} 
-                onClick={handleCreateMeeting}
-                disabled={loading}
+                text={loading ? 'Starting...' : '+ Project Meeting'} 
+                onClick={handleStartTeamMeeting}
+                disabled={loading || !projectId}
               />
             </div>
           </div>
@@ -304,7 +483,7 @@ const Zoom = () => {
               </div>
               <PrimaryButton 
                 text="Start a Meeting" 
-                onClick={handleCreateMeeting}
+                onClick={handleStartTeamMeeting}
                 disabled={loading}
               />
             </div>
