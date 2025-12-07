@@ -61,6 +61,11 @@ const userSchema = new mongoose.Schema({
   selectedBackdrop: {
     type: String,
     default: null
+  },
+  zoom: {
+    accessToken: String,
+    refreshToken: String,
+    expiresAt: Number
   }
 }, { timestamps: true });
 

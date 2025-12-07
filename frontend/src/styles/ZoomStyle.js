@@ -1,82 +1,160 @@
-import styled from "styled-components";
-
-export const ZoomContainer = styled.div`
-  background-color: #f3f4f6;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background: #DDF9EA;
-  `;
-
-export const MainContent = styled.div`
-  flex: 1;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  background: #DDF9EA;  // Mint green background
-`;
-
-export const ProfileRow = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 20px; // pushes it down from the top nav
-  margin-bottom: 10px;
-  backgroundColor: "white;
-`;
-
-export const PageTitle = styled.h1`
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  backgroundColor: "white";
-`;
-
-export const ZoomHeader = styled.div`
-  background-color: white; //makes the content rectangle stand out
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-`;
-
-export const ZoomMessage = styled.p`
-  font-size: 1.2rem;
-  text-align: center;
-  margin-bottom: 1.5rem;
-  color: "white";
-
-  strong {
-    color: "white";
-  }
-`;
-
-export const ButtonRow = styled.div`
-  display: flex;
-  gap: 1rem;
-`;
-
-export const ZoomButton = styled.button`
-  background-color: ${({ color }) =>
-    color === "blue" ? "#3b82f6" : color === "green" ? "#10b981" : "#ccc"};
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: ${({ color }) =>
-      color === "blue" ? "#2563eb" : color === "green" ? "#059669" : "#aaa"};
-  }
-`;
-
-export const ContentRow = styled.div`
-  display: flex;
-  flex: 1;
-background: #DDF9EA
-;`;
+export const ZoomStyle = {
+  container: {
+      maxWidth: '1200px',
+      margin: '0 auto',
+    },
+    header: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '32px',
+      flexWrap: 'wrap',
+      gap: '16px',
+    },
+    title: {
+      fontSize: '36px',
+      fontWeight: 700,
+      color: '#0F3E2D',
+      margin: 0,
+      letterSpacing: '-0.5px',
+    },
+    emptyState: {
+      backgroundColor: '#fff',
+      padding: '60px 40px',
+      borderRadius: '16px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+      textAlign: 'center',
+      border: '1px solid rgba(15, 62, 45, 0.06)',
+    },
+    emptyStateIcon: {
+      width: '200px',
+      height: '200px',
+    },
+    emptyStateTitle: {
+      fontSize: '24px',
+      fontWeight: 700,
+      color: '#0F3E2D',
+      marginBottom: '12px',
+    },
+    emptyStateText: {
+      fontSize: '16px',
+      color: '#666',
+      marginBottom: '32px',
+      lineHeight: 1.6,
+    },
+    statsCard: {
+      backgroundColor: '#fff',
+      padding: '28px',
+      borderRadius: '16px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+      border: '1px solid rgba(15, 62, 45, 0.06)',
+      marginBottom: '32px',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      gap: '24px',
+    },
+    statItem: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '16px',
+    },
+    statIcon: {
+      fontSize: '32px',
+    },
+    statContent: {
+      display: 'flex',
+      flexDirection: 'column',
+    },
+    statLabel: {
+      fontSize: '13px',
+      fontWeight: 700,
+      color: '#555',
+      textTransform: 'uppercase',
+      letterSpacing: '1px',
+    },
+    statValue: {
+      fontSize: '28px',
+      fontWeight: 700,
+      color: '#0F3E2D',
+    },
+    buttonGroup: {
+      display: 'flex',
+      gap: '12px',
+      flexWrap: 'wrap',
+    },
+    sectionTitle: {
+      fontSize: '22px',
+      fontWeight: 700,
+      color: '#0F3E2D',
+      marginBottom: '20px',
+      letterSpacing: '-0.3px',
+    },
+    meetingsGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+      gap: '20px',
+      marginBottom: '32px',
+    },
+    meetingCard: {
+      backgroundColor: '#fff',
+      padding: '24px',
+      borderRadius: '16px',
+      border: '1px solid rgba(15, 62, 45, 0.06)',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+      transition: 'all 0.2s ease',
+      cursor: 'pointer',
+    },
+    meetingCardHover: {
+      transform: 'translateY(-4px)',
+      boxShadow: '0 8px 20px rgba(0,0,0,0.12)',
+    },
+    meetingTitle: {
+      fontSize: '18px',
+      fontWeight: 700,
+      color: '#0F3E2D',
+      marginBottom: '12px',
+      letterSpacing: '-0.2px',
+    },
+    meetingTime: {
+      fontSize: '14px',
+      color: '#666',
+      marginBottom: '16px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+    },
+    meetingId: {
+      fontSize: '13px',
+      color: '#999',
+      fontFamily: 'monospace',
+      marginBottom: '16px',
+    },
+    joinButton: {
+      width: '100%',
+      padding: '12px',
+      backgroundColor: '#1e3a8a',
+      color: '#fff',
+      border: 'none',
+      borderRadius: '10px',
+      fontSize: '15px',
+      fontWeight: 600,
+      cursor: 'pointer',
+      transition: 'all 0.2s ease',
+    },
+    emptyMeetings: {
+      backgroundColor: '#fff',
+      padding: '60px 40px',
+      borderRadius: '16px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+      textAlign: 'center',
+      border: '1px solid rgba(15, 62, 45, 0.06)',
+    },
+    emptyMeetingsText: {
+      fontSize: '16px',
+      color: '#666',
+      marginBottom: '24px',
+    },
+};
+export default ZoomStyle;
