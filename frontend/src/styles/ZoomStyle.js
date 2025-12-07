@@ -20,15 +20,15 @@ export const ZoomStyle = {
     },
     emptyState: {
       backgroundColor: '#fff',
-      padding: '60px 40px',
+      padding: '30px 40px',
       borderRadius: '16px',
       boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
       textAlign: 'center',
       border: '1px solid rgba(15, 62, 45, 0.06)',
     },
     emptyStateIcon: {
-      width: '200px',
-      height: '200px',
+      width: '150px',
+      height: '150px',
     },
     emptyStateTitle: {
       fontSize: '24px',
