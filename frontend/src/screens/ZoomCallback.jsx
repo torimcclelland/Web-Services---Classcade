@@ -1,12 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const ZoomCallback = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [status, setStatus] = useState('Processing...');
+  const hasProcessed = useRef(false);
 
   useEffect(() => {
+    // Prevent duplicate calls in React StrictMode or re-renders
+    if (hasProcessed.current) return;
+    hasProcessed.current = true;
+
     const handleCallback = async () => {
       const code = searchParams.get('code');
       const userId = searchParams.get('state');
@@ -39,7 +44,8 @@ const ZoomCallback = () => {
           setStatus('Successfully connected! Redirecting...');
           setTimeout(() => navigate('/zoom?connected=true'), 1000);
         } else {
-          setStatus('Connection failed. Redirecting...');
+          console.error('Connection failed:', data);
+          setStatus(`Connection failed: ${data.error || 'Unknown error'}. Redirecting...`);
           setTimeout(() => navigate('/zoom?error=connection_failed'), 2000);
         }
       } catch (error) {

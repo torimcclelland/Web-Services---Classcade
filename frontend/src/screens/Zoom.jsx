@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import MainLayout from '../components/MainLayout';
 import ZoomStyle from '../styles/ZoomStyle';
 import PrimaryButton from '../components/PrimaryButton';
 import SecondaryButton from '../components/SecondaryButton';
 import ZoomLogo from '../assets/ZoomLogo.png';
+import { useUser } from '../context/UserContext';
 
 const Zoom = () => {
+  const { user } = useUser();
   const [isConnected, setIsConnected] = useState(() => {
     // Check localStorage for saved connection state
     return localStorage.getItem('zoomConnected') === 'true';
@@ -13,20 +15,11 @@ const Zoom = () => {
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hoveredMeeting, setHoveredMeeting] = useState(null);
-  const userId = '69038607d8d8d5f275a6f3ca';
 
-  useEffect(() => {
-    checkZoomConnection();
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('connected') === 'true') {
-      setIsConnected(true);
-      localStorage.setItem('zoomConnected', 'true');
-      fetchMeetings();
-      window.history.replaceState({}, '', '/zoom');
-    }
-  }, []);
+  const userId = user?._id;
 
-  const checkZoomConnection = async () => {
+  const checkZoomConnection = useCallback(async () => {
+    if (!userId) return;
     try {
       const response = await fetch(`http://localhost:4000/api/zoom/meetings?userId=${userId}`);
       if (response.ok) {
@@ -34,6 +27,12 @@ const Zoom = () => {
         localStorage.setItem('zoomConnected', 'true');
         const data = await response.json();
         setMeetings(data.meetings || []);
+      } else if (response.status === 500) {
+        const data = await response.json();
+        if (data.error?.includes('not connected')) {
+          setIsConnected(false);
+          localStorage.removeItem('zoomConnected');
+        }
       } else if (response.status === 401 || response.status === 403) {
         setIsConnected(false);
         localStorage.removeItem('zoomConnected');
@@ -41,7 +40,48 @@ const Zoom = () => {
     } catch (error) {
       console.log('Network error checking Zoom connection:', error);
     }
-  };
+  }, [userId]);
+
+  const fetchMeetings = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const response = await fetch(`http://localhost:4000/api/zoom/meetings?userId=${userId}`);
+      const data = await response.json();
+      setMeetings(data.meetings || []);
+    } catch (error) {
+      console.error('Error fetching meetings:', error);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('connected') === 'true') {
+      setIsConnected(true);
+      localStorage.setItem('zoomConnected', 'true');
+      window.history.replaceState({}, '', '/zoom');
+      setTimeout(() => fetchMeetings(), 500);
+    } else if (urlParams.get('error')) {
+      setIsConnected(false);
+      localStorage.removeItem('zoomConnected');
+      alert('Failed to connect Zoom. Please try again.');
+      window.history.replaceState({}, '', '/zoom');
+    } else {
+      checkZoomConnection();
+    }
+  }, [userId, fetchMeetings, checkZoomConnection]);
+
+  // Show loading or error if user is not available
+  if (!user) {
+    return (
+      <MainLayout>
+        <div style={{ padding: '20px', textAlign: 'center' }}>
+          <p>Please log in to access Zoom integration.</p>
+        </div>
+      </MainLayout>
+    );
+  }
 
   const handleConnectZoom = async () => {
     try {
@@ -57,16 +97,6 @@ const Zoom = () => {
     }
   };
 
-  const fetchMeetings = async () => {
-    try {
-      const response = await fetch(`http://localhost:4000/api/zoom/meetings?userId=${userId}`);
-      const data = await response.json();
-      setMeetings(data.meetings || []);
-    } catch (error) {
-      console.error('Error fetching meetings:', error);
-    }
-  };
-
   const handleCreateMeeting = async () => {
     setLoading(true);
     try {
@@ -78,15 +108,15 @@ const Zoom = () => {
       
       const data = await response.json();
 
-      if (data.meeting?.join_url) {
+      if (response.ok && data.meeting?.join_url) {
         window.open(data.meeting.join_url, '_blank');
-        fetchMeetings();
+        setTimeout(() => fetchMeetings(), 1000);
       } else {
-        alert('Failed to create Zoom meeting.');
+        alert(`Failed to create Zoom meeting: ${data.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error creating meeting:', error);
-      alert('Something went wrong while creating the meeting.');
+      alert('Something went wrong while creating the meeting. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -147,7 +177,7 @@ const Zoom = () => {
             <h1 style={ZoomStyle.title}>Zoom Meetings</h1>
             <div style={ZoomStyle.buttonGroup}>
               <PrimaryButton text="Refresh" onClick={fetchMeetings} />
-              <PrimaryButton text="Disconnect" onClick={handleDisconnect} />
+              <PrimaryButton text="Unlink Account" onClick={handleDisconnect} />
             </div>
           </div>
 

@@ -14,17 +14,28 @@ router.get('/auth', (req, res) => {
     return res.status(400).json({ error: 'userId is required' });
   }
 
+  // Request the necessary scopes for meeting management
+  const scopes = [
+    'meeting:write:meeting',
+    'meeting:read:meeting',
+    'meeting:read:list_meetings'
+  ].join(' ');
+
   const authUrl = `https://zoom.us/oauth/authorize?` +
     `response_type=code&` +
     `client_id=${process.env.ZOOM_CLIENT_ID}&` +
     `redirect_uri=${encodeURIComponent(process.env.ZOOM_REDIRECT_URI)}&` +
-    `state=${userId}`;
+    `state=${userId}&` +
+    `scope=${encodeURIComponent(scopes)}`;
 
   res.json({ authUrl });
 });
 
 // POST /api/zoom/callback - OAuth callback handler (called from frontend)
 router.post('/callback', async (req, res) => {
+  console.log('=== ZOOM CALLBACK ===');
+  console.log('Code:', req.body.code?.substring(0, 20) + '...');
+  console.log('UserId:', req.body.userId);
   try {
     const { code, userId } = req.body;
     
