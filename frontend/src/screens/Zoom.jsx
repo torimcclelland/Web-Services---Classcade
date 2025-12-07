@@ -4,6 +4,7 @@ import ZoomStyle from '../styles/ZoomStyle';
 import PrimaryButton from '../components/PrimaryButton';
 import SecondaryButton from '../components/SecondaryButton';
 import ZoomLogo from '../assets/ZoomLogo.png';
+import ModalWrapper from '../components/ModalWrapper';
 import { useUser } from '../context/UserContext';
 import { useProject } from '../context/ProjectContext';
 import io from 'socket.io-client';
@@ -20,6 +21,8 @@ const Zoom = () => {
   const [hoveredMeeting, setHoveredMeeting] = useState(null);
   const [teamMeeting, setTeamMeeting] = useState(null);
   const [socket, setSocket] = useState(null);
+  const [showEndMeetingModal, setShowEndMeetingModal] = useState(false);
+  const [showDisconnectModal, setShowDisconnectModal] = useState(false);
 
   const userId = user?._id;
   const projectId = selectedProject?._id;
@@ -198,7 +201,7 @@ const Zoom = () => {
 
   const handleEndTeamMeeting = async () => {
     if (!projectId) return;
-    if (!window.confirm('Are you sure you want to end the team meeting for everyone?')) return;
+    setShowEndMeetingModal(false);
 
     try {
       const response = await fetch(`http://localhost:4000/api/zoom/team-meeting/${projectId}`, {
@@ -210,16 +213,14 @@ const Zoom = () => {
       if (response.ok) {
         setTeamMeeting(null);
         socket?.emit('teamMeetingEnded', { projectId });
-        alert('Team meeting ended');
       }
     } catch (error) {
       console.error('Error ending team meeting:', error);
-      alert('Failed to end team meeting');
     }
   };
 
   const handleDisconnect = async () => {
-    if (!window.confirm('Are you sure you want to disconnect Zoom?')) return;
+    setShowDisconnectModal(false);
     
     try {
       await fetch('http://localhost:4000/api/zoom/disconnect', {
@@ -231,10 +232,8 @@ const Zoom = () => {
       setIsConnected(false);
       localStorage.removeItem('zoomConnected');
       setMeetings([]);
-      alert('Zoom disconnected successfully');
     } catch (error) {
       console.error('Error disconnecting Zoom:', error);
-      alert('Failed to disconnect Zoom');
     }
   };
 
@@ -272,7 +271,7 @@ const Zoom = () => {
           <div style={ZoomStyle.header}>
             <h1 style={ZoomStyle.title}>Zoom Meetings</h1>
             <div style={ZoomStyle.buttonGroup}>
-              <SecondaryButton text="Unlink Account" onClick={handleDisconnect} />
+              <SecondaryButton text="Unlink Account" onClick={() => setShowDisconnectModal(true)} />
             </div>
           </div>
 
@@ -327,7 +326,7 @@ const Zoom = () => {
                     Join Meeting
                   </button>
                   <button
-                    onClick={handleEndTeamMeeting}
+                    onClick={() => setShowEndMeetingModal(true)}
                     style={{
                       backgroundColor: 'white',
                       color: 'black',
@@ -489,6 +488,110 @@ const Zoom = () => {
             </div>
           )}
         </div>
+
+        {/* End Meeting Confirmation Modal */}
+        {showEndMeetingModal && (
+          <ModalWrapper onClose={() => setShowEndMeetingModal(false)}>
+            <div style={{ textAlign: 'center' }}>
+              <h2 style={{ margin: '0 0 16px 0', fontSize: '20px', fontWeight: '600', color: '#1a1a1a' }}>
+                End Team Meeting?
+              </h2>
+              <p style={{ margin: '0 0 24px 0', fontSize: '15px', color: '#666', lineHeight: '1.5' }}>
+                This will end the meeting for all team members. This action cannot be undone.
+              </p>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                <button
+                  onClick={() => setShowEndMeetingModal(false)}
+                  style={{
+                    padding: '10px 24px',
+                    fontSize: '15px',
+                    fontWeight: '600',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '8px',
+                    backgroundColor: 'white',
+                    color: '#374151',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleEndTeamMeeting}
+                  style={{
+                    padding: '10px 24px',
+                    fontSize: '15px',
+                    fontWeight: '600',
+                    border: 'none',
+                    borderRadius: '8px',
+                    backgroundColor: '#dc2626',
+                    color: 'white',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#b91c1c'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
+                >
+                  End Meeting
+                </button>
+              </div>
+            </div>
+          </ModalWrapper>
+        )}
+
+        {/* Disconnect Zoom Confirmation Modal */}
+        {showDisconnectModal && (
+          <ModalWrapper onClose={() => setShowDisconnectModal(false)}>
+            <div style={{ textAlign: 'center' }}>
+              <h2 style={{ margin: '0 0 16px 0', fontSize: '20px', fontWeight: '600', color: '#1a1a1a' }}>
+                Unlink Zoom Account?
+              </h2>
+              <p style={{ margin: '0 0 24px 0', fontSize: '15px', color: '#666', lineHeight: '1.5' }}>
+                You will need to reconnect your Zoom account to create or join meetings again.
+              </p>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                <button
+                  onClick={() => setShowDisconnectModal(false)}
+                  style={{
+                    padding: '10px 24px',
+                    fontSize: '15px',
+                    fontWeight: '600',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '8px',
+                    backgroundColor: 'white',
+                    color: '#374151',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDisconnect}
+                  style={{
+                    padding: '10px 24px',
+                    fontSize: '15px',
+                    fontWeight: '600',
+                    border: 'none',
+                    borderRadius: '8px',
+                    backgroundColor: '#dc2626',
+                    color: 'white',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#b91c1c'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
+                >
+                  Unlink Account
+                </button>
+              </div>
+            </div>
+          </ModalWrapper>
+        )}
       </MainLayout>
     );
   }
