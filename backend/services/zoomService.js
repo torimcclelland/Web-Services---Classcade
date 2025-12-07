@@ -150,6 +150,8 @@ router.post('/team-meeting', async (req, res) => {
     await project.save();
     console.log('Project saved with team meeting');
     
+    await project.populate('teamMeeting.createdBy', 'firstName lastName');
+    
     res.json({ 
       success: true, 
       teamMeeting: project.teamMeeting,

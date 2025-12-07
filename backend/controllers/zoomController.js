@@ -108,7 +108,16 @@ const getMeetings = async (userId) => {
     const response = await axios.get(`${ZOOM_API_BASE}/users/me/meetings`, {
       headers: getAuthHeader(accessToken),
     });
-    return response.data.meetings;
+    
+    // Filter out meetings that have already started or are in the past
+    const now = new Date();
+    const upcomingMeetings = response.data.meetings.filter(meeting => {
+      if (!meeting.start_time) return false;
+      const meetingStart = new Date(meeting.start_time);
+      return meetingStart > now;
+    });
+    
+    return upcomingMeetings;
   } catch (err) {
     console.error('Zoom getMeetings error:', err.response?.data || err.message);
     
