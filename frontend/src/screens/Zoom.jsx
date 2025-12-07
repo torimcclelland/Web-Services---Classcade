@@ -176,8 +176,7 @@ const Zoom = () => {
           <div style={ZoomStyle.header}>
             <h1 style={ZoomStyle.title}>Zoom Meetings</h1>
             <div style={ZoomStyle.buttonGroup}>
-              <PrimaryButton text="Refresh" onClick={fetchMeetings} />
-              <PrimaryButton text="Unlink Account" onClick={handleDisconnect} />
+              <SecondaryButton text="Unlink Account" onClick={handleDisconnect} />
             </div>
           </div>
 
@@ -205,35 +204,96 @@ const Zoom = () => {
 
           {meetings.length > 0 ? (
             <>
-              <h2 style={ZoomStyle.sectionTitle}>Upcoming Meetings</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                <h2 style={{ ...ZoomStyle.sectionTitle, margin: 0 }}>Upcoming Meetings</h2>
+                <button
+                  onClick={fetchMeetings}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '18px',
+                    padding: '0px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#000000ff',
+                    transition: 'color 0.2s, transform 0.2s',
+                    borderRadius: '4px',
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.color = '#2563EB';
+                    e.currentTarget.style.transform = 'rotate(180deg)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.color = '#6B7280';
+                    e.currentTarget.style.transform = 'rotate(0deg)';
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.color = '#2563EB';
+                    e.currentTarget.style.transform = 'rotate(180deg)';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.color = '#6B7280';
+                    e.currentTarget.style.transform = 'rotate(0deg)';
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      fetchMeetings();
+                    }
+                  }}
+                  title="Refresh meetings"
+                  aria-label="Refresh meetings"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                  </svg>
+                </button>
+              </div>
               <div style={ZoomStyle.meetingsGrid}>
-                {meetings.map((meeting) => (
-                  <div
-                    key={meeting.id}
-                    style={{
-                      ...ZoomStyle.meetingCard,
-                      ...(hoveredMeeting === meeting.id ? ZoomStyle.meetingCardHover : {}),
-                    }}
-                    onMouseEnter={() => setHoveredMeeting(meeting.id)}
-                    onMouseLeave={() => setHoveredMeeting(null)}
-                  >
-                    <div style={ZoomStyle.meetingTitle}>{meeting.topic}</div>
-                    <div style={ZoomStyle.meetingTime}>
-                      🕒 {formatDate(meeting.start_time)}
-                    </div>
-                    <div style={ZoomStyle.meetingId}>
-                      Meeting ID: {meeting.id}
-                    </div>
-                    <button
-                      style={ZoomStyle.joinButton}
-                      onClick={() => window.open(meeting.join_url, '_blank')}
-                      onMouseOver={(e) => e.target.style.backgroundColor = '#1e40af'}
-                      onMouseOut={(e) => e.target.style.backgroundColor = '#1e3a8a'}
+                {meetings.map((meeting) => {
+                  const titleId = `meeting-title-${meeting.id}`;
+                  return (
+                    <article
+                      key={meeting.id}
+                      aria-labelledby={titleId}
+                      style={{
+                        ...ZoomStyle.meetingCard,
+                        ...(hoveredMeeting === meeting.id ? ZoomStyle.meetingCardHover : {}),
+                      }}
+                      onMouseEnter={() => setHoveredMeeting(meeting.id)}
+                      onMouseLeave={() => setHoveredMeeting(null)}
+                      onFocus={() => setHoveredMeeting(meeting.id)}
+                      onBlur={() => setHoveredMeeting(null)}
                     >
-                      Join Meeting
-                    </button>
-                  </div>
-                ))}
+                      <div id={titleId} style={ZoomStyle.meetingTitle}>{meeting.topic}</div>
+                      <div style={ZoomStyle.meetingTime}>
+                        🕒 {formatDate(meeting.start_time)}
+                      </div>
+                      <div style={ZoomStyle.meetingId}>
+                        Meeting ID: {meeting.id}
+                      </div>
+                      <button
+                        style={ZoomStyle.joinButton}
+                        onClick={() => window.open(meeting.join_url, '_blank')}
+                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1e40af'}
+                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#1e3a8a'}
+                        onFocus={(e) => e.currentTarget.style.backgroundColor = '#1e40af'}
+                        onBlur={(e) => e.currentTarget.style.backgroundColor = '#1e3a8a'}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            window.open(meeting.join_url, '_blank');
+                          }
+                        }}
+                        aria-label={`Join meeting ${meeting.topic}`}
+                      >
+                        Join Meeting
+                      </button>
+                    </article>
+                  );
+                })}
               </div>
             </>
           ) : (
