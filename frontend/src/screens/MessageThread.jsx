@@ -346,8 +346,8 @@ const MessageThread = () => {
         <MainLayout showSidebar={true}>
             <div style={{
                 ...MessageThreadStyle.container,
-                height: 'calc(100vh - 100px)',  // Reserve space for TopNavBar + some breathing room
-                maxHeight: 'calc(100vh - 100px)',
+                height: 'calc(100vh - 120px)',  // Increased from 100px to 120px
+                maxHeight: 'calc(100vh - 120px)',
                 width: '100%',
                 maxWidth: '100%',
             }}>
