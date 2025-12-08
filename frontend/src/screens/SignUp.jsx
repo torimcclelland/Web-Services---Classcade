@@ -326,11 +326,7 @@ const SignUp = () => {
             />
             <button
               type="button"
-              onMouseDown={() => setShowPassword(true)}
-              onMouseUp={() => setShowPassword(false)}
-              onMouseLeave={() => setShowPassword(false)}
-              onTouchStart={() => setShowPassword(true)}
-              onTouchEnd={() => setShowPassword(false)}
+              onClick={() => setShowPassword((prev) => !prev)}
               style={{
                 position: "absolute",
                 right: "6px",
@@ -405,11 +401,7 @@ const SignUp = () => {
             />
             <button
               type="button"
-              onMouseDown={() => setShowConfirmPassword(true)}
-              onMouseUp={() => setShowConfirmPassword(false)}
-              onMouseLeave={() => setShowConfirmPassword(false)}
-              onTouchStart={() => setShowConfirmPassword(true)}
-              onTouchEnd={() => setShowConfirmPassword(false)}
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
               style={{
                 position: "absolute",
                 right: "6px",
