@@ -344,7 +344,13 @@ const MessageThread = () => {
 
     return (
         <MainLayout showSidebar={true}>
-            <div style={MessageThreadStyle.container}>
+            <div style={{
+                ...MessageThreadStyle.container,
+                height: 'calc(100vh - 100px)',  // Reserve space for TopNavBar + some breathing room
+                maxHeight: 'calc(100vh - 100px)',
+                width: '100%',
+                maxWidth: '100%',
+            }}>
                 <div style={MessageThreadStyle.layout}>
                     <ChannelSidebar
                         channels={channels}
@@ -359,23 +365,20 @@ const MessageThread = () => {
                     <main style={MessageThreadStyle.main}>
                         <div style={{
                             ...MessageThreadStyle.header,
-                            padding: isMobile ? "1rem 1rem" : "1rem 1.5rem",
-                            minHeight: 'auto',
-                            height: 'auto',
-                            display: 'flex',
+                            ...(isMobile && { padding: "1rem 1rem", minHeight: '60px', height: 'auto' }),
                             flexDirection: 'column',
                             gap: showSearch ? '0.75rem' : '0',
                             alignItems: 'stretch',
-                            boxSizing: 'border-box'
+                            overflow: 'hidden'
                         }}>
-                            {/* First row: Title and buttons - ALWAYS SAME HEIGHT */}
                             <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
                                 width: '100%',
                                 gap: '0.75rem',
-                                minHeight: '40px'
+                                minHeight: '40px',
+                                overflow: 'hidden'
                             }}>
                                 <div style={{
                                     display: 'flex',
@@ -413,16 +416,16 @@ const MessageThread = () => {
                                             <div style={{
                                                 display: 'flex',
                                                 alignItems: 'center',
-                                                gap: '8px'
+                                                gap: '8px',
+                                                overflow: 'hidden'
                                             }}>
                                                 <h3 style={{
                                                     ...MessageThreadStyle.chatTitle,
-                                                    fontSize: isMobile ? '1rem' : '1.25rem',
-                                                    margin: 0,
+                                                    ...(isMobile && { fontSize: '1rem' }),
                                                     overflow: 'hidden',
                                                     textOverflow: 'ellipsis',
                                                     whiteSpace: 'nowrap',
-                                                    maxWidth: '100%'
+                                                    flexShrink: 1
                                                 }}>
                                                     {project.name}
                                                 </h3>
@@ -430,7 +433,10 @@ const MessageThread = () => {
                                                     <span style={{
                                                         ...MessageThreadStyle.channelBadge,
                                                         flexShrink: 0,
-                                                        whiteSpace: 'nowrap'
+                                                        whiteSpace: 'nowrap',
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        maxWidth: isMobile ? '120px' : '200px'
                                                     }}>
                                                         #{activeChannel.name}
                                                     </span>
@@ -481,7 +487,6 @@ const MessageThread = () => {
                                 </button>
                             </div>
 
-                            {/* Second row: Search bar (only when active) */}
                             {showSearch && (
                                 <div style={{
                                     width: '100%',

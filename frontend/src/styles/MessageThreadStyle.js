@@ -3,14 +3,18 @@ const MessageThreadStyle = {
         backgroundColor: "#f3f4f6",
         display: "flex",
         flexDirection: "column",
-        height: "100vh",
+        height: "100%",
+        width: "100%",
         overflow: "hidden",
+        boxSizing: "border-box",
     },
     layout: {
         display: "flex",
         flex: 1,
         backgroundColor: "#ffffff",
         overflow: "hidden",
+        minHeight: 0,
+        width: "100%",
     },
     main: {
         flex: 1,
@@ -18,6 +22,7 @@ const MessageThreadStyle = {
         flexDirection: "column",
         overflow: "hidden",
         minHeight: 0,
+        width: "100%",
         backgroundColor: "#ffffff",
     },
     header: {
@@ -31,16 +36,10 @@ const MessageThreadStyle = {
         backgroundColor: "#ffffff",
         borderBottom: "1px solid #e5e7eb",
         boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
-        height: '73px',
+        minHeight: '60px',
+        maxHeight: '120px',  // Reasonable limit for header even with search
         boxSizing: 'border-box',
-    },
-    // RESPONSIVE: Mobile header (smaller screens)
-    '@media (max-width: 768px)': {
-        header: {
-            padding: "0.75rem 1rem",
-            height: 'auto',
-            minHeight: '60px',
-        },
+        overflowY: 'auto',  // If it gets too tall, scroll within header
     },
     chatTitle: {
         margin: 0,
@@ -49,7 +48,6 @@ const MessageThreadStyle = {
         color: "#1f2937",
         lineHeight: "1.5",
     },
-    // RESPONSIVE: Smaller title on mobile
     chatTitleMobile: {
         fontSize: "1rem",
     },
@@ -68,13 +66,15 @@ const MessageThreadStyle = {
     chatWindow: {
         flex: 1,
         overflowY: "auto",
+        overflowX: "hidden",
         display: "flex",
         flexDirection: "column",
         padding: "1.5rem",
         backgroundColor: "#f9fafb",
         minHeight: 0,
+        height: 0,  // Forces flex to calculate correctly
+        boxSizing: "border-box",
     },
-    // RESPONSIVE: Less padding on mobile
     chatWindowMobile: {
         padding: "1rem",
     },
@@ -84,7 +84,6 @@ const MessageThreadStyle = {
         borderRadius: "12px",
         maxWidth: "60%",
     },
-    // RESPONSIVE: Wider bubbles on mobile
     messageBubbleMobile: {
         maxWidth: "85%",
     },
@@ -134,13 +133,14 @@ const MessageThreadStyle = {
     inputArea: {
         display: "flex",
         gap: "0.75rem",
-        flexShrink: 0,
+        flexShrink: 0,  // Input area NEVER shrinks
         position: "relative",
         padding: "1rem 1.5rem",
         backgroundColor: "#ffffff",
         borderTop: "1px solid #e5e7eb",
+        boxSizing: "border-box",
+        minHeight: '70px',  // Ensure minimum space for input
     },
-    // RESPONSIVE: Stack input on small screens if needed
     inputAreaMobile: {
         padding: "0.75rem 1rem",
     },
@@ -155,6 +155,7 @@ const MessageThreadStyle = {
         transition: "border-color 0.2s",
         fontFamily: "inherit",
         lineHeight: "1.5",
+        boxSizing: "border-box",
     },
     sendButton: {
         padding: "0.75rem 1.5rem",
@@ -167,8 +168,8 @@ const MessageThreadStyle = {
         fontSize: "0.875rem",
         transition: "background-color 0.2s",
         lineHeight: "1.2",
+        flexShrink: 0,
     },
-    // RESPONSIVE: Smaller button on mobile
     sendButtonMobile: {
         padding: "0.75rem 1rem",
         fontSize: "0.8125rem",
