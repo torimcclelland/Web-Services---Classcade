@@ -8,7 +8,7 @@ import Logo from "../assets/Logo.png";
 const styles = {
   container: {
     backgroundColor: "#DDF9EA",
-    height: "100vh",
+    minHeight: "100vh",
     width: "100%",
     display: "flex",
     flexDirection: "column",
@@ -17,7 +17,7 @@ const styles = {
     padding: 12,
     paddingTop: 20,
     boxSizing: "border-box",
-    overflow: "hidden",
+    overflowY: "auto",
   },
   title: {
     fontSize: 30,
