@@ -207,12 +207,13 @@ const AddNewProject = ({ isOpen, onClose, onProjectCreated }) => {
 
       setSuccessMessage("Project created successfully!");
 
+      if (onProjectCreated) {
+        onProjectCreated(response.data);
+      }
+      
       setTimeout(() => {
-        if (onProjectCreated) {
-          onProjectCreated(response.data);
-        }
         onClose();
-      }, 1000);
+      }, 500);
     } catch (err) {
       console.error(err);
       const serverMsg = err.response?.data?.error || err.message || "Error creating project";

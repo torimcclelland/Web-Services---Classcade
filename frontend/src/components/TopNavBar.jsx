@@ -238,7 +238,7 @@ const TopNavBar = () => {
 
   const handleProjectCreated = async (createdProject) => {
     localStorage.removeItem('userProjectsTimestamp');
-    const project = createdProject?.project;
+    const project = createdProject?.project || createdProject;
 
     if (project && project._id) {
       if (user?._id) {

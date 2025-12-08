@@ -313,11 +313,11 @@ const HomePage = () => {
     }
   };
 
-  const handleProjectCreated = (createdProject) => {
-    // If a created project is provided, select it and go to dashboard
-    const project = createdProject?.project;
+  const handleProjectCreated = async (createdProject) => {
+    const project = createdProject?.project || createdProject;
 
     if (project && project._id) {
+      await fetchProjects();
       setSelectedProject(project);
       // Save selection to localStorage for persistence
       localStorage.setItem("selectedProject", JSON.stringify(project));
