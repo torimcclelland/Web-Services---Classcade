@@ -12,16 +12,17 @@ const styles = {
     width: "100%",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
-    padding: 24,
+    padding: 12,
+    paddingTop: 20,
     boxSizing: "border-box",
     overflowY: "auto",
   },
   title: {
-    fontSize: 34,
+    fontSize: 30,
     fontWeight: 600,
-    marginBottom: 24,
+    marginBottom: 12,
     color: "#0F3E2D",
     textAlign: "center",
   },
@@ -30,18 +31,18 @@ const styles = {
     maxWidth: 400,
     display: "flex",
     flexDirection: "column",
-    gap: 16,
+    gap: 10,
   },
   buttonGroup: {
-    marginTop: 24,
+    marginTop: 12,
     display: "flex",
     flexDirection: "column",
-    gap: 12,
+    gap: 10,
     width: "100%",
     alignItems: "center",
   },
   footerText: {
-    marginTop: 16,
+    marginTop: 12,
     fontSize: 14,
     color: "#555",
   },
@@ -325,11 +326,7 @@ const SignUp = () => {
             />
             <button
               type="button"
-              onMouseDown={() => setShowPassword(true)}
-              onMouseUp={() => setShowPassword(false)}
-              onMouseLeave={() => setShowPassword(false)}
-              onTouchStart={() => setShowPassword(true)}
-              onTouchEnd={() => setShowPassword(false)}
+              onClick={() => setShowPassword((prev) => !prev)}
               style={{
                 position: "absolute",
                 right: "6px",
@@ -404,11 +401,7 @@ const SignUp = () => {
             />
             <button
               type="button"
-              onMouseDown={() => setShowConfirmPassword(true)}
-              onMouseUp={() => setShowConfirmPassword(false)}
-              onMouseLeave={() => setShowConfirmPassword(false)}
-              onTouchStart={() => setShowConfirmPassword(true)}
-              onTouchEnd={() => setShowConfirmPassword(false)}
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
               style={{
                 position: "absolute",
                 right: "6px",

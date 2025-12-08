@@ -184,11 +184,7 @@ const LogIn = () => {
             />
             <button
               type="button"
-              onMouseDown={() => setShowPassword(true)}
-              onMouseUp={() => setShowPassword(false)}
-              onMouseLeave={() => setShowPassword(false)}
-              onTouchStart={() => setShowPassword(true)}
-              onTouchEnd={() => setShowPassword(false)}
+              onClick={() => setShowPassword((prev) => !prev)}
               style={{
                 position: 'absolute',
                 right: '6px',
