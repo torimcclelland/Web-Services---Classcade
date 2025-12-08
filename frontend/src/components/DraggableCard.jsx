@@ -2,7 +2,7 @@ import React from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { HiDotsVertical } from "react-icons/hi";
 
-const DraggableCard = ({ task, onEdit }) => {
+const DraggableCard = ({ task, onEdit, memberLookup }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: task._id,
@@ -19,6 +19,19 @@ const DraggableCard = ({ task, onEdit }) => {
     }
   }, [isDragging, task]);
 
+  const assigneeName = React.useMemo(() => {
+    const id =
+      (typeof task.assignedTo === "object" && task.assignedTo?._id) ||
+      task.assignedTo;
+    if (!id) return "Unassigned";
+    const member = memberLookup?.[id];
+    if (!member) return "Unassigned";
+    const fullName = `${member.firstName || ""} ${
+      member.lastName || ""
+    }`.trim();
+    return fullName || member.username || member.email || "Unassigned";
+  }, [memberLookup, task.assignedTo]);
+
   const style = {
     transform: transform
       ? `translate(${transform.x}px, ${transform.y}px)`
@@ -28,7 +41,9 @@ const DraggableCard = ({ task, onEdit }) => {
     padding: "0.5rem 0.75rem",
     borderRadius: "8px",
     marginBottom: "0.75rem",
-    boxShadow: isDragging ? "0 8px 16px rgba(0,0,0,0.2)" : "0 2px 4px rgba(0,0,0,0.1)",
+    boxShadow: isDragging
+      ? "0 8px 16px rgba(0,0,0,0.2)"
+      : "0 2px 4px rgba(0,0,0,0.1)",
     border: "1px solid #e0e0e0",
     cursor: isDragging ? "grabbing" : "grab",
     position: isDragging ? "fixed" : "relative",
@@ -39,31 +54,39 @@ const DraggableCard = ({ task, onEdit }) => {
   };
 
   return (
-    <div ref={(node) => {
-      setNodeRef(node);
-      nodeRef.current = node;
-    }} style={style} {...listeners} {...attributes}>
-
-      <div style={{ 
-        display: "flex", 
-        justifyContent: "space-between", 
-        alignItems: "flex-start",
-        gap: "0.5rem",
-        marginBottom: "0.25rem"
-      }}>
-        <h4 style={{ 
-          fontWeight: 600,
-          fontSize: "0.95rem",
-          margin: 0,
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-          wordBreak: "break-word",
-          flex: 1
-        }}>
+    <div
+      ref={(node) => {
+        setNodeRef(node);
+        nodeRef.current = node;
+      }}
+      style={style}
+      {...listeners}
+      {...attributes}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: "0.5rem",
+          marginBottom: "0.25rem",
+        }}
+      >
+        <h4
+          style={{
+            fontWeight: 600,
+            fontSize: "0.95rem",
+            margin: 0,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            wordBreak: "break-word",
+            flex: 1,
+          }}
+        >
           {task.name}
         </h4>
-        
+
         {/* Three dots menu */}
         <button
           onClick={(e) => {
@@ -91,26 +114,43 @@ const DraggableCard = ({ task, onEdit }) => {
         </button>
       </div>
 
-      <p style={{ 
-        fontSize: "0.85rem", 
-        marginBottom: "0.25rem",
-        margin: 0,
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        display: "-webkit-box",
-        WebkitLineClamp: 2,
-        WebkitBoxOrient: "vertical",
-        wordBreak: "break-word",
-        color: "#666"
-      }}>
+      <p
+        style={{
+          fontSize: "0.85rem",
+          marginBottom: "0.25rem",
+          margin: 0,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          display: "-webkit-box",
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: "vertical",
+          wordBreak: "break-word",
+          color: "#666",
+        }}
+      >
         {task.description}
       </p>
+      <p
+        style={{
+          fontSize: "0.75rem",
+          color: "#4b5563",
+          margin: "0.25rem 0",
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+        }}
+      >
+        <span style={{ fontWeight: 600, color: "#111827" }}>Assigned To:</span>{" "}
+        <span>{assigneeName}</span>
+      </p>
       {task.dueDate && (
-        <p style={{ 
-          fontSize: "0.75rem", 
-          color: "#888",
-          margin: "0.25rem 0 0 0"
-        }}>
+        <p
+          style={{
+            fontSize: "0.75rem",
+            color: "#888",
+            margin: "0.25rem 0 0 0",
+          }}
+        >
           Due: {new Date(task.dueDate).toLocaleDateString()}
         </p>
       )}

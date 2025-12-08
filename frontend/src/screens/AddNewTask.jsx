@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PrimaryButton from "../components/PrimaryButton";
 import AddNewTaskStyle from "../styles/AddNewTaskStyle";
 import api from "../api";
@@ -19,6 +19,24 @@ const AddNewTaskModal = ({ task, onClose, onSuccess }) => {
   const [status, setStatus] = useState(task?.status || "Not Started");
   const [error, setError] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [members, setMembers] = useState([]);
+  const [assignedTo, setAssignedTo] = useState(
+    (typeof task?.assignedTo === "object" && task.assignedTo?._id) || task?.assignedTo || user?._id || ""
+  );
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      if (!selectedProject?._id) return;
+      try {
+        const res = await api.get(`/api/project/${selectedProject._id}/members`);
+        setMembers(res.data || []);
+      } catch (err) {
+        console.error("Failed to load project members:", err);
+      }
+    };
+
+    fetchMembers();
+  }, [selectedProject]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,13 +55,14 @@ const AddNewTaskModal = ({ task, onClose, onSuccess }) => {
           description: description.trim(),
           dueDate: dueDate || null,
           status,
+          assignedTo: assignedTo || null,
         });
       } else {
         //creating new task
         await api.post(`/api/task/${selectedProject._id}`, {
           name: taskName.trim(),
           description: description.trim(),
-          assignedTo: user._id,
+          assignedTo: assignedTo || user?._id || null,
           dueDate: dueDate || null,
           status,
         });
@@ -119,6 +138,22 @@ const AddNewTaskModal = ({ task, onClose, onSuccess }) => {
         onChange={(e) => setDueDate(e.target.value)}
         min={new Date().toISOString().split('T')[0]}
       />
+
+      <label style={AddNewTaskStyle.label}>Assign To</label>
+      <select
+        style={AddNewTaskStyle.select}
+        value={assignedTo || ""}
+        onChange={(e) => setAssignedTo(e.target.value)}
+      >
+        <option value="">Unassigned</option>
+        {members.map((member) => (
+          <option key={member._id} value={member._id}>
+            {member.firstName || member.lastName
+              ? `${member.firstName || ""} ${member.lastName || ""}`.trim()
+              : member.username || member.email || "User"}
+          </option>
+        ))}
+      </select>
 
       <label style={AddNewTaskStyle.label}>Status</label>
       <select

@@ -62,6 +62,7 @@ const DashboardStyle = {
     fontWeight: 700,
     color: "#0F3E2D",
     lineHeight: 1.2,
+    whiteSpace: "nowrap",
   },
   statValueSmall: {
     fontSize: "18px",

@@ -277,8 +277,17 @@ const TopNavBar = () => {
     }
   };
 
-  const handleSelectProject = (project) => {
-    setSelectedProject(project);
+  const handleSelectProject = async (project) => {
+    try {
+      const res = await api.get(`/api/project/${project._id}`);
+      const fullProject = res.data || project;
+      setSelectedProject(fullProject);
+      localStorage.setItem("selectedProject", JSON.stringify(fullProject));
+    } catch (err) {
+      console.error("Error fetching project details:", err);
+      setSelectedProject(project);
+      localStorage.setItem("selectedProject", JSON.stringify(project));
+    }
     navigate("/dashboard");
   };
 

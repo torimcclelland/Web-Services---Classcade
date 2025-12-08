@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PrimaryButton from "../components/PrimaryButton";
 import MyTasksStyle from "../styles/MyTasksStyle";
@@ -73,8 +73,16 @@ const MyTasks = () => {
   const [tasks, setTasks] = useState([]);
   const [activeTaskId, setActiveTaskId] = useState(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [members, setMembers] = useState([]);
   const { selectedProject } = useProject();
   const sensors = useSensors(useSensor(PointerSensor));
+  const memberLookup = useMemo(() => {
+    const map = {};
+    members.forEach((m) => {
+      map[m._id] = m;
+    });
+    return map;
+  }, [members]);
 
   useEffect(() => {
     if (!selectedProject?._id) {
@@ -82,16 +90,21 @@ const MyTasks = () => {
       return;
     }
 
-    const fetchTasks = async () => {
+    const fetchTasksAndMembers = async () => {
       try {
         const res = await api.get(`/api/task/${selectedProject._id}`);
         setTasks(res.data || []);
+
+        const membersRes = await api.get(
+          `/api/project/${selectedProject._id}/members`
+        );
+        setMembers(membersRes.data || []);
       } catch (err) {
-        console.error("Failed to fetch tasks:", err);
+        console.error("Failed to fetch tasks/members:", err);
       }
     };
 
-    fetchTasks();
+    fetchTasksAndMembers();
   }, [selectedProject, navigate]);
 
   const getTasksByStatus = (lane) =>
@@ -217,6 +230,7 @@ const MyTasks = () => {
                     <DraggableCard
                       key={task._id}
                       task={task}
+                      memberLookup={memberLookup}
                       onEdit={handleEdit}
                     />
                   ))}
