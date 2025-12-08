@@ -37,9 +37,9 @@ const MessageThreadStyle = {
         borderBottom: "1px solid #e5e7eb",
         boxShadow: "0 1px 2px rgba(0, 0, 0, 0.05)",
         minHeight: '60px',
-        maxHeight: '120px',  // Reasonable limit for header even with search
+        maxHeight: '120px',
         boxSizing: 'border-box',
-        overflowY: 'auto',  // If it gets too tall, scroll within header
+        overflowY: 'auto',
     },
     chatTitle: {
         margin: 0,
@@ -72,7 +72,7 @@ const MessageThreadStyle = {
         padding: "1.5rem",
         backgroundColor: "#f9fafb",
         minHeight: 0,
-        height: 0,  // Forces flex to calculate correctly
+        height: 0,
         boxSizing: "border-box",
     },
     chatWindowMobile: {
@@ -133,13 +133,13 @@ const MessageThreadStyle = {
     inputArea: {
         display: "flex",
         gap: "0.75rem",
-        flexShrink: 0,  // Input area NEVER shrinks
+        flexShrink: 0,
         position: "relative",
         padding: "1rem 1.5rem",
         backgroundColor: "#ffffff",
         borderTop: "1px solid #e5e7eb",
         boxSizing: "border-box",
-        minHeight: '70px',  // Ensure minimum space for input
+        minHeight: '70px',
     },
     inputAreaMobile: {
         padding: "0.75rem 1rem",
