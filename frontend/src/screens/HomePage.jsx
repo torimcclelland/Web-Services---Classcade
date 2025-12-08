@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../assets/Logo.png";
 import LogoutImg from "../assets/Logout.png";
+import SettingsIcon from "../assets/SettingsIcon.svg";
 import api from "../api";
 import { useProject } from "../context/ProjectContext";
 import HomePageStyle from "../styles/HomePageStyle";
@@ -67,6 +68,13 @@ const HomePage = () => {
   const handleCardClick = (project) => {
     setSelectedProject(project);
     navigate("/dashboard");
+  };
+
+  const handleSettings = (e, project) => {
+    e.stopPropagation();
+    setSelectedProject(project);
+    localStorage.setItem("selectedProject", JSON.stringify(project));
+    navigate("/settings");
   };
 
   const handleAddTask = (e, project) => {
@@ -320,24 +328,49 @@ const HomePage = () => {
                       </div>
                     </div>
                   </div>
-                  <button
-                    style={{
-                      padding: "8px 16px",
-                      backgroundColor: "#1e3a8a",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "6px",
-                      cursor: "pointer",
-                      fontSize: "0.9rem",
-                      fontWeight: "600",
-                      transition: "background-color 0.2s ease",
-                    }}
-                    onClick={(e) => handleAddTask(e, g)}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = "#1e40af"}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = "#1e3a8a"}
-                  >
-                    + Add Task
-                  </button>
+                  <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                    <button
+                      style={{
+                        padding: "8px 16px",
+                        backgroundColor: "#1e3a8a",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        fontSize: "0.9rem",
+                        fontWeight: "600",
+                        transition: "background-color 0.2s ease",
+                      }}
+                      onClick={(e) => handleAddTask(e, g)}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = "#1e40af"}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = "#1e3a8a"}
+                    >
+                      + Add Task
+                    </button>
+                    <button
+                      style={{
+                        padding: "8px",
+                        backgroundColor: "transparent",
+                        border: "none",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        transition: "all 0.2s ease",
+                      }}
+                      onClick={(e) => handleSettings(e, g)}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = "#f3f4f6";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = "transparent";
+                      }}
+                      title="Project Settings"
+                    >
+                      <img src={SettingsIcon} alt="Settings" style={{ width: "20px", height: "20px", opacity: 0.6 }} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

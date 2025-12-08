@@ -90,7 +90,7 @@ const Dashboard = () => {
         {/* Header Section */}
         <div style={DashboardStyle.header}>
           <h1 style={DashboardStyle.projectTitle}>{selectedProject?.name}</h1>
-          <PrimaryButton text="Edit Project" />
+          <PrimaryButton text="Edit Project" onClick={() => navigate('/settings')} />
         </div>
 
         {/* Stats Grid */}
