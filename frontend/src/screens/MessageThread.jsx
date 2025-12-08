@@ -19,59 +19,19 @@ const MessageThread = () => {
     const [members, setMembers] = useState([]);
     const [showAllMembers, setShowAllMembers] = useState(false);
 
-    // Channel state
     const [channels, setChannels] = useState([]);
     const [activeChannelId, setActiveChannelId] = useState(null);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-    // Responsive state
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-    // Attachment state
     const [attachments, setAttachments] = useState([]);
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef(null);
     const MAX_ATTACHMENTS = 5;
 
-    // Reaction state
-    const [showEmojiPicker, setShowEmojiPicker] = useState(null);
-    const [hoveredMessage, setHoveredMessage] = useState(null);
-
     const messagesEndRef = useRef(null);
-    const emojiPickerRef = useRef(null);
 
-    // Emoji mapping
-    const EMOJI_MAP = {
-        'thumbsup': String.fromCodePoint(0x1F44D),
-        'heart': String.fromCodePoint(0x2764, 0xFE0F),
-        'laugh': String.fromCodePoint(0x1F602),
-        'surprise': String.fromCodePoint(0x1F62E),
-        'sad': String.fromCodePoint(0x1F622),
-        'party': String.fromCodePoint(0x1F389)
-    };
-
-    const REACTION_EMOJIS = [
-        { name: 'thumbsup', display: String.fromCodePoint(0x1F44D) },
-        { name: 'heart', display: String.fromCodePoint(0x2764, 0xFE0F) },
-        { name: 'laugh', display: String.fromCodePoint(0x1F602) },
-        { name: 'surprise', display: String.fromCodePoint(0x1F62E) },
-        { name: 'sad', display: String.fromCodePoint(0x1F622) },
-        { name: 'party', display: String.fromCodePoint(0x1F389) }
-    ];
-
-    // Handle click outside emoji picker
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
-                setShowEmojiPicker(null);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    // Handle responsive layout
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth <= 768);
@@ -81,7 +41,6 @@ const MessageThread = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Fetch project info and members
     useEffect(() => {
         const fetchProject = async () => {
             if (!conversationId) return;
@@ -103,7 +62,6 @@ const MessageThread = () => {
         fetchProject();
     }, [conversationId]);
 
-    // Fetch channels for this project
     useEffect(() => {
         const fetchChannels = async () => {
             if (!conversationId) return;
@@ -135,7 +93,6 @@ const MessageThread = () => {
         fetchChannels();
     }, [conversationId]);
 
-    // Socket connection and message handling for active channel
     useEffect(() => {
         if (!activeChannelId) return;
 
@@ -158,30 +115,16 @@ const MessageThread = () => {
             });
         };
 
-        const handleReactionUpdated = (updatedMsg) => {
-            console.log('Reaction updated:', updatedMsg);
-            setMessages((prev) =>
-                prev.map(m => {
-                    const mId = m._id || m.id;
-                    const updatedId = updatedMsg._id || updatedMsg.id;
-                    return mId === updatedId ? updatedMsg : m;
-                })
-            );
-        };
-
         socketManager.on("receiveMessage", handleReceiveMessage);
-        socketManager.on("reactionUpdated", handleReactionUpdated);
 
         return () => {
             socketManager.off("receiveMessage", handleReceiveMessage);
-            socketManager.off("reactionUpdated", handleReactionUpdated);
             if (socketManager.isConnected()) {
                 socketManager.emit('leaveRoom', activeChannelId);
             }
         };
     }, [activeChannelId]);
 
-    // Fetch messages for active channel
     useEffect(() => {
         const fetchHistory = async () => {
             if (!currentUserId || !activeChannelId) return;
@@ -198,12 +141,23 @@ const MessageThread = () => {
         fetchHistory();
     }, [activeChannelId, currentUserId]);
 
-    // Auto-scroll to bottom
+    useEffect(() => {
+        if (!activeChannelId || !currentUserId || messages.length === 0) return;
+
+        const timer = setTimeout(() => {
+            socketManager.emit('markChannelAsRead', {
+                channelId: activeChannelId,
+                userId: currentUserId
+            });
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [activeChannelId, currentUserId, messages.length]);
+
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    // Handle channel selection
     const handleChannelSelect = useCallback((channelId) => {
         if (channelId === activeChannelId) return;
         if (activeChannelId && socketManager.isConnected()) {
@@ -217,7 +171,6 @@ const MessageThread = () => {
         }
     }, [activeChannelId, isMobile]);
 
-    // Handle file selection and upload
     const handleFileSelect = async (e) => {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
@@ -258,58 +211,16 @@ const MessageThread = () => {
         }
     };
 
-    // Remove attachment before sending
     const removeAttachment = (index) => {
         setAttachments(prev => prev.filter((_, i) => i !== index));
     };
 
-    // Format file size helper
     const formatFileSize = (bytes) => {
         if (bytes < 1024) return bytes + ' B';
         if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
         return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
     };
 
-    // Handle emoji reaction
-    const handleReaction = useCallback((messageId, emojiName) => {
-        const message = messages.find(m => (m._id || m.id) === messageId);
-        if (!message) return;
-
-        const userReaction = message.reactions?.find(r =>
-            (r.user?._id || r.user) === currentUserId
-        );
-
-        if (userReaction && userReaction.type === emojiName) {
-            socketManager.emit('removeReaction', { messageId, userId: currentUserId });
-        } else {
-            socketManager.emit('addReaction', { messageId, userId: currentUserId, emoji: emojiName });
-        }
-
-        setShowEmojiPicker(null);
-    }, [messages, currentUserId]);
-
-    // Group reactions by emoji name
-    const groupReactions = (reactions) => {
-        if (!reactions || reactions.length === 0) return [];
-
-        const grouped = {};
-        reactions.forEach(r => {
-            if (!grouped[r.type]) {
-                grouped[r.type] = [];
-            }
-            grouped[r.type].push(r);
-        });
-
-        return Object.entries(grouped).map(([emojiName, reactions]) => ({
-            emojiName,
-            emoji: EMOJI_MAP[emojiName] || '?',
-            count: reactions.length,
-            users: reactions.map(r => r.user),
-            hasCurrentUser: reactions.some(r => (r.user?._id || r.user) === currentUserId)
-        }));
-    };
-
-    // Send message handler with attachments
     const sendMessage = useCallback(async () => {
         if (!input.trim() && attachments.length === 0) return;
         if (!activeChannelId) return;
@@ -342,8 +253,7 @@ const MessageThread = () => {
                 lastName: user.lastName
             },
             createdAt: new Date().toISOString(),
-            readBy: [],
-            reactions: []
+            readBy: []
         };
 
         setMessages(prev => [...prev, optimisticMessage]);
@@ -361,7 +271,6 @@ const MessageThread = () => {
 
     const activeChannel = channels.find(c => (c.id || c._id) === activeChannelId);
 
-    // Date separator helper
     const formatDateSeparator = (date) => {
         const today = new Date();
         const messageDate = new Date(date);
@@ -398,7 +307,6 @@ const MessageThread = () => {
         return groups;
     };
 
-    // Check if user is alone in project
     const isAloneInProject = members.length === 1 && members[0]._id === currentUserId;
 
     return (
@@ -416,7 +324,6 @@ const MessageThread = () => {
                     />
 
                     <main style={MessageThreadStyle.main}>
-                        {/* Header */}
                         <div style={{
                             ...MessageThreadStyle.header,
                             ...(isMobile && { padding: "0.75rem 1rem", minHeight: '60px', height: 'auto' })
@@ -458,7 +365,6 @@ const MessageThread = () => {
                             )}
                         </div>
 
-                        {/* Messages window */}
                         <div style={{
                             ...MessageThreadStyle.chatWindow,
                             ...(isMobile && { padding: '1rem' })
@@ -499,8 +405,6 @@ const MessageThread = () => {
                                             ? `${msg.sender.firstName} ${msg.sender.lastName}`
                                             : 'Unknown User');
 
-                                    const groupedReactions = groupReactions(msg.reactions);
-
                                     return (
                                         <div
                                             key={msgId}
@@ -508,262 +412,91 @@ const MessageThread = () => {
                                                 display: 'flex',
                                                 justifyContent: isCurrentUser ? 'flex-end' : 'flex-start',
                                                 marginBottom: '12px',
-                                                width: '100%',
-                                                position: 'relative'
+                                                width: '100%'
                                             }}
-                                            onMouseEnter={() => setHoveredMessage(msgId)}
-                                            onMouseLeave={() => setHoveredMessage(null)}
                                         >
-                                            <div style={{
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                alignItems: isCurrentUser ? 'flex-end' : 'flex-start',
-                                                maxWidth: isMobile ? '85%' : '70%',
-                                                position: 'relative'
-                                            }}>
-                                                {/* Message bubble */}
-                                                <div
-                                                    style={{
-                                                        ...MessageThreadStyle.messageBubble,
-                                                        backgroundColor: isCurrentUser ? '#1e3a8a' : '#ffffff',
-                                                        color: isCurrentUser ? 'white' : '#1f2937',
-                                                        borderRadius: '12px',
+                                            <div
+                                                style={{
+                                                    ...MessageThreadStyle.messageBubble,
+                                                    backgroundColor: isCurrentUser ? '#1e3a8a' : '#ffffff',
+                                                    color: isCurrentUser ? 'white' : '#1f2937',
+                                                    maxWidth: isMobile ? '85%' : '70%',
+                                                    borderRadius: '12px',
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    gap: '4px',
+                                                    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                                                }}
+                                            >
+                                                <strong style={MessageThreadStyle.messageAuthor}>
+                                                    {senderName}
+                                                </strong>
+
+                                                {msg.content && (
+                                                    <span style={MessageThreadStyle.messageContent}>
+                                                        {msg.content}
+                                                    </span>
+                                                )}
+
+                                                {msg.attachments && msg.attachments.length > 0 && (
+                                                    <div style={{
+                                                        marginTop: msg.content ? '8px' : '0',
                                                         display: 'flex',
                                                         flexDirection: 'column',
-                                                        gap: '4px',
-                                                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                                                        position: 'relative'
-                                                    }}
-                                                >
-                                                    <strong style={MessageThreadStyle.messageAuthor}>
-                                                        {senderName}
-                                                    </strong>
-
-                                                    {msg.content && (
-                                                        <span style={MessageThreadStyle.messageContent}>
-                                                            {msg.content}
-                                                        </span>
-                                                    )}
-
-                                                    {msg.attachments && msg.attachments.length > 0 && (
-                                                        <div style={{
-                                                            marginTop: msg.content ? '8px' : '0',
-                                                            display: 'flex',
-                                                            flexDirection: 'column',
-                                                            gap: '6px'
-                                                        }}>
-                                                            {msg.attachments.map((file, idx) => (
-                                                                <a
-                                                                    key={idx}
-                                                                    href={`http://localhost:4000${file.url}`}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    download={file.originalName}
-                                                                    style={{
-                                                                        padding: '8px 12px',
-                                                                        backgroundColor: isCurrentUser ? '#1e40af' : '#f3f4f6',
-                                                                        color: isCurrentUser ? '#fff' : '#1e3a8a',
-                                                                        borderRadius: '6px',
-                                                                        textDecoration: 'none',
-                                                                        fontSize: '0.875rem',
-                                                                        display: 'flex',
-                                                                        justifyContent: 'space-between',
-                                                                        alignItems: 'center',
-                                                                        transition: 'opacity 0.2s',
-                                                                        border: isCurrentUser ? 'none' : '1px solid #e5e7eb'
-                                                                    }}
-                                                                    onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
-                                                                    onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-                                                                >
-                                                                    <span style={{
-                                                                        overflow: 'hidden',
-                                                                        textOverflow: 'ellipsis',
-                                                                        whiteSpace: 'nowrap',
-                                                                        marginRight: '8px'
-                                                                    }}>
-                                                                        {file.originalName}
-                                                                    </span>
-                                                                    <span style={{
-                                                                        fontSize: '0.75rem',
-                                                                        opacity: 0.8,
-                                                                        flexShrink: 0
-                                                                    }}>
-                                                                        {formatFileSize(file.fileSize)}
-                                                                    </span>
-                                                                </a>
-                                                            ))}
-                                                        </div>
-                                                    )}
-
-                                                    <small style={{
-                                                        ...MessageThreadStyle.messageTime,
-                                                        alignSelf: 'flex-end'
+                                                        gap: '6px'
                                                     }}>
-                                                        {new Date(msg.createdAt).toLocaleTimeString([], {
-                                                            hour: '2-digit',
-                                                            minute: '2-digit'
-                                                        })}
-                                                    </small>
-
-                                                    {/* Reaction button - Teams style */}
-                                                    {hoveredMessage === msgId && !msgId.toString().startsWith('temp-') && (
-                                                        <div
-                                                            style={{
-                                                                position: 'absolute',
-                                                                top: '-16px',
-                                                                right: isCurrentUser ? 'auto' : '12px',
-                                                                left: isCurrentUser ? '12px' : 'auto',
-                                                                display: 'flex',
-                                                                gap: '4px',
-                                                                background: '#ffffff',
-                                                                border: '1px solid #e5e7eb',
-                                                                borderRadius: '20px',
-                                                                padding: '4px',
-                                                                boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-                                                                zIndex: 10
-                                                            }}
-                                                        >
-                                                            {/* Add reaction button with smiley face SVG */}
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setShowEmojiPicker(showEmojiPicker === msgId ? null : msgId);
-                                                                }}
+                                                        {msg.attachments.map((file, idx) => (
+                                                            <a
+                                                                key={idx}
+                                                                href={`http://localhost:4000${file.url}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                download={file.originalName}
                                                                 style={{
-                                                                    background: showEmojiPicker === msgId ? '#f3f4f6' : 'transparent',
-                                                                    border: 'none',
-                                                                    borderRadius: '16px',
-                                                                    padding: '6px 10px',
-                                                                    cursor: 'pointer',
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    gap: '4px',
-                                                                    transition: 'background 0.2s',
-                                                                    fontSize: '0.75rem',
-                                                                    color: '#6b7280',
-                                                                    fontWeight: '500'
-                                                                }}
-                                                                onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
-                                                                onMouseLeave={(e) => {
-                                                                    if (showEmojiPicker !== msgId) {
-                                                                        e.currentTarget.style.background = 'transparent';
-                                                                    }
-                                                                }}
-                                                                title="Add reaction"
-                                                            >
-                                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                                                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
-                                                                    <path d="M4.285 9.567a.5.5 0 0 1 .683.183A3.498 3.498 0 0 0 8 11.5a3.498 3.498 0 0 0 3.032-1.75.5.5 0 1 1 .866.5A4.498 4.498 0 0 1 8 12.5a4.498 4.498 0 0 1-3.898-2.25.5.5 0 0 1 .183-.683zM7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5zm4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5z" />
-                                                                </svg>
-                                                            </button>
-                                                        </div>
-                                                    )}
-
-                                                    {/* Emoji picker dropdown */}
-                                                    {showEmojiPicker === msgId && (
-                                                        <div
-                                                            ref={emojiPickerRef}
-                                                            style={{
-                                                                position: 'absolute',
-                                                                top: '-52px',
-                                                                right: isCurrentUser ? 'auto' : '8px',
-                                                                left: isCurrentUser ? '8px' : 'auto',
-                                                                background: '#ffffff',
-                                                                border: '1px solid #e5e7eb',
-                                                                borderRadius: '12px',
-                                                                padding: '6px',
-                                                                display: 'grid',
-                                                                gridTemplateColumns: 'repeat(3, 1fr)',
-                                                                gap: '4px',
-                                                                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                                                                zIndex: 20,
-                                                                width: '120px'
-                                                            }}
-                                                        >
-                                                            {REACTION_EMOJIS.map(({ name, display }) => (
-                                                                <button
-                                                                    key={name}
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        handleReaction(msgId, name);
-                                                                    }}
-                                                                    style={{
-                                                                        background: 'transparent',
-                                                                        border: 'none',
-                                                                        fontSize: '1.25rem',
-                                                                        cursor: 'pointer',
-                                                                        padding: '4px',
-                                                                        borderRadius: '6px',
-                                                                        transition: 'all 0.15s',
-                                                                        display: 'flex',
-                                                                        alignItems: 'center',
-                                                                        justifyContent: 'center',
-                                                                        height: '32px',
-                                                                        width: '100%'
-                                                                    }}
-                                                                    onMouseEnter={(e) => {
-                                                                        e.currentTarget.style.background = '#f3f4f6';
-                                                                        e.currentTarget.style.transform = 'scale(1.1)';
-                                                                    }}
-                                                                    onMouseLeave={(e) => {
-                                                                        e.currentTarget.style.background = 'transparent';
-                                                                        e.currentTarget.style.transform = 'scale(1)';
-                                                                    }}
-                                                                >
-                                                                    {display}
-                                                                </button>
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {/* Reaction display below message */}
-                                                {groupedReactions.length > 0 && (
-                                                    <div style={{
-                                                        display: 'flex',
-                                                        gap: '6px',
-                                                        marginTop: '6px',
-                                                        flexWrap: 'wrap'
-                                                    }}>
-                                                        {groupedReactions.map(({ emojiName, emoji, count, users, hasCurrentUser }) => (
-                                                            <button
-                                                                key={emojiName}
-                                                                onClick={() => handleReaction(msgId, emojiName)}
-                                                                style={{
-                                                                    background: hasCurrentUser ? '#dbeafe' : '#f9fafb',
-                                                                    border: hasCurrentUser ? '1.5px solid #3b82f6' : '1px solid #e5e7eb',
-                                                                    borderRadius: '14px',
-                                                                    padding: '4px 10px',
+                                                                    padding: '8px 12px',
+                                                                    backgroundColor: isCurrentUser ? '#1e40af' : '#f3f4f6',
+                                                                    color: isCurrentUser ? '#fff' : '#1e3a8a',
+                                                                    borderRadius: '6px',
+                                                                    textDecoration: 'none',
                                                                     fontSize: '0.875rem',
-                                                                    cursor: 'pointer',
                                                                     display: 'flex',
+                                                                    justifyContent: 'space-between',
                                                                     alignItems: 'center',
-                                                                    gap: '4px',
-                                                                    transition: 'all 0.15s',
-                                                                    fontWeight: hasCurrentUser ? '600' : '400'
+                                                                    transition: 'opacity 0.2s',
+                                                                    border: isCurrentUser ? 'none' : '1px solid #e5e7eb'
                                                                 }}
-                                                                onMouseEnter={(e) => {
-                                                                    e.currentTarget.style.transform = 'scale(1.05)';
-                                                                    e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.1)';
-                                                                }}
-                                                                onMouseLeave={(e) => {
-                                                                    e.currentTarget.style.transform = 'scale(1)';
-                                                                    e.currentTarget.style.boxShadow = 'none';
-                                                                }}
-                                                                title={users.map(u => u?.firstName || 'Unknown').join(', ')}
+                                                                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                                                                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
                                                             >
-                                                                <span style={{ lineHeight: '1' }}>{emoji}</span>
+                                                                <span style={{
+                                                                    overflow: 'hidden',
+                                                                    textOverflow: 'ellipsis',
+                                                                    whiteSpace: 'nowrap',
+                                                                    marginRight: '8px'
+                                                                }}>
+                                                                    {file.originalName}
+                                                                </span>
                                                                 <span style={{
                                                                     fontSize: '0.75rem',
-                                                                    color: hasCurrentUser ? '#1e40af' : '#6b7280',
-                                                                    lineHeight: '1'
+                                                                    opacity: 0.8,
+                                                                    flexShrink: 0
                                                                 }}>
-                                                                    {count}
+                                                                    {formatFileSize(file.fileSize)}
                                                                 </span>
-                                                            </button>
+                                                            </a>
                                                         ))}
                                                     </div>
                                                 )}
+
+                                                <small style={{
+                                                    ...MessageThreadStyle.messageTime,
+                                                    alignSelf: 'flex-end'
+                                                }}>
+                                                    {new Date(msg.createdAt).toLocaleTimeString([], {
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
+                                                </small>
                                             </div>
                                         </div>
                                     );
@@ -772,7 +505,6 @@ const MessageThread = () => {
                             <div ref={messagesEndRef} />
                         </div>
 
-                        {/* Input area with file upload */}
                         {activeChannelId && !isAloneInProject && (
                             <div style={{
                                 ...MessageThreadStyle.inputArea,
@@ -780,7 +512,6 @@ const MessageThread = () => {
                                 flexDirection: 'column',
                                 gap: '0.5rem'
                             }}>
-                                {/* Attachment preview */}
                                 {attachments.length > 0 && (
                                     <div style={{
                                         display: 'flex',
@@ -885,9 +616,7 @@ const MessageThread = () => {
                                     </div>
                                 )}
 
-                                {/* Input row */}
                                 <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
-                                    {/* Paperclip button */}
                                     <button
                                         onClick={() => {
                                             if (attachments.length >= MAX_ATTACHMENTS) {
@@ -952,7 +681,6 @@ const MessageThread = () => {
                                         disabled={attachments.length >= MAX_ATTACHMENTS}
                                     />
 
-                                    {/* Text input */}
                                     <div style={{ flex: 1, position: 'relative' }}>
                                         <textarea
                                             style={{
@@ -985,7 +713,6 @@ const MessageThread = () => {
                                         </div>
                                     </div>
 
-                                    {/* Send button */}
                                     <button
                                         style={{
                                             ...MessageThreadStyle.sendButton,

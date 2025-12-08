@@ -33,7 +33,6 @@ const uploadService = require('./services/uploadService');
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Swagger configuration options
 const options = {
     definition: {
         openapi: "3.0.0",
@@ -56,7 +55,6 @@ const options = {
 const specs = swaggerJsdoc(options);
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
-
 app.use(cors());
 app.use(express.json());
 
@@ -101,19 +99,16 @@ const startServer = async () => {
         io.on('connection', socket => {
             console.log('Socket connected:', socket.id);
 
-            // Join a room
             socket.on('joinRoom', roomId => {
                 socket.join(roomId);
                 console.log(`Socket ${socket.id} joined room ${roomId}`);
             });
 
-            // Leave a room
             socket.on('leaveRoom', roomId => {
                 socket.leave(roomId);
                 console.log(`Socket ${socket.id} left room ${roomId}`);
             });
 
-            // Send message
             socket.on('sendMessage', async msg => {
                 try {
                     const messageData = {
@@ -132,8 +127,7 @@ const startServer = async () => {
 
                     const populated = await Chat.findById(saved._id)
                         .populate('sender', 'firstName lastName avatar email')
-                        .populate('recipients', 'firstName lastName avatar email')
-                        .populate('reactions.user', 'firstName lastName');
+                        .populate('recipients', 'firstName lastName avatar email');
 
                     console.log('Populated sender:', populated.sender);
 
@@ -147,67 +141,46 @@ const startServer = async () => {
                 }
             });
 
-            // Add reaction
-            socket.on('addReaction', async ({ messageId, userId, emoji }) => {
+            socket.on('markChannelAsRead', async ({ channelId, userId }) => {
                 try {
-                    console.log('Adding reaction:', { messageId, userId, emoji });
+                    console.log(`[Socket] Marking channel ${channelId} as read for user ${userId}`);
 
-                    // Remove existing reaction from this user
-                    await Chat.findByIdAndUpdate(messageId, { $pull: { reactions: { user: userId } } });
+                    const unreadMessages = await Chat.find({
+                        channelId: channelId,
+                        'readBy.user': { $ne: userId }
+                    }).select('_id content sender');
 
-                    // Add new reaction
-                    const updated = await Chat.findByIdAndUpdate(
-                        messageId,
-                        { $push: { reactions: { user: userId, type: emoji, createdAt: new Date() } } },
-                        { new: true }
-                    )
-                        .populate('sender', 'firstName lastName avatar email')
-                        .populate('recipients', 'firstName lastName avatar email')
-                        .populate('reactions.user', 'firstName lastName');
+                    console.log(`[Socket] Found ${unreadMessages.length} unread messages in channel ${channelId}`);
 
-                    if (updated) {
-                        const channelId = updated.channelId;
-                        io.to(channelId).emit('reactionUpdated', updated);
-                        console.log('Reaction added and broadcasted to channel:', channelId);
+                    if (unreadMessages.length > 0) {
+                        console.log('[Socket] Sample unread message IDs:', unreadMessages.slice(0, 3).map(m => m._id));
                     }
+
+                    const result = await Chat.updateMany(
+                        {
+                            channelId: channelId,
+                            'readBy.user': { $ne: userId }
+                        },
+                        {
+                            $addToSet: { readBy: { user: userId, readAt: new Date() } }
+                        }
+                    );
+
+                    console.log(`[Socket] Update result: matched=${result.matchedCount}, modified=${result.modifiedCount}`);
+
+                    io.to(channelId).emit('channelMarkedAsRead', { channelId, userId });
+                    console.log(`[Socket] Broadcasted channelMarkedAsRead to channel ${channelId}`);
+
                 } catch (err) {
-                    console.error('Error adding reaction:', err);
-                    socket.emit('reactionError', { error: 'Failed to add reaction' });
+                    console.error('[Socket] Error marking channel as read:', err);
                 }
             });
 
-            // NEW: Remove reaction
-            socket.on('removeReaction', async ({ messageId, userId }) => {
-                try {
-                    console.log('Removing reaction:', { messageId, userId });
-
-                    const updated = await Chat.findOneAndUpdate(
-                        { _id: messageId },
-                        { $pull: { reactions: { user: userId } } },
-                        { new: true }
-                    )
-                        .populate('sender', 'firstName lastName avatar email')
-                        .populate('recipients', 'firstName lastName avatar email')
-                        .populate('reactions.user', 'firstName lastName');
-
-                    if (updated) {
-                        const channelId = updated.channelId;
-                        io.to(channelId).emit('reactionUpdated', updated);
-                        console.log('Reaction removed and broadcasted to channel:', channelId);
-                    }
-                } catch (err) {
-                    console.error('Error removing reaction:', err);
-                    socket.emit('reactionError', { error: 'Failed to remove reaction' });
-                }
-            });
-
-            // Handle messages read event
             socket.on('messagesRead', ({ channelId, userId, count }) => {
                 console.log(`${count} messages marked as read in channel ${channelId} by user ${userId}`);
                 socket.to(channelId).emit('messagesReadUpdate', { channelId, userId, count });
             });
 
-            // Team meeting events
             socket.on('teamMeetingCreated', ({ projectId, teamMeeting }) => {
                 console.log(`Team meeting created for project ${projectId}`);
                 io.to(`project_${projectId}`).emit('teamMeetingUpdate', { projectId, teamMeeting });

@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../api";
+import socketManager from "../utils/socketManager";
+import { useUser } from "../context/UserContext";
 import ChannelSidebarStyle from "../styles/ChannelSidebarStyle";
 
 const ChannelSidebar = ({
@@ -11,14 +13,86 @@ const ChannelSidebar = ({
     isCollapsed,
     onToggleCollapse
 }) => {
+    const { user } = useUser();
     const [isCreating, setIsCreating] = useState(false);
     const [newChannelName, setNewChannelName] = useState("");
     const [editingChannelId, setEditingChannelId] = useState(null);
     const [editingName, setEditingName] = useState("");
     const [hoveredChannelId, setHoveredChannelId] = useState(null);
     const [openMenuId, setOpenMenuId] = useState(null);
+    const [unreadCounts, setUnreadCounts] = useState({});
 
     const MAX_CHANNEL_NAME_LENGTH = 50;
+
+    const fetchUnreadCounts = async () => {
+        if (!user?._id || channels.length === 0) return;
+
+        try {
+            const res = await api.get("/api/chat", {
+                params: { conversationId: projectId }
+            });
+
+            const counts = {};
+            channels.forEach(channel => {
+                const channelId = channel.id || channel._id;
+                const unread = res.data.filter(msg => {
+                    if (msg.channelId !== channelId) return false;
+                    const senderId = msg.sender?._id || msg.sender;
+                    const isFromOther = senderId !== user._id;
+                    const isUnread = !msg.readBy?.some(r => {
+                        const readerId = r.user?._id || r.user;
+                        return readerId?.toString() === user._id?.toString();
+                    });
+                    return isFromOther && isUnread;
+                }).length;
+                counts[channelId] = unread;
+            });
+
+            console.log('[ChannelSidebar] Unread counts:', counts);
+            setUnreadCounts(counts);
+        } catch (err) {
+            console.error("Error fetching unread counts:", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchUnreadCounts();
+    }, [channels, user]);
+
+    useEffect(() => {
+        if (!user?._id) return;
+
+        socketManager.connect();
+
+        const handleNewMessage = (msg) => {
+            console.log('[ChannelSidebar] Received message:', msg);
+            const senderId = msg.sender?._id || msg.sender;
+            if (senderId !== user._id && msg.channelId) {
+                setUnreadCounts(prev => ({
+                    ...prev,
+                    [msg.channelId]: (prev[msg.channelId] || 0) + 1
+                }));
+            }
+        };
+
+        const handleChannelRead = ({ channelId, userId }) => {
+            console.log('[ChannelSidebar] Channel marked as read:', channelId, userId);
+            if (userId === user._id) {
+                setUnreadCounts(prev => ({
+                    ...prev,
+                    [channelId]: 0
+                }));
+            }
+        };
+
+        socketManager.on("receiveMessage", handleNewMessage);
+        socketManager.on("channelMarkedAsRead", handleChannelRead);
+
+        return () => {
+            socketManager.off("receiveMessage", handleNewMessage);
+            socketManager.off("channelMarkedAsRead", handleChannelRead);
+        };
+    }, [user]);
 
     const handleCreateChannel = async () => {
         if (!newChannelName.trim()) {
@@ -183,6 +257,7 @@ const ChannelSidebar = ({
                     const isHovered = hoveredChannelId === channelId;
                     const isEditing = editingChannelId === channelId;
                     const isGeneral = channel.name?.toLowerCase() === 'general';
+                    const unreadCount = unreadCounts[channelId] || 0; // Get unread count
 
                     const itemStyle = {
                         ...ChannelSidebarStyle.channelItem,
@@ -194,7 +269,7 @@ const ChannelSidebar = ({
                     return (
                         <div
                             key={channelId}
-                            style={itemStyle}
+                            style={{ ...itemStyle, position: 'relative' }}
                             onMouseEnter={() => setHoveredChannelId(channelId)}
                             onMouseLeave={() => setHoveredChannelId(null)}
                         >
@@ -226,10 +301,34 @@ const ChannelSidebar = ({
                                         )}
                                     </div>
 
+                                    {/* Unread badge */}
+                                    {unreadCount > 0 && (
+                                        <span
+                                            style={{
+                                                position: 'absolute',
+                                                top: '50%',
+                                                right: isCollapsed ? '6px' : '32px',
+                                                transform: 'translateY(-50%)',
+                                                backgroundColor: '#dc3545',
+                                                color: 'white',
+                                                borderRadius: '10px',
+                                                padding: '2px 6px',
+                                                fontSize: '10px',
+                                                fontWeight: 'bold',
+                                                minWidth: '16px',
+                                                textAlign: 'center',
+                                                zIndex: 1
+                                            }}
+                                        >
+                                            {unreadCount > 9 ? '9+' : unreadCount}
+                                        </span>
+                                    )}
+
                                     {/* Tooltip for collapsed state */}
                                     {isCollapsed && isHovered && (
                                         <div style={ChannelSidebarStyle.tooltip}>
                                             {channel.name}
+                                            {unreadCount > 0 && ` (${unreadCount})`}
                                         </div>
                                     )}
 
