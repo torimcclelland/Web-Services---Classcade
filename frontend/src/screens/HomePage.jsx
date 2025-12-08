@@ -23,10 +23,14 @@ const HomePage = () => {
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [taskProject, setTaskProject] = useState(null);
   const [showEditProfile, setShowEditProfile] = useState(false);
-  const [editProfileTab, setEditProfileTab] = useState('personal');
+  const [editProfileTab, setEditProfileTab] = useState("personal");
   const [userData, setUserData] = useState(null);
   const [toast, setToast] = useState("");
   const [showToast, setShowToast] = useState(false);
+  const [projectAlerts, setProjectAlerts] = useState([]);
+  const [alertsLoading, setAlertsLoading] = useState(false);
+  const [expandedProjectId, setExpandedProjectId] = useState(null);
+  const [expandedProjectCards, setExpandedProjectCards] = useState([]);
 
   const { setSelectedProject } = useProject();
 
@@ -42,9 +46,13 @@ const HomePage = () => {
       if (!user?._id) return;
 
       const res = await api.get(`/api/project/user/${user._id}/details`);
-      setProjects(res.data || []);
+      const projectList = res.data || [];
+      setProjects(projectList);
+      return projectList;
     } catch (e) {
       console.error("Error fetching projects", e);
+      setProjects([]);
+      return [];
     }
   };
 
@@ -60,8 +68,95 @@ const HomePage = () => {
     }
   };
 
+  const fetchUpcomingAlerts = async (projectList) => {
+    if (!projectList?.length) {
+      setProjectAlerts([]);
+      setExpandedProjectId(null);
+      return;
+    }
+
+    setAlertsLoading(true);
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const projectsWithTasks = await Promise.all(
+        projectList.map(async (project) => {
+          try {
+            const res = await api.get(`/api/task/${project._id}`);
+            return { project, tasks: res.data || [] };
+          } catch (err) {
+            console.error("Error fetching tasks for project", project._id, err);
+            return { project, tasks: [] };
+          }
+        })
+      );
+
+      const alertGroups = projectsWithTasks.map(({ project, tasks }) => {
+        const alerts = tasks
+          .filter((task) => task.dueDate && task.status !== "Done")
+          .map((task) => {
+            const due = new Date(task.dueDate);
+            if (Number.isNaN(due.getTime())) return null;
+
+            const diffDays = Math.ceil(
+              (due.setHours(0, 0, 0, 0) - today) / (1000 * 60 * 60 * 24)
+            );
+
+            if (diffDays > 7) return null;
+
+            let dueLabel = `Due in ${diffDays} day${diffDays === 1 ? "" : "s"}`;
+            if (diffDays < 0) {
+              const daysOverdue = Math.abs(diffDays);
+              dueLabel = `${daysOverdue} day${
+                daysOverdue === 1 ? "" : "s"
+              } overdue`;
+            } else if (diffDays === 0) {
+              dueLabel = "Due today";
+            }
+
+            return {
+              key: `${project._id}-${task._id}`,
+              taskName: task.name,
+              dueDate: task.dueDate,
+              diffDays,
+              dueLabel,
+            };
+          })
+          .filter(Boolean)
+          .sort(
+            (a, b) =>
+              new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+          );
+
+        return {
+          projectId: project._id,
+          projectName: project.name,
+          alerts,
+        };
+      });
+
+      setProjectAlerts(alertGroups);
+
+      if (!expandedProjectId && alertGroups.length > 0) {
+        setExpandedProjectId(alertGroups[0].projectId);
+      }
+    } catch (error) {
+      console.error("Error building upcoming alerts", error);
+      setProjectAlerts([]);
+      setExpandedProjectId(null);
+    } finally {
+      setAlertsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchProjects();
+    const loadHomeData = async () => {
+      const projectList = await fetchProjects();
+      await fetchUpcomingAlerts(projectList);
+    };
+
+    loadHomeData();
     fetchUserInfo();
   }, []);
 
@@ -77,6 +172,14 @@ const HomePage = () => {
     navigate("/settings");
   };
 
+  const toggleProjectExpand = (projectId) => {
+    setExpandedProjectCards((prev) =>
+      prev.includes(projectId)
+        ? prev.filter((id) => id !== projectId)
+        : [...prev, projectId]
+    );
+  };
+
   const handleAddTask = (e, project) => {
     e.stopPropagation();
     setTaskProject(project);
@@ -88,6 +191,7 @@ const HomePage = () => {
     setShowAddTaskModal(false);
     setTaskProject(null);
     triggerToast("Task created successfully!");
+    fetchUpcomingAlerts(projects);
   };
 
   const handleLogout = () => {
@@ -99,7 +203,7 @@ const HomePage = () => {
 
   const fetchUserData = async (retryCount = 0) => {
     try {
-      const storedUser = localStorage.getItem('user');
+      const storedUser = localStorage.getItem("user");
       if (storedUser) {
         const user = JSON.parse(storedUser);
         const response = await api.get(`/api/user/${user._id}`);
@@ -107,39 +211,47 @@ const HomePage = () => {
         return true;
       }
     } catch (error) {
-      console.error(`Error fetching user data (attempt ${retryCount + 1}/3):`, error);
-      
+      console.error(
+        `Error fetching user data (attempt ${retryCount + 1}/3):`,
+        error
+      );
+
       if (retryCount < 2) {
-        await new Promise(resolve => setTimeout(resolve, 500 * (retryCount + 1)));
+        await new Promise((resolve) =>
+          setTimeout(resolve, 500 * (retryCount + 1))
+        );
         return fetchUserData(retryCount + 1);
       }
-      
-      console.error('Failed to fetch user data after 3 attempts');
+
+      console.error("Failed to fetch user data after 3 attempts");
       return false;
     }
   };
 
   const handleEditAccount = async () => {
-    setEditProfileTab('personal');
+    setEditProfileTab("personal");
     await fetchUserData();
     setShowEditProfile(true);
   };
 
   const handleCustomization = async () => {
-    setEditProfileTab('customization');
+    setEditProfileTab("customization");
     await fetchUserData();
     setShowEditProfile(true);
   };
 
   const handleSaveProfile = async (updates) => {
     try {
-      const storedUser = localStorage.getItem('user');
-      if (!storedUser) return { success: false, error: 'User not found' };
+      const storedUser = localStorage.getItem("user");
+      if (!storedUser) return { success: false, error: "User not found" };
 
       const user = JSON.parse(storedUser);
       const currentUserData = userData || JSON.parse(storedUser);
 
-      if (updates.firstName !== currentUserData.firstName || updates.lastName !== currentUserData.lastName) {
+      if (
+        updates.firstName !== currentUserData.firstName ||
+        updates.lastName !== currentUserData.lastName
+      ) {
         await api.put(`/api/user/${user._id}/updatename`, {
           firstName: updates.firstName,
           lastName: updates.lastName,
@@ -164,7 +276,7 @@ const HomePage = () => {
         });
       }
 
-      const customizationsChanged = 
+      const customizationsChanged =
         updates.selectedIcon !== currentUserData.selectedIcon ||
         updates.selectedBanner !== currentUserData.selectedBanner ||
         updates.selectedBackdrop !== currentUserData.selectedBackdrop;
@@ -178,15 +290,18 @@ const HomePage = () => {
       }
 
       const updatedUserResponse = await api.get(`/api/user/${user._id}`);
-      localStorage.setItem('user', JSON.stringify(updatedUserResponse.data));
+      localStorage.setItem("user", JSON.stringify(updatedUserResponse.data));
       setUserData(updatedUserResponse.data);
 
-      window.dispatchEvent(new Event('userUpdated'));
+      window.dispatchEvent(new Event("userUpdated"));
 
       return { success: true };
     } catch (error) {
-      console.error('Error saving profile:', error);
-      const errorMessage = error.response?.data?.error || error.message || 'Failed to update profile';
+      console.error("Error saving profile:", error);
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to update profile";
       return { success: false, error: errorMessage };
     }
   };
@@ -203,8 +318,8 @@ const HomePage = () => {
       return;
     }
 
-    // Otherwise just refresh the projects list
-    fetchProjects();
+    // Otherwise just refresh the projects list and alerts
+    fetchProjects().then(fetchUpcomingAlerts);
   };
 
   return (
@@ -241,8 +356,8 @@ const HomePage = () => {
         }}
       >
         {" "}
-        <ProfileCircle 
-          size={64} 
+        <ProfileCircle
+          size={64}
           onEditAccount={handleEditAccount}
           onCustomization={handleCustomization}
         />
@@ -266,8 +381,9 @@ const HomePage = () => {
             <div style={HomePageStyle.emptyStateIcon}>📋</div>
             <h2 style={HomePageStyle.emptyStateTitle}>No Projects Yet</h2>
             <p style={HomePageStyle.emptyStateDescription}>
-              Get started by creating a project! Projects help you organize tasks, 
-              collaborate with team members, and track progress all in one place.
+              Get started by creating a project! Projects help you organize
+              tasks, collaborate with team members, and track progress all in
+              one place.
             </p>
             <button
               style={{
@@ -300,77 +416,160 @@ const HomePage = () => {
               {projects.map((g, index) => (
                 <div
                   key={g._id || index}
-                  style={{
-                    ...HomePageStyle.card,
-                    backgroundColor: hoveredCard === index ? "#f5f5f5" : "#fff",
-                    transition: "background-color 0.2s ease",
-                  }}
-                  onClick={() => handleCardClick(g)}
-                  onMouseEnter={() => setHoveredCard(index)}
-                  onMouseLeave={() => setHoveredCard(null)}
+                  style={{ display: "flex", flexDirection: "column", gap: 6 }}
                 >
-                  <div style={HomePageStyle.cardLeft}>
-                    <div
-                      style={{
-                        ...HomePageStyle.badge,
-                        backgroundColor: hoveredCard === index ? "#f5f5f5" : "#fff",
-                        transition: "background-color 0.2s ease",
-                      }}
-                    >
-                      {index + 1}.
-                    </div>
-                    <div style={HomePageStyle.cardContent}>
-                      <div style={HomePageStyle.cardTitle}>{g.name}</div>
-                      <div style={HomePageStyle.cardMeta}>
-                        <div style={HomePageStyle.metaText}>
-                          Members: {g.members?.length || 0}
+                  <div
+                    style={{
+                      ...HomePageStyle.card,
+                      backgroundColor:
+                        hoveredCard === index ? "#f5f5f5" : "#fff",
+                      transition: "background-color 0.2s ease",
+                    }}
+                    onClick={() => handleCardClick(g)}
+                    onMouseEnter={() => setHoveredCard(index)}
+                    onMouseLeave={() => setHoveredCard(null)}
+                  >
+                    <div style={HomePageStyle.cardLeft}>
+                      <div
+                        style={{
+                          ...HomePageStyle.badge,
+                          backgroundColor:
+                            hoveredCard === index ? "#f5f5f5" : "#fff",
+                          transition: "background-color 0.2s ease",
+                        }}
+                      >
+                        {index + 1}.
+                      </div>
+                      <div style={HomePageStyle.cardContent}>
+                        <div style={HomePageStyle.cardTitle}>{g.name}</div>
+                        <div style={HomePageStyle.cardMeta}>
+                          <div style={HomePageStyle.metaText}>
+                            Members: {g.members?.length || 0}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                    <button
+                    <div
                       style={{
-                        padding: "8px 16px",
-                        backgroundColor: "#1e3a8a",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        fontSize: "0.9rem",
-                        fontWeight: "600",
-                        transition: "background-color 0.2s ease",
-                      }}
-                      onClick={(e) => handleAddTask(e, g)}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = "#1e40af"}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = "#1e3a8a"}
-                    >
-                      + Add Task
-                    </button>
-                    <button
-                      style={{
-                        padding: "8px",
-                        backgroundColor: "transparent",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor: "pointer",
                         display: "flex",
+                        gap: "8px",
                         alignItems: "center",
-                        justifyContent: "center",
-                        transition: "all 0.2s ease",
                       }}
-                      onClick={(e) => handleSettings(e, g)}
-                      onMouseEnter={(e) => {
-                        e.target.style.backgroundColor = "#f3f4f6";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.backgroundColor = "transparent";
-                      }}
-                      title="Project Settings"
                     >
-                      <img src={SettingsIcon} alt="Settings" style={{ width: "20px", height: "20px", opacity: 0.6 }} />
-                    </button>
+                      <button
+                        style={{
+                          padding: "8px 16px",
+                          backgroundColor: "#1e3a8a",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                          fontSize: "0.9rem",
+                          fontWeight: "600",
+                          transition: "background-color 0.2s ease",
+                        }}
+                        onClick={(e) => handleAddTask(e, g)}
+                        onMouseEnter={(e) =>
+                          (e.target.style.backgroundColor = "#1e40af")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.target.style.backgroundColor = "#1e3a8a")
+                        }
+                      >
+                        + Add Task
+                      </button>
+                      <button
+                        style={{
+                          padding: "8px",
+                          backgroundColor: "transparent",
+                          border: "none",
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          transition: "all 0.2s ease",
+                        }}
+                        onClick={(e) => handleSettings(e, g)}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = "#f3f4f6";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = "transparent";
+                        }}
+                        title="Project Settings"
+                      >
+                        <img
+                          src={SettingsIcon}
+                          alt="Settings"
+                          style={{
+                            width: "20px",
+                            height: "20px",
+                            opacity: 0.6,
+                          }}
+                        />
+                      </button>
+                      <button
+                        style={HomePageStyle.expandBtn}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleProjectExpand(g._id);
+                        }}
+                        title="Show due tasks"
+                      >
+                        {expandedProjectCards.includes(g._id) ? "▴" : "▾"}
+                      </button>
+                    </div>
                   </div>
+
+                  {expandedProjectCards.includes(g._id) && (
+                    <div style={HomePageStyle.cardExpand}>
+                      {projectAlerts.find((p) => p.projectId === g._id)?.alerts
+                        ?.length ? (
+                        projectAlerts
+                          .find((p) => p.projectId === g._id)
+                          .alerts.map((alert) => (
+                            <div
+                              key={alert.key}
+                              style={HomePageStyle.alertItem}
+                            >
+                              <div
+                                style={{
+                                  ...HomePageStyle.alertIcon,
+                                  backgroundColor:
+                                    alert.diffDays < 0 ? "#fee2e2" : "#e0f2fe",
+                                  color:
+                                    alert.diffDays < 0 ? "#b91c1c" : "#0f3e2d",
+                                }}
+                              >
+                                !
+                              </div>
+                              <div style={HomePageStyle.alertContent}>
+                                <div style={HomePageStyle.alertTask}>
+                                  {alert.taskName}
+                                </div>
+                              </div>
+                              <div
+                                style={{
+                                  ...HomePageStyle.alertDue,
+                                  color:
+                                    alert.diffDays < 0 ? "#b91c1c" : "#1e3a8a",
+                                }}
+                              >
+                                {alert.dueLabel}
+                                <div style={HomePageStyle.alertDate}>
+                                  {new Date(alert.dueDate).toLocaleDateString()}
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                      ) : (
+                        <div style={HomePageStyle.alertsEmpty}>
+                          No upcoming deadlines for this project.
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
