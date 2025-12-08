@@ -135,6 +135,26 @@ const StatsStyle = {
     "80%": { opacity: 1, transform: "translateY(-4px)" },
     "100%": { opacity: 0, transform: "translateY(-8px)" },
   },
+  emptyState: {
+    backgroundColor: "#fff",
+    padding: "3rem",
+    borderRadius: "12px",
+    boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+    textAlign: "center",
+    marginTop: "2rem",
+  },
+  
+  emptyTitle: {
+    fontSize: "1.5rem",
+    fontWeight: 700,
+    color: "#1f2937",
+    marginBottom: "1rem",
+  },
+  
+  emptyText: {
+    fontSize: "1rem",
+    color: "#4b5563",
+  },
+  
 };
-
 export default StatsStyle;

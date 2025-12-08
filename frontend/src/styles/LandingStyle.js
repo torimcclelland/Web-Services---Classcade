@@ -4,7 +4,7 @@ export const Container = styled.div`
   font-family: "Poppins", sans-serif;
   background: linear-gradient(135deg, #ddf9ea, #ddf9ea);
   color: #333;
-  height: 95vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;

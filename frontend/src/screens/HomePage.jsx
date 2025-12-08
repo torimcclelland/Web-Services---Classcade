@@ -187,6 +187,13 @@ const HomePage = () => {
     setShowAddTaskModal(true);
   };
 
+  const handleContactMembers = (e, project) => {
+    e.stopPropagation();
+    setSelectedProject(project);
+    localStorage.setItem("selectedProject", JSON.stringify(project));
+    navigate(`/messages/${project._id}`);
+  };
+
   const handleTaskSuccess = () => {
     setShowAddTaskModal(false);
     setTaskProject(null);
@@ -459,6 +466,34 @@ const HomePage = () => {
                       <button
                         style={{
                           padding: "8px 16px",
+                          backgroundColor: "#f3f4f6",
+                          color: "#0f172a",
+                          border: "1px solid #e5e7eb",
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                          fontSize: "0.9rem",
+                          fontWeight: "600",
+                          transition:
+                            "background-color 0.2s ease, border-color 0.2s ease",
+                          height: 38,
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                        onClick={(e) => handleContactMembers(e, g)}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = "#e5e7eb";
+                          e.target.style.borderColor = "#d1d5db";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = "#f3f4f6";
+                          e.target.style.borderColor = "#e5e7eb";
+                        }}
+                      >
+                        💬 Contact Members
+                      </button>
+                      <button
+                        style={{
+                          padding: "8px 16px",
                           backgroundColor: "#1e3a8a",
                           color: "white",
                           border: "none",
@@ -467,6 +502,9 @@ const HomePage = () => {
                           fontSize: "0.9rem",
                           fontWeight: "600",
                           transition: "background-color 0.2s ease",
+                          height: 38,
+                          display: "flex",
+                          alignItems: "center",
                         }}
                         onClick={(e) => handleAddTask(e, g)}
                         onMouseEnter={(e) =>
