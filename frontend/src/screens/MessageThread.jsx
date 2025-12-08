@@ -30,6 +30,9 @@ const MessageThread = () => {
     const fileInputRef = useRef(null);
     const MAX_ATTACHMENTS = 5;
 
+    const [searchQuery, setSearchQuery] = useState("");
+    const [showSearch, setShowSearch] = useState(false);
+
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
@@ -166,10 +169,40 @@ const MessageThread = () => {
         setActiveChannelId(channelId);
         setMessages([]);
         setAttachments([]);
+        setSearchQuery("");
+        setShowSearch(false);
         if (isMobile) {
             setIsSidebarCollapsed(true);
         }
     }, [activeChannelId, isMobile]);
+
+    const filterMessagesBySearch = (messageGroups) => {
+        if (!searchQuery.trim()) return messageGroups;
+
+        const query = searchQuery.toLowerCase();
+        return messageGroups.filter(item => {
+            if (item.type === 'date') return true;
+            const msg = item.data;
+            const contentMatch = msg.content?.toLowerCase().includes(query);
+            const senderMatch = msg.sender?.firstName?.toLowerCase().includes(query) ||
+                msg.sender?.lastName?.toLowerCase().includes(query);
+            const fileMatch = msg.attachments?.some(att =>
+                att.originalName?.toLowerCase().includes(query)
+            );
+            return contentMatch || senderMatch || fileMatch;
+        });
+    };
+
+    const highlightText = (text, query) => {
+        if (!query.trim() || !text) return text;
+
+        const parts = text.split(new RegExp(`(${query})`, 'gi'));
+        return parts.map((part, i) =>
+            part.toLowerCase() === query.toLowerCase() ?
+                <mark key={i} style={{ backgroundColor: '#fef08a', padding: '2px 0' }}>{part}</mark> :
+                part
+        );
+    };
 
     const handleFileSelect = async (e) => {
         const files = Array.from(e.target.files);
@@ -326,41 +359,186 @@ const MessageThread = () => {
                     <main style={MessageThreadStyle.main}>
                         <div style={{
                             ...MessageThreadStyle.header,
-                            ...(isMobile && { padding: "0.75rem 1rem", minHeight: '60px', height: 'auto' })
+                            padding: isMobile ? "1rem 1rem" : "1rem 1.5rem",
+                            minHeight: 'auto',
+                            height: 'auto',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: showSearch ? '0.75rem' : '0',
+                            alignItems: 'stretch',
+                            boxSizing: 'border-box'
                         }}>
-                            {isMobile && (
+                            {/* First row: Title and buttons - ALWAYS SAME HEIGHT */}
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                width: '100%',
+                                gap: '0.75rem',
+                                minHeight: '40px'
+                            }}>
+                                <div style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    flex: 1,
+                                    minWidth: 0,
+                                    overflow: 'hidden'
+                                }}>
+                                    {isMobile && (
+                                        <button
+                                            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                                            style={{
+                                                background: 'none',
+                                                border: '1px solid #1e3a8a',
+                                                borderRadius: '5px',
+                                                fontWeight: 700,
+                                                fontSize: '0.875rem',
+                                                cursor: 'pointer',
+                                                padding: '0.5rem 0.75rem',
+                                                color: '#1e3a8a',
+                                                flexShrink: 0,
+                                                whiteSpace: 'nowrap'
+                                            }}
+                                        >
+                                            MENU
+                                        </button>
+                                    )}
+                                    {project && (
+                                        <div style={{
+                                            flex: 1,
+                                            minWidth: 0,
+                                            overflow: 'hidden'
+                                        }}>
+                                            <div style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '8px'
+                                            }}>
+                                                <h3 style={{
+                                                    ...MessageThreadStyle.chatTitle,
+                                                    fontSize: isMobile ? '1rem' : '1.25rem',
+                                                    margin: 0,
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    whiteSpace: 'nowrap',
+                                                    maxWidth: '100%'
+                                                }}>
+                                                    {project.name}
+                                                </h3>
+                                                {activeChannel && (
+                                                    <span style={{
+                                                        ...MessageThreadStyle.channelBadge,
+                                                        flexShrink: 0,
+                                                        whiteSpace: 'nowrap'
+                                                    }}>
+                                                        #{activeChannel.name}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
                                 <button
-                                    onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                                    onClick={() => {
+                                        setShowSearch(!showSearch);
+                                        if (showSearch) {
+                                            setSearchQuery("");
+                                        }
+                                    }}
                                     style={{
-                                        background: 'none',
-                                        border: '1px solid #1e3a8a',
-                                        borderRadius: '5px',
-                                        fontWeight: 700,
-                                        fontSize: '0.9375rem',
+                                        background: showSearch ? '#1e3a8a' : 'white',
+                                        border: '1px solid #d1d5db',
+                                        borderRadius: '6px',
+                                        padding: '8px 12px',
                                         cursor: 'pointer',
-                                        padding: '0.5rem 0.75rem',
-                                        color: '#1e3a8a',
-                                        marginRight: '0.5rem'
+                                        color: showSearch ? 'white' : '#1e3a8a',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        fontSize: '0.875rem',
+                                        fontWeight: '500',
+                                        transition: 'all 0.2s',
+                                        flexShrink: 0,
+                                        whiteSpace: 'nowrap'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (!showSearch) {
+                                            e.currentTarget.style.backgroundColor = '#f3f4f6';
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (!showSearch) {
+                                            e.currentTarget.style.backgroundColor = 'white';
+                                        }
                                     }}
                                 >
-                                    MENU
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
+                                    </svg>
+                                    {!isMobile && <span>Search</span>}
                                 </button>
-                            )}
-                            {project && (
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                        <h3 style={{
-                                            ...MessageThreadStyle.chatTitle,
-                                            ...(isMobile && { fontSize: '1rem' })
+                            </div>
+
+                            {/* Second row: Search bar (only when active) */}
+                            {showSearch && (
+                                <div style={{
+                                    width: '100%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    boxSizing: 'border-box'
+                                }}>
+                                    <input
+                                        type="text"
+                                        placeholder="Search messages..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        autoFocus
+                                        style={{
+                                            flex: 1,
+                                            padding: '10px 12px',
+                                            border: '1px solid #d1d5db',
+                                            borderRadius: '6px',
+                                            fontSize: '0.875rem',
+                                            outline: 'none',
+                                            boxSizing: 'border-box',
+                                            minWidth: 0
+                                        }}
+                                        onFocus={(e) => e.target.style.borderColor = '#1e3a8a'}
+                                        onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                                    />
+                                    {searchQuery && (
+                                        <span style={{
+                                            fontSize: '0.75rem',
+                                            color: '#6b7280',
+                                            whiteSpace: 'nowrap',
+                                            flexShrink: 0
                                         }}>
-                                            {project.name}
-                                        </h3>
-                                        {activeChannel && (
-                                            <span style={MessageThreadStyle.channelBadge}>
-                                                #{activeChannel.name}
-                                            </span>
-                                        )}
-                                    </div>
+                                            {filterMessagesBySearch(groupMessagesByDate(messages)).filter(i => i.type === 'message').length} results
+                                        </span>
+                                    )}
+                                    <button
+                                        onClick={() => {
+                                            setSearchQuery("");
+                                            setShowSearch(false);
+                                        }}
+                                        style={{
+                                            background: '#fee2e2',
+                                            border: '1px solid #fecaca',
+                                            borderRadius: '6px',
+                                            padding: '8px 12px',
+                                            cursor: 'pointer',
+                                            color: '#dc2626',
+                                            fontSize: '0.875rem',
+                                            fontWeight: '500',
+                                            whiteSpace: 'nowrap',
+                                            flexShrink: 0
+                                        }}
+                                    >
+                                        Clear
+                                    </button>
                                 </div>
                             )}
                         </div>
@@ -380,7 +558,7 @@ const MessageThread = () => {
                                     No messages yet. Start the conversation!
                                 </div>
                             ) : (
-                                groupMessagesByDate(messages).map((item, index) => {
+                                filterMessagesBySearch(groupMessagesByDate(messages)).map((item, index) => {
                                     if (item.type === 'date') {
                                         return (
                                             <div key={`date-${index}`} style={MessageThreadStyle.dateSeparator}>
@@ -429,12 +607,12 @@ const MessageThread = () => {
                                                 }}
                                             >
                                                 <strong style={MessageThreadStyle.messageAuthor}>
-                                                    {senderName}
+                                                    {highlightText(senderName, searchQuery)}
                                                 </strong>
 
                                                 {msg.content && (
                                                     <span style={MessageThreadStyle.messageContent}>
-                                                        {msg.content}
+                                                        {highlightText(msg.content, searchQuery)}
                                                     </span>
                                                 )}
 
@@ -474,7 +652,7 @@ const MessageThread = () => {
                                                                     whiteSpace: 'nowrap',
                                                                     marginRight: '8px'
                                                                 }}>
-                                                                    {file.originalName}
+                                                                    {highlightText(file.originalName, searchQuery)}
                                                                 </span>
                                                                 <span style={{
                                                                     fontSize: '0.75rem',

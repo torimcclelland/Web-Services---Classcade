@@ -24,6 +24,11 @@ const ChannelSidebar = ({
 
     const MAX_CHANNEL_NAME_LENGTH = 50;
 
+    const validateChannelName = (name) => {
+        const validPattern = /^[a-zA-Z0-9_-]+$/;
+        return validPattern.test(name);
+    };
+
     const fetchUnreadCounts = async () => {
         if (!user?._id || channels.length === 0) return;
 
@@ -48,7 +53,6 @@ const ChannelSidebar = ({
                 counts[channelId] = unread;
             });
 
-            console.log('[ChannelSidebar] Unread counts:', counts);
             setUnreadCounts(counts);
         } catch (err) {
             console.error("Error fetching unread counts:", err);
@@ -65,7 +69,6 @@ const ChannelSidebar = ({
         socketManager.connect();
 
         const handleNewMessage = (msg) => {
-            console.log('[ChannelSidebar] Received message:', msg);
             const senderId = msg.sender?._id || msg.sender;
             if (senderId !== user._id && msg.channelId) {
                 setUnreadCounts(prev => ({
@@ -76,7 +79,6 @@ const ChannelSidebar = ({
         };
 
         const handleChannelRead = ({ channelId, userId }) => {
-            console.log('[ChannelSidebar] Channel marked as read:', channelId, userId);
             if (userId === user._id) {
                 setUnreadCounts(prev => ({
                     ...prev,
@@ -97,6 +99,11 @@ const ChannelSidebar = ({
     const handleCreateChannel = async () => {
         if (!newChannelName.trim()) {
             alert("Channel name cannot be empty");
+            return;
+        }
+
+        if (!validateChannelName(newChannelName.trim())) {
+            alert("Channel name can only contain letters, numbers, hyphens, and underscores (no spaces or special characters)");
             return;
         }
 
@@ -128,6 +135,11 @@ const ChannelSidebar = ({
             return;
         }
 
+        if (!validateChannelName(newName.trim())) {
+            alert("Channel name can only contain letters, numbers, hyphens, and underscores (no spaces or special characters)");
+            return;
+        }
+
         if (newName.trim().length > MAX_CHANNEL_NAME_LENGTH) {
             alert(`Channel name must be ${MAX_CHANNEL_NAME_LENGTH} characters or less`);
             return;
@@ -151,36 +163,25 @@ const ChannelSidebar = ({
     };
 
     const handleDeleteChannel = async (channelId) => {
-        console.log('[ChannelSidebar] handleDeleteChannel called with ID:', channelId);
-
         const channel = channels.find(c => (c.id || c._id) === channelId);
         const channelName = channel?.name;
 
-        console.log('[ChannelSidebar] Found channel:', channel);
-        console.log('[ChannelSidebar] Channel name:', channelName);
-
         if (channelName?.toLowerCase() === 'general') {
-            console.log('[ChannelSidebar] Cannot delete general channel');
             alert("Cannot delete the general channel!");
             return;
         }
 
         if (!window.confirm(`Delete #${channelName}? All messages will be permanently lost.`)) {
-            console.log('[ChannelSidebar] User cancelled delete');
             return;
         }
 
         try {
-            console.log('[ChannelSidebar] Sending DELETE request to:', `/api/channels/${channelId}`);
-            const response = await api.delete(`/api/channels/${channelId}`);
-            console.log('[ChannelSidebar] Delete response:', response.data);
+            await api.delete(`/api/channels/${channelId}`);
 
             const filtered = channels.filter(c => (c.id || c._id) !== channelId);
-            console.log('[ChannelSidebar] Channels after filter:', filtered);
             onChannelsUpdate(filtered);
 
             if (activeChannelId === channelId) {
-                console.log('[ChannelSidebar] Deleted channel was active, switching channel');
                 const generalChannel = filtered.find(c => c.name.toLowerCase() === 'general');
                 if (generalChannel) {
                     onChannelSelect(generalChannel.id || generalChannel._id);
@@ -191,8 +192,7 @@ const ChannelSidebar = ({
 
             setOpenMenuId(null);
         } catch (err) {
-            console.error('[ChannelSidebar] Error deleting channel:', err);
-            console.error('[ChannelSidebar] Error response:', err.response?.data);
+            console.error("Error deleting channel:", err);
             alert("Failed to delete channel: " + (err.response?.data?.error || err.message));
         }
     };
@@ -204,7 +204,6 @@ const ChannelSidebar = ({
 
     return (
         <div style={sidebarStyle}>
-            {/* Header */}
             <div style={ChannelSidebarStyle.header}>
                 {!isCollapsed ? (
                     <>
@@ -243,7 +242,6 @@ const ChannelSidebar = ({
                 )}
             </div>
 
-            {/* Channel list */}
             <div style={ChannelSidebarStyle.channelList}>
                 {channels.length === 0 && !isCreating && !isCollapsed && (
                     <div style={ChannelSidebarStyle.emptyState}>
@@ -257,7 +255,7 @@ const ChannelSidebar = ({
                     const isHovered = hoveredChannelId === channelId;
                     const isEditing = editingChannelId === channelId;
                     const isGeneral = channel.name?.toLowerCase() === 'general';
-                    const unreadCount = unreadCounts[channelId] || 0; // Get unread count
+                    const unreadCount = unreadCounts[channelId] || 0;
 
                     const itemStyle = {
                         ...ChannelSidebarStyle.channelItem,
@@ -301,7 +299,6 @@ const ChannelSidebar = ({
                                         )}
                                     </div>
 
-                                    {/* Unread badge */}
                                     {unreadCount > 0 && (
                                         <span
                                             style={{
@@ -324,7 +321,6 @@ const ChannelSidebar = ({
                                         </span>
                                     )}
 
-                                    {/* Tooltip for collapsed state */}
                                     {isCollapsed && isHovered && (
                                         <div style={ChannelSidebarStyle.tooltip}>
                                             {channel.name}
@@ -332,13 +328,11 @@ const ChannelSidebar = ({
                                         </div>
                                     )}
 
-                                    {/* Channel menu - only for non-general channels */}
                                     {!isGeneral && !isCollapsed && (
                                         <div style={{ position: 'relative' }}>
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    console.log('[ChannelSidebar] Menu button clicked for channel:', channelId);
                                                     setOpenMenuId(openMenuId === channelId ? null : channelId);
                                                 }}
                                                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e5e7eb'}
@@ -372,7 +366,6 @@ const ChannelSidebar = ({
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                console.log('[ChannelSidebar] Rename clicked for channel:', channelId);
                                                                 setEditingChannelId(channelId);
                                                                 setEditingName(channel.name);
                                                                 setOpenMenuId(null);
@@ -386,7 +379,6 @@ const ChannelSidebar = ({
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                console.log('[ChannelSidebar] Delete button clicked for channel:', channelId);
                                                                 handleDeleteChannel(channelId);
                                                             }}
                                                             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'}
@@ -410,7 +402,6 @@ const ChannelSidebar = ({
                 })}
             </div>
 
-            {/* Create channel section */}
             {isCreating && !isCollapsed && (
                 <div style={ChannelSidebarStyle.createSection}>
                     <div style={{ position: 'relative' }}>
