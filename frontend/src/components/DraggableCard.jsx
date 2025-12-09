@@ -42,6 +42,13 @@ const DraggableCard = ({ task, onEdit, memberLookup }) => {
     return config[priority] || config.Medium;
   }, [task.priority]);
 
+  const formatDueDate = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toLocaleDateString(undefined, { timeZone: "UTC" });
+  };
+
   const style = {
     transform: transform
       ? `translate(${transform.x}px, ${transform.y}px)`
@@ -186,7 +193,7 @@ const DraggableCard = ({ task, onEdit, memberLookup }) => {
             margin: "0.25rem 0 0 0",
           }}
         >
-          Due: {new Date(task.dueDate).toLocaleDateString()}
+          Due: {formatDueDate(task.dueDate)}
         </p>
       )}
     </div>
