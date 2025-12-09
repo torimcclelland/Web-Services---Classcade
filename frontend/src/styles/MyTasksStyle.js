@@ -27,10 +27,10 @@ const MyTasksStyle = {
     alignItems: "center",
     flexWrap: "wrap",
     gap: "1rem",
-    marginTop: "-1.5rem",
+    marginTop: "-1rem",
   },
   headerShift: {
-    marginTop: "-1.5rem",
+    marginTop: "0rem",
     display: "flex",
     alignItems: "center",
     gap: 8,

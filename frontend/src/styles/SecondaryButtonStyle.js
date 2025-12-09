@@ -25,6 +25,7 @@ export const SecondaryButtonStyle = {
     WebkitFontSmoothing: 'antialiased',
     MozOsxFontSmoothing: 'grayscale',
     backgroundClip: 'padding-box',
+    minWidth: '125px',
   },
 
   secondaryButtonHover: {
