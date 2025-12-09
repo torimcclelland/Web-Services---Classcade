@@ -80,6 +80,14 @@
   margin-bottom: 0.5rem;
   max-height: 200px;
   overflow-y: auto;
+  background: linear-gradient(#fff, #fff), linear-gradient(#fff, #fff),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0));
+  background-repeat: no-repeat;
+  background-size: 100% 100%, 100% 12px, 100% 12px;
+  background-position: 0 0, 0 0, 0 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 12px;
 }
 
 .member-list li {
