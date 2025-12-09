@@ -32,7 +32,7 @@ const TopNavBar = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState(() => {
     // Initialize from localStorage cache
-    const cached = localStorage.getItem('userProjects');
+    const cached = localStorage.getItem("userProjects");
     return cached ? JSON.parse(cached) : [];
   });
   const [bannerColor, setBannerColor] = useState(() => {
@@ -58,7 +58,7 @@ const TopNavBar = () => {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [successMessageText, setSuccessMessageText] = useState("");
   const [showEditProfile, setShowEditProfile] = useState(false);
-  const [editProfileTab, setEditProfileTab] = useState('personal');
+  const [editProfileTab, setEditProfileTab] = useState("personal");
   const [userData, setUserData] = useState(null);
 
   const { selectedProject, setSelectedProject } = useProject();
@@ -81,7 +81,7 @@ const TopNavBar = () => {
 
   const fetchUserData = async (retryCount = 0) => {
     try {
-      const storedUser = localStorage.getItem('user');
+      const storedUser = localStorage.getItem("user");
       if (storedUser) {
         const user = JSON.parse(storedUser);
         const response = await api.get(`/api/user/${user._id}`);
@@ -89,30 +89,35 @@ const TopNavBar = () => {
         return true;
       }
     } catch (error) {
-      console.error(`Error fetching user data (attempt ${retryCount + 1}/3):`, error);
-      
+      console.error(
+        `Error fetching user data (attempt ${retryCount + 1}/3):`,
+        error
+      );
+
       // Retry up to 3 times
       if (retryCount < 2) {
         // Wait a bit before retrying (exponential backoff: 500ms, 1000ms)
-        await new Promise(resolve => setTimeout(resolve, 500 * (retryCount + 1)));
+        await new Promise((resolve) =>
+          setTimeout(resolve, 500 * (retryCount + 1))
+        );
         return fetchUserData(retryCount + 1);
       }
-      
+
       // After 3 attempts, give up and leave fields blank
-      console.error('Failed to fetch user data after 3 attempts');
+      console.error("Failed to fetch user data after 3 attempts");
       return false;
     }
   };
 
   const handleEditAccount = async () => {
-    setEditProfileTab('personal');
+    setEditProfileTab("personal");
     // Always fetch fresh user data when opening the modal
     await fetchUserData();
     setShowEditProfile(true);
   };
 
   const handleCustomization = async () => {
-    setEditProfileTab('customization');
+    setEditProfileTab("customization");
     // Always fetch fresh user data when opening the modal
     await fetchUserData();
     setShowEditProfile(true);
@@ -120,14 +125,17 @@ const TopNavBar = () => {
 
   const handleSaveProfile = async (updates) => {
     try {
-      const storedUser = localStorage.getItem('user');
-      if (!storedUser) return { success: false, error: 'User not found' };
+      const storedUser = localStorage.getItem("user");
+      if (!storedUser) return { success: false, error: "User not found" };
 
       const user = JSON.parse(storedUser);
       const currentUserData = userData || JSON.parse(storedUser);
 
       // Only update if values have changed
-      if (updates.firstName !== currentUserData.firstName || updates.lastName !== currentUserData.lastName) {
+      if (
+        updates.firstName !== currentUserData.firstName ||
+        updates.lastName !== currentUserData.lastName
+      ) {
         await api.put(`/api/user/${user._id}/updatename`, {
           firstName: updates.firstName,
           lastName: updates.lastName,
@@ -153,7 +161,7 @@ const TopNavBar = () => {
       }
 
       // Update selected customizations (only if changed)
-      const customizationsChanged = 
+      const customizationsChanged =
         updates.selectedIcon !== currentUserData.selectedIcon ||
         updates.selectedBanner !== currentUserData.selectedBanner ||
         updates.selectedBackdrop !== currentUserData.selectedBackdrop;
@@ -168,16 +176,19 @@ const TopNavBar = () => {
 
       // Fetch updated user data from backend
       const updatedUserResponse = await api.get(`/api/user/${user._id}`);
-      localStorage.setItem('user', JSON.stringify(updatedUserResponse.data));
+      localStorage.setItem("user", JSON.stringify(updatedUserResponse.data));
       setUserData(updatedUserResponse.data);
 
       // Dispatch event to notify other components
-      window.dispatchEvent(new Event('userUpdated'));
+      window.dispatchEvent(new Event("userUpdated"));
 
       return { success: true };
     } catch (error) {
-      console.error('Error saving profile:', error);
-      const errorMessage = error.response?.data?.error || error.message || 'Failed to update profile';
+      console.error("Error saving profile:", error);
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to update profile";
       return { success: false, error: errorMessage };
     }
   };
@@ -185,23 +196,19 @@ const TopNavBar = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       if (!user?._id) return;
-      
-      // Check if we already have cached projects
-      const cached = localStorage.getItem('userProjects');
-      const cacheTimestamp = localStorage.getItem('userProjectsTimestamp');
-      const now = Date.now();
-      
-      // Use cache if it's less than 5 minutes old
-      if (cached && cacheTimestamp && (now - parseInt(cacheTimestamp)) < 300000) {
-        return; // Use existing cached data
-      }
-      
+
       try {
-        const res = await api.get(`/api/project/user/${user._id}`);
+        const res = await api.get(`/api/project/user/${user._id}/details`);
         setProjects(res.data);
         // Cache the projects
-        localStorage.setItem('userProjects', JSON.stringify(res.data));
-        localStorage.setItem('userProjectsTimestamp', now.toString());
+        try {
+          localStorage.setItem("userProjects", JSON.stringify(res.data));
+          localStorage.setItem("userProjectsTimestamp", Date.now().toString());
+        } catch (e) {
+          console.warn("Failed to cache projects:", e);
+          localStorage.removeItem("userProjects");
+          localStorage.removeItem("userProjectsTimestamp");
+        }
       } catch (err) {
         console.error("Error fetching user projects:", err);
       }
@@ -213,13 +220,25 @@ const TopNavBar = () => {
     // Listen for user updates and project changes
     const handleProjectUpdate = () => {
       // Invalidate cache and refetch
-      localStorage.removeItem('userProjectsTimestamp');
+      localStorage.removeItem("userProjectsTimestamp");
       if (user?._id) {
-        api.get(`/api/project/user/${user._id}`).then(res => {
-          setProjects(res.data);
-          localStorage.setItem('userProjects', JSON.stringify(res.data));
-          localStorage.setItem('userProjectsTimestamp', Date.now().toString());
-        }).catch(err => console.error("Error fetching projects:", err));
+        api
+          .get(`/api/project/user/${user._id}/details`)
+          .then((res) => {
+            setProjects(res.data);
+            try {
+              localStorage.setItem("userProjects", JSON.stringify(res.data));
+              localStorage.setItem(
+                "userProjectsTimestamp",
+                Date.now().toString()
+              );
+            } catch (e) {
+              console.warn("Failed to cache projects:", e);
+              localStorage.removeItem("userProjects");
+              localStorage.removeItem("userProjectsTimestamp");
+            }
+          })
+          .catch((err) => console.error("Error fetching projects:", err));
       }
     };
 
@@ -237,22 +256,31 @@ const TopNavBar = () => {
   const goToHome = () => navigate("/home");
 
   const handleProjectCreated = async (createdProject) => {
-    localStorage.removeItem('userProjectsTimestamp');
+    localStorage.removeItem("userProjectsTimestamp");
     const project = createdProject?.project || createdProject;
 
     if (project && project._id) {
       if (user?._id) {
         try {
-          const res = await api.get(`/api/project/user/${user._id}`);
+          const res = await api.get(`/api/project/user/${user._id}/details`);
           setProjects(res.data);
-          localStorage.setItem('userProjects', JSON.stringify(res.data));
-          localStorage.setItem('userProjectsTimestamp', Date.now().toString());
-          window.dispatchEvent(new Event('projectsUpdated'));
+          try {
+            localStorage.setItem("userProjects", JSON.stringify(res.data));
+            localStorage.setItem(
+              "userProjectsTimestamp",
+              Date.now().toString()
+            );
+          } catch (e) {
+            console.warn("Failed to cache projects:", e);
+            localStorage.removeItem("userProjects");
+            localStorage.removeItem("userProjectsTimestamp");
+          }
+          window.dispatchEvent(new Event("projectsUpdated"));
         } catch (err) {
           console.error("Error fetching user projects:", err);
         }
       }
-      
+
       setSelectedProject(project);
       try {
         localStorage.setItem("selectedProject", JSON.stringify(project));
@@ -265,16 +293,43 @@ const TopNavBar = () => {
     // Otherwise refresh the projects list
     if (!user?._id) return;
     try {
-      const res = await api.get(`/api/project/user/${user._id}`);
+      const res = await api.get(`/api/project/user/${user._id}/details`);
       setProjects(res.data);
       // Update cache
-      localStorage.setItem('userProjects', JSON.stringify(res.data));
-      localStorage.setItem('userProjectsTimestamp', Date.now().toString());
+      try {
+        localStorage.setItem("userProjects", JSON.stringify(res.data));
+        localStorage.setItem("userProjectsTimestamp", Date.now().toString());
+      } catch (e) {
+        console.warn("Failed to cache projects:", e);
+        localStorage.removeItem("userProjects");
+        localStorage.removeItem("userProjectsTimestamp");
+      }
       // Notify other components
-      window.dispatchEvent(new Event('projectsUpdated'));
+      window.dispatchEvent(new Event("projectsUpdated"));
     } catch (err) {
       console.error("Error fetching user projects:", err);
     }
+  };
+
+  const getDueDot = (project) => {
+    if (!project?.dueDate) return { color: "#d1d5db", title: "No due date" };
+    const due = new Date(project.dueDate);
+    if (Number.isNaN(due.getTime()))
+      return { color: "#d1d5db", title: "No due date" };
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) return { color: "#dc2626", title: "Overdue" };
+    if (diffDays <= 3)
+      return {
+        color: "#dc2626",
+        title: `Due in ${diffDays} day${diffDays === 1 ? "" : "s"}`,
+      };
+    if (diffDays <= 7)
+      return { color: "#f59e0b", title: `Due in ${diffDays} days` };
+    return { color: "#16a34a", title: `Due in ${diffDays} days` };
   };
 
   const handleSelectProject = async (project) => {
@@ -325,13 +380,19 @@ const TopNavBar = () => {
       }
 
       // Refresh projects list
-      const res = await api.get(`/api/project/user/${user._id}`);
+      const res = await api.get(`/api/project/user/${user._id}/details`);
       setProjects(res.data);
       // Update cache
-      localStorage.setItem('userProjects', JSON.stringify(res.data));
-      localStorage.setItem('userProjectsTimestamp', Date.now().toString());
+      try {
+        localStorage.setItem("userProjects", JSON.stringify(res.data));
+        localStorage.setItem("userProjectsTimestamp", Date.now().toString());
+      } catch (e) {
+        console.warn("Failed to cache projects:", e);
+        localStorage.removeItem("userProjects");
+        localStorage.removeItem("userProjectsTimestamp");
+      }
       // Notify other components
-      window.dispatchEvent(new Event('projectsUpdated'));
+      window.dispatchEvent(new Event("projectsUpdated"));
 
       // If the project being left is currently selected, clear selection
       if (selectedProject?._id === projectToLeave._id) {
@@ -402,6 +463,7 @@ const TopNavBar = () => {
             const isActive = selectedProject?._id === proj._id;
             const activeTabColor = darkenColor(bannerColor, 25);
             const isHovered = hoveredTab === proj._id;
+            const dueDot = getDueDot(proj);
 
             return (
               <div
@@ -424,7 +486,25 @@ const TopNavBar = () => {
                 onMouseLeave={() => setHoveredTab(null)}
                 onClick={() => handleSelectProject(proj)}
               >
-                <span>{proj.name}</span>
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      backgroundColor: dueDot.color,
+                      display: "inline-block",
+                    }}
+                    title={dueDot.title}
+                  />
+                  {proj.name}
+                </span>
                 <button
                   style={
                     isActive
@@ -462,13 +542,13 @@ const TopNavBar = () => {
             <FaPlus size={20} />
           </button>
         </div>
-                <div style={TopNavBarStyle.profileContainer}>
-                  <ProfileCircle 
-                    size={40} 
-                    onEditAccount={handleEditAccount}
-                    onCustomization={handleCustomization}
-                  />
-                </div>
+        <div style={TopNavBarStyle.profileContainer}>
+          <ProfileCircle
+            size={40}
+            onEditAccount={handleEditAccount}
+            onCustomization={handleCustomization}
+          />
+        </div>
       </div>
 
       <AddNewProject
