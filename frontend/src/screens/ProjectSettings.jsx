@@ -240,36 +240,49 @@ const ProjectSettings = () => {
     <MainLayout showSidebar={true}>
       {showToast && <div className="toast show">{toast}</div>}
 
-      <h2>Project Settings</h2>
+      <h2 className="settings-title">Project Settings</h2>
 
       <div className="settings-grid">
-        <div className="settings-panel">
-          <label>Project Name</label>
-          <input
-            value={name}
-            maxLength={20}
-            onChange={(e) => setName(e.target.value)}
-          />
+        <div className="settings-column">
+          <div className="settings-panel details-panel">
+            <h3 className="panel-heading">Details</h3>
+            <label>Project Name</label>
+            <input
+              value={name}
+              maxLength={20}
+              onChange={(e) => setName(e.target.value)}
+            />
 
-          <label>Due Date</label>
-          <input
-            type="date"
-            value={dueDate}
-            min={today}
-            onChange={(e) => setDueDate(e.target.value)}
-          />
+            <label>Due Date</label>
+            <input
+              type="date"
+              value={dueDate}
+              min={today}
+              onChange={(e) => setDueDate(e.target.value)}
+            />
 
-          <div className="settings-button-row">
-            <PrimaryButton text="Update Project" onClick={handleUpdate} />
+            <div className="settings-button-row">
+              <PrimaryButton text="Update Project" onClick={handleUpdate} />
+            </div>
+          </div>
+
+          <div className="settings-panel danger-panel delete-panel">
+          <h3 className="panel-heading danger-heading">Delete Project</h3>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
+            <p className="danger-text" style={{ margin: 0 }}>
+              Permanently remove this project, its tasks, and member access. This action cannot be undone.
+            </p>
             <SecondaryButton
               text="Delete Project"
               onClick={() => setConfirmDelete(true)}
+              style={{ backgroundColor: "#dc2626", color: "#fff", border: "none" }}
             />
           </div>
         </div>
+        </div>
 
-        <div className="settings-panel">
-          <h3>Members</h3>
+        <div className="settings-panel members-panel">
+          <h3 className="panel-heading">Members</h3>
 
           <ul className="member-list">
             {members.map((m) => (
