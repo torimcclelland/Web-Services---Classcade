@@ -246,14 +246,7 @@ const MyTasks = () => {
           <div style={MyTasksStyle.header}>
             <h2>Tasks ({selectedProject?.name})</h2>
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                flexWrap: "wrap",
-              }}
-            >
+            <div style={MyTasksStyle.headerShift}>
               {[
                 { key: "all", label: "All tasks" },
                 { key: "pastDue", label: "Past due" },

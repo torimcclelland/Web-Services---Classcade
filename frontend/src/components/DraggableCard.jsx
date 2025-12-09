@@ -55,12 +55,12 @@ const DraggableCard = ({ task, onEdit, memberLookup }) => {
       : undefined,
     opacity: isDragging ? 0.8 : 1,
     backgroundColor: "#fff",
-    padding: "0.5rem 0.75rem",
-    borderRadius: "8px",
-    marginBottom: "0.75rem",
+    padding: "0.4rem 0.5rem",
+    borderRadius: "6px",
+    marginBottom: "0.4rem",
     boxShadow: isDragging
       ? "0 8px 16px rgba(0,0,0,0.2)"
-      : "0 2px 4px rgba(0,0,0,0.1)",
+      : "0 1px 3px rgba(0,0,0,0.08)",
     border: "1px solid #e0e0e0",
     cursor: isDragging ? "grabbing" : "grab",
     position: isDragging ? "fixed" : "relative",
@@ -92,7 +92,7 @@ const DraggableCard = ({ task, onEdit, memberLookup }) => {
         <h4
           style={{
             fontWeight: 600,
-            fontSize: "0.95rem",
+            fontSize: "0.875rem",
             margin: 0,
             overflow: "hidden",
             textOverflow: "ellipsis",
@@ -133,7 +133,7 @@ const DraggableCard = ({ task, onEdit, memberLookup }) => {
 
       <p
         style={{
-          fontSize: "0.85rem",
+          fontSize: "0.8rem",
           marginBottom: "0.25rem",
           margin: 0,
           overflow: "hidden",
@@ -149,12 +149,12 @@ const DraggableCard = ({ task, onEdit, memberLookup }) => {
       </p>
       <p
         style={{
-          fontSize: "0.75rem",
+          fontSize: "0.7rem",
           color: "#4b5563",
-          margin: "0.25rem 0",
+          margin: "0.2rem 0",
           display: "flex",
           alignItems: "center",
-          gap: 6,
+          gap: 4,
         }}
       >
         <span style={{ fontWeight: 600, color: "#111827" }}>Assigned To:</span>{" "}
@@ -162,40 +162,49 @@ const DraggableCard = ({ task, onEdit, memberLookup }) => {
       </p>
       <div
         style={{
-          display: "inline-flex",
+          display: "flex",
           alignItems: "center",
-          gap: 6,
-          padding: "4px 8px",
-          borderRadius: 8,
-          backgroundColor: priorityInfo.bg,
-          color: priorityInfo.color,
-          fontSize: "0.75rem",
-          fontWeight: 700,
-          margin: "0.25rem 0",
+          gap: "0.5rem",
+          margin: "0.2rem 0 0 0",
         }}
       >
-        <span
+        {task.dueDate && (
+          <p
+            style={{
+              fontSize: "0.7rem",
+              color: "#888",
+              margin: 0,
+            }}
+          >
+            Due: {formatDueDate(task.dueDate)}
+          </p>
+        )}
+        <div
           style={{
-            width: 8,
-            height: 8,
-            borderRadius: "50%",
-            backgroundColor: priorityInfo.color,
-            display: "inline-block",
-          }}
-        />
-        <span>Priority: {priorityInfo.label}</span>
-      </div>
-      {task.dueDate && (
-        <p
-          style={{
-            fontSize: "0.75rem",
-            color: "#888",
-            margin: "0.25rem 0 0 0",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
+            padding: "2px 6px",
+            borderRadius: 6,
+            backgroundColor: priorityInfo.bg,
+            color: priorityInfo.color,
+            fontSize: "0.7rem",
+            fontWeight: 700,
+            marginLeft: task.dueDate ? "auto" : 0,
           }}
         >
-          Due: {formatDueDate(task.dueDate)}
-        </p>
-      )}
+          <span
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              backgroundColor: priorityInfo.color,
+              display: "inline-block",
+            }}
+          />
+          <span>{priorityInfo.label}</span>
+        </div>
+      </div>
     </div>
   );
 };
