@@ -257,6 +257,10 @@ const MessageThread = () => {
     const sendMessage = useCallback(async () => {
         if (!input.trim() && attachments.length === 0) return;
         if (!activeChannelId) return;
+        if (!user || !currentUserId) {
+            console.error('Cannot send message: user not logged in');
+            return;
+        }
 
         if (input.trim().length > 1000) {
             alert("Message is too long! Maximum 1000 characters.");
@@ -282,8 +286,8 @@ const MessageThread = () => {
             ...msg,
             sender: {
                 _id: currentUserId,
-                firstName: user.firstName,
-                lastName: user.lastName
+                firstName: user?.firstName || '',
+                lastName: user?.lastName || ''
             },
             createdAt: new Date().toISOString(),
             readBy: []

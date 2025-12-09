@@ -4,6 +4,7 @@ import TextField from "../components/TextField";
 import PrimaryButton from "../components/PrimaryButton";
 import api from "../api";
 import Logo from "../assets/Logo.png";
+import { useUser } from "../context/UserContext";
 
 const styles = {
   container: {
@@ -55,6 +56,7 @@ const styles = {
 
 const SignUp = () => {
   const navigate = useNavigate();
+  const { setUser } = useUser();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -189,6 +191,8 @@ const SignUp = () => {
         });
         const userData = loginRes.data.user;
         localStorage.setItem("user", JSON.stringify(userData));
+        
+        setUser(userData);
 
         // Fetch and cache user projects on signup (will be empty initially)
         try {

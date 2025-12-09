@@ -4,6 +4,7 @@ import TextField from "../components/TextField";
 import PrimaryButton from "../components/PrimaryButton";
 import Logo from "../assets/Logo.png";
 import api from "../api";
+import { useUser } from "../context/UserContext";
 
 const styles = {
   container: {
@@ -54,6 +55,7 @@ const styles = {
 
 const LogIn = () => {
   const navigate = useNavigate();
+  const { setUser } = useUser();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -98,6 +100,8 @@ const LogIn = () => {
       const res = await api.post("/api/user/login", { username, password });
       const userData = res.data.user;
       localStorage.setItem("user", JSON.stringify(userData));
+      
+      setUser(userData);
       
       // Fetch and cache user projects on login
       try {
