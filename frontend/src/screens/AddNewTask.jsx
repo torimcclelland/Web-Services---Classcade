@@ -17,6 +17,7 @@ const AddNewTaskModal = ({ task, onClose, onSuccess }) => {
     task?.dueDate ? new Date(task.dueDate).toISOString().split("T")[0] : ""
   );
   const [status, setStatus] = useState(task?.status || "Not Started");
+  const [priority, setPriority] = useState(task?.priority || "Medium");
   const [error, setError] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [members, setMembers] = useState([]);
@@ -55,6 +56,7 @@ const AddNewTaskModal = ({ task, onClose, onSuccess }) => {
           description: description.trim(),
           dueDate: dueDate || null,
           status,
+          priority,
           assignedTo: assignedTo || null,
         });
       } else {
@@ -62,9 +64,10 @@ const AddNewTaskModal = ({ task, onClose, onSuccess }) => {
         await api.post(`/api/task/${selectedProject._id}`, {
           name: taskName.trim(),
           description: description.trim(),
-          assignedTo: assignedTo || user?._id || null,
+          assignedTo: assignedTo || null,
           dueDate: dueDate || null,
           status,
+          priority,
         });
       }
 
@@ -166,6 +169,17 @@ const AddNewTaskModal = ({ task, onClose, onSuccess }) => {
             {lane}
           </option>
         ))}
+      </select>
+
+      <label style={AddNewTaskStyle.label}>Priority</label>
+      <select
+        style={AddNewTaskStyle.select}
+        value={priority}
+        onChange={(e) => setPriority(e.target.value)}
+      >
+        <option value="High">High</option>
+        <option value="Medium">Medium</option>
+        <option value="Low">Low</option>
       </select>
 
       <div style={AddNewTaskStyle.actionButtons}>

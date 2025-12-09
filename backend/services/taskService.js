@@ -17,7 +17,7 @@ router.get("/getByProject/:projectId", async (req, res) => {
 // Create a task in a project
 router.post("/:projectid", async (req, res) => {
   try {
-    const { name, description, assignedTo, dueDate } = req.body;
+    const { name, description, assignedTo, dueDate, priority } = req.body;
 
     const created = await Task.create({
       projectId: req.params.projectid,
@@ -26,6 +26,7 @@ router.post("/:projectid", async (req, res) => {
       assignedTo,
       dueDate,
       status: req.body.status || "Not Started",
+      priority: priority || "Medium",
     });
 
     res.status(201).json(created);
