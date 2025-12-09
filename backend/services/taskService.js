@@ -3,6 +3,16 @@ const Task = require("../models/task");
 
 const router = express.Router();
 
+const normalizePriority = (priority) => {
+  if (!priority) return undefined;
+  const normalized =
+    typeof priority === "string"
+      ? priority.charAt(0).toUpperCase() + priority.slice(1).toLowerCase()
+      : priority;
+  const valid = ["High", "Medium", "Low"];
+  return valid.includes(normalized) ? normalized : undefined;
+};
+
 // Get tasks by project (unique route to avoid conflicts)
 router.get("/getByProject/:projectId", async (req, res) => {
   try {
@@ -18,6 +28,7 @@ router.get("/getByProject/:projectId", async (req, res) => {
 router.post("/:projectid", async (req, res) => {
   try {
     const { name, description, assignedTo, dueDate, priority } = req.body;
+    const normalizedPriority = normalizePriority(priority) || "Medium";
 
     const created = await Task.create({
       projectId: req.params.projectid,
@@ -26,7 +37,7 @@ router.post("/:projectid", async (req, res) => {
       assignedTo,
       dueDate,
       status: req.body.status || "Not Started",
-      priority: priority || "Medium",
+      priority: normalizedPriority,
     });
 
     res.status(201).json(created);
@@ -119,9 +130,16 @@ router.get("/:projectid/:taskid", async (req, res) => {
 // Update a task
 router.put("/:projectid/:taskid", async (req, res) => {
   try {
+    const updateBody = { ...req.body };
+    if (Object.prototype.hasOwnProperty.call(req.body, "priority")) {
+      const normalizedPriority =
+        normalizePriority(req.body.priority) || "Medium";
+      updateBody.priority = normalizedPriority;
+    }
+
     const updated = await Task.findOneAndUpdate(
       { _id: req.params.taskid, projectId: req.params.projectid },
-      req.body,
+      updateBody,
       { new: true, runValidators: true }
     );
 

@@ -32,6 +32,16 @@ const DraggableCard = ({ task, onEdit, memberLookup }) => {
     return fullName || member.username || member.email || "Unassigned";
   }, [memberLookup, task.assignedTo]);
 
+  const priorityInfo = React.useMemo(() => {
+    const priority = task.priority || "Medium";
+    const config = {
+      High: { color: "#b91c1c", bg: "#fee2e2", label: "High" },
+      Medium: { color: "#92400e", bg: "#fef3c7", label: "Medium" },
+      Low: { color: "#065f46", bg: "#d1fae5", label: "Low" },
+    };
+    return config[priority] || config.Medium;
+  }, [task.priority]);
+
   const style = {
     transform: transform
       ? `translate(${transform.x}px, ${transform.y}px)`
@@ -143,6 +153,31 @@ const DraggableCard = ({ task, onEdit, memberLookup }) => {
         <span style={{ fontWeight: 600, color: "#111827" }}>Assigned To:</span>{" "}
         <span>{assigneeName}</span>
       </p>
+      <div
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          padding: "4px 8px",
+          borderRadius: 8,
+          backgroundColor: priorityInfo.bg,
+          color: priorityInfo.color,
+          fontSize: "0.75rem",
+          fontWeight: 700,
+          margin: "0.25rem 0",
+        }}
+      >
+        <span
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            backgroundColor: priorityInfo.color,
+            display: "inline-block",
+          }}
+        />
+        <span>Priority: {priorityInfo.label}</span>
+      </div>
       {task.dueDate && (
         <p
           style={{
